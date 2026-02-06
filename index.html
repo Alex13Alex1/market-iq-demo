@@ -1,0 +1,153 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Market IQ — Concept UI</title>  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(circle at 20% 20%, #0a1f2f, #020617 60%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app {
+      width: 390px;
+      height: 780px;
+      border-radius: 32px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #020617, #040d1d);
+      box-shadow: 0 40px 120px rgba(0,0,0,0.9), 0 0 60px rgba(0,255,255,0.15);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      padding: 28px 24px 12px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: #22d3ee;
+      text-transform: uppercase;
+    }
+
+    .market-card {
+      margin: 12px 20px;
+      padding: 20px;
+      border-radius: 20px;
+      background: linear-gradient(160deg, rgba(0,255,255,0.08), rgba(0,255,255,0.02));
+      border: 1px solid rgba(0,255,255,0.2);
+      backdrop-filter: blur(12px);
+    }
+
+    .symbol { color: #94a3b8; font-size: 12px; margin-bottom: 6px; }
+
+    .price {
+      font-size: 34px;
+      font-weight: 700;
+      color: #22c55e;
+      text-shadow: 0 0 25px rgba(34,197,94,0.5);
+    }
+
+    .question {
+      text-align: center;
+      margin: 26px 20px 16px;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .buttons {
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: auto;
+      margin-bottom: 16px;
+    }
+
+    .btn {
+      height: 90px;
+      border-radius: 18px;
+      font-size: 24px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+
+    .btn-up {
+      background: linear-gradient(135deg,#22c55e,#16a34a);
+      color: black;
+      box-shadow: 0 10px 30px rgba(34,197,94,0.35);
+    }
+
+    .btn-down {
+      background: linear-gradient(135deg,#f43f5e,#e11d48);
+      color: white;
+      box-shadow: 0 10px 30px rgba(244,63,94,0.35);
+    }
+
+    .btn:hover { transform: scale(1.02); }
+
+    .crowd {
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+      padding-bottom: 14px;
+    }
+
+    .crowd strong { color: #22c55e; }
+
+    .nav {
+      display: flex;
+      justify-content: space-around;
+      padding: 14px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.4);
+    }
+
+    .nav div {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .nav .active {
+      background: linear-gradient(135deg,#22d3ee,#0891b2);
+      color: black;
+    }
+
+  </style></head>
+<body><div class="app">  <div class="header">
+    <div class="logo">MARKET IQ</div>
+  </div>  <div class="market-card">
+    <div class="symbol">BTC / USD</div>
+    <div class="price">$98,500</div>
+  </div>  <div class="question">
+    Will price be higher tomorrow?
+  </div>  <div class="buttons">
+    <button class="btn btn-up">⬆ UP</button>
+    <button class="btn btn-down">⬇ DOWN</button>
+  </div>  <div class="crowd">
+    Crowd now: <strong>63% UP</strong>
+  </div>  <div class="nav">
+    <div class="active">🏠</div>
+    <div>📊</div>
+    <div>🎯</div>
+    <div>🏆</div>
+    <div>👤</div>
+  </div></div></body>
+</html>
