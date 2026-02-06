@@ -1,1020 +1,213 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Market IQ — Full Concept Demo</title>
-  <style>
-    :root{
-      --bg0:#020617;
-      --bg1:#060b18;
-      --panel: rgba(255,255,255,.06);
-      --panel2: rgba(255,255,255,.085);
-      --stroke: rgba(255,255,255,.10);
-      --stroke2: rgba(34,211,238,.22);
-      --cyan:#22d3ee;
-      --cyan2:#0891b2;
-      --gold:#fbbf24;
-      --green:#22c55e;
-      --red:#f43f5e;
-      --slate:#94a3b8;
-      --white:#e2e8f0;
-      --shadow: 0 40px 120px rgba(0,0,0,.85);
-      --radius: 22px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Market IQ Demo</title>
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      min-height: 100vh;
-      background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(34,211,238,.20), transparent 55%),
-        radial-gradient(900px 600px at 80% 30%, rgba(251,191,36,.10), transparent 55%),
-        radial-gradient(900px 700px at 50% 90%, rgba(99,102,241,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      color: var(--white);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding: 24px 14px;
-    }
+<style>
+body{
+ margin:0;
+ font-family:system-ui;
+ background:#020617;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ height:100vh;
+ color:white;
+}
 
-    .wrap{
-      width: min(1080px, 100%);
-      display:grid;
-      grid-template-columns: 430px 1fr;
-      gap: 22px;
-      align-items:start;
-    }
+.app{
+ width:390px;
+ height:780px;
+ background:#020617;
+ border-radius:28px;
+ overflow:hidden;
+ position:relative;
+ box-shadow:0 40px 120px rgba(0,0,0,.8);
+}
 
-    @media (max-width: 980px){
-      .wrap{grid-template-columns: 1fr; justify-items:center;}
-    }
+/* progress */
+.progress{
+ height:4px;
+ background:#0b1222;
+}
+.progress-bar{
+ height:100%;
+ width:10%;
+ background:#22d3ee;
+ transition:.4s;
+}
 
-    /* Phone */
-    .phone{
-      width: 390px;
-      height: 820px;
-      border-radius: 34px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow), 0 0 60px rgba(34,211,238,.16);
-      overflow:hidden;
-      position:relative;
-      backdrop-filter: blur(14px);
-    }
+/* pages */
+.page{
+ position:absolute;
+ inset:0;
+ padding:26px;
+ display:flex;
+ flex-direction:column;
+ gap:18px;
+ transform:translateX(100%);
+ opacity:0;
+ transition:.4s ease;
+}
 
-    .statusbar{
-      height: 44px;
-      padding: 14px 18px 0;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      color: rgba(226,232,240,.75);
-      font-size: 12px;
-      letter-spacing:.2px;
-    }
-    .pill{
-      display:flex; gap:8px; align-items:center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.08);
-    }
-    .dot{width:8px;height:8px;border-radius:999px;background: var(--cyan); box-shadow: 0 0 16px rgba(34,211,238,.7);}
-    .app{
-      height: calc(100% - 44px);
-      display:flex;
-      flex-direction:column;
-      background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.98));
-    }
+.page.active{
+ transform:translateX(0);
+ opacity:1;
+}
 
-    .top{
-      padding: 14px 18px 10px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-    }
+h1{margin:0;font-size:22px}
 
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .logo{
-      font-size: 12px;
-      letter-spacing: 3px;
-      color: rgba(34,211,238,.95);
-      text-transform:uppercase;
-    }
-    .subtitle{
-      color: rgba(148,163,184,.85);
-      font-size: 12px;
-      line-height: 1.3;
-    }
+.card{
+ background:#0b1222;
+ border-radius:18px;
+ padding:18px;
+ border:1px solid rgba(255,255,255,.08);
+}
 
-    .statsRow{
-      display:flex;
-      gap: 10px;
-      align-items:center;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-    .miniStat{
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      min-width: 110px;
-    }
-    .miniLabel{color: rgba(148,163,184,.8); font-size: 10px; letter-spacing:.2px}
-    .miniValue{font-size: 14px; font-weight: 700; margin-top: 3px}
-    .miniValue .cyan{color: var(--cyan)}
-    .miniValue .gold{color: var(--gold)}
-    .miniValue .green{color: var(--green)}
+.btn{
+ height:64px;
+ border-radius:16px;
+ border:none;
+ font-size:18px;
+ font-weight:700;
+ cursor:pointer;
+}
 
-    .content{
-      padding: 10px 18px 0;
-      display:flex;
-      flex-direction:column;
-      gap: 12px;
-      flex:1;
-      overflow:hidden;
-    }
+.next{ background:#22d3ee; color:black }
+.up{ background:#22c55e; color:black }
+.down{ background:#f43f5e }
 
-    .card{
-      border-radius: var(--radius);
-      background: linear-gradient(160deg, rgba(255,255,255,.085), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 18px 60px rgba(0,0,0,.35);
-      overflow:hidden;
-    }
-
-    .hero{
-      padding: 16px;
-      position:relative;
-    }
-    .hero:before{
-      content:"";
-      position:absolute; inset:-80px -80px auto auto;
-      width:240px;height:240px;border-radius:999px;
-      background: radial-gradient(circle, rgba(34,211,238,.20), transparent 62%);
-      filter: blur(2px);
-      pointer-events:none;
-    }
-
-    .assetRow{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 14px;
-    }
-
-    .asset{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .asset .sym{color: rgba(148,163,184,.9); font-size: 12px}
-    .asset .px{
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-    }
-
-    .chipRow{
-      display:flex;
-      gap: 8px;
-      margin-top: 12px;
-      flex-wrap:wrap;
-    }
-    .chip{
-      padding: 7px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: rgba(226,232,240,.9);
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .chip b{color: var(--cyan)}
-    .chip .warn{color: var(--gold)}
-    .chip .ok{color: var(--green)}
-
-    .question{
-      padding: 14px 16px;
-      border-top: 1px solid rgba(255,255,255,.06);
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-    }
-    .qTitle{
-      font-size: 16px;
-      font-weight: 700;
-      line-height: 1.25;
-    }
-    .qMeta{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-      color: rgba(148,163,184,.9);
-      font-size: 12px;
-    }
-    .bar{
-      height: 10px;
-      width: 100%;
-      border-radius: 999px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.08);
-      overflow:hidden;
-    }
-    .bar > div{
-      height: 100%;
-      width: 63%;
-      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.95));
-    }
-
-    .btnRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 12px 16px 16px;
-    }
-    button{
-      border:0;
-      border-radius: 18px;
-      height: 74px;
-      font-size: 18px;
-      font-weight: 800;
-      cursor:pointer;
-      transition: transform .12s ease, filter .12s ease;
-      user-select:none;
-    }
-    button:active{transform: scale(.98)}
-    .up{ background: linear-gradient(135deg, var(--green), #16a34a); color: #04130a; }
-    .down{ background: linear-gradient(135deg, var(--red), #e11d48); color: #fff; }
-    .ghost{
-      height: 44px;
-      font-size: 13px;
-      font-weight: 700;
-      border-radius: 14px;
-      background: rgba(255,255,255,.06);
-      color: rgba(226,232,240,.92);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-
-    .grid2{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    .panel{
-      padding: 14px;
-    }
-    .panel h3{
-      font-size: 12px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(148,163,184,.85);
-      margin-bottom: 10px;
-    }
-
-    .kv{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 10px 0;
-      border-bottom: 1px dashed rgba(255,255,255,.10);
-      font-size: 13px;
-    }
-    .kv:last-child{border-bottom:0}
-    .kv .k{color: rgba(226,232,240,.92)}
-    .kv .v{color: rgba(148,163,184,.95); font-weight: 700}
-    .tag{
-      display:inline-flex; align-items:center; gap:6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.30);
-      border: 1px solid rgba(34,211,238,.20);
-      color: rgba(226,232,240,.92);
-      font-size: 12px;
-    }
-    .tag .star{color: var(--gold)}
-    .tag .cyan{color: var(--cyan)}
-
-    /* Bottom Nav */
-    .nav{
-      display:flex;
-      justify-content:space-around;
-      padding: 12px 10px;
-      border-top: 1px solid rgba(255,255,255,.06);
-      background: rgba(0,0,0,.35);
-      backdrop-filter: blur(12px);
-    }
-    .nav .item{
-      width: 64px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap: 6px;
-      color: rgba(148,163,184,.9);
-      font-size: 10px;
-      cursor:pointer;
-      user-select:none;
-    }
-    .nav .ico{
-      width: 40px; height: 40px;
-      border-radius: 14px;
-      display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      font-size: 18px;
-    }
-    .nav .active .ico{
-      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(251,191,36,.20));
-      border: 1px solid rgba(34,211,238,.28);
-      color: #02111a;
-    }
-    .nav .active{color: rgba(226,232,240,.95)}
-
-    /* Screens */
-    .screen{display:none; height:100%; overflow:hidden;}
-    .screen.active{display:flex; flex-direction:column; height:100%;}
-    .scroll{
-      overflow:auto;
-      padding-bottom: 10px;
-      scrollbar-width: none;
-    }
-    .scroll::-webkit-scrollbar{display:none}
-
-    /* Reward overlay */
-    .overlay{
-      position:absolute;
-      inset:0;
-      background: rgba(2,6,23,.68);
-      display:none;
-      align-items:flex-end;
-      justify-content:center;
-      padding: 18px;
-      backdrop-filter: blur(10px);
-    }
-    .overlay.show{display:flex}
-    .sheet{
-      width: 100%;
-      border-radius: 26px;
-      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 30px 120px rgba(0,0,0,.7);
-      overflow:hidden;
-    }
-    .sheetTop{
-      padding: 16px;
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-    }
-    .sheetTop h2{font-size: 18px; margin-bottom: 6px}
-    .sheetTop p{font-size: 12px; color: rgba(148,163,184,.92); line-height:1.35}
-    .xbtn{
-      width: 40px; height: 40px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.35);
-      color: rgba(226,232,240,.9);
-      cursor:pointer;
-      font-weight:900;
-    }
-    .sheetMid{
-      padding: 0 16px 16px;
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .big{
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .big .lab{color: rgba(148,163,184,.86); font-size: 10px; letter-spacing:.2px}
-    .big .val{font-size: 18px; font-weight: 900; margin-top:4px}
-    .big .val .g{color: var(--green)}
-    .big .val .c{color: var(--cyan)}
-    .big .val .y{color: var(--gold)}
-    .sheetActions{
-      padding: 0 16px 16px;
-      display:flex; gap: 10px;
-    }
-    .sheetActions .ghost{flex:1}
-    .sheetActions .primary{
-      flex:1;
-      height: 44px;
-      border-radius: 14px;
-      font-size: 13px;
-      font-weight: 900;
-      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(251,191,36,.30));
-      color: #041017;
-      border: 1px solid rgba(34,211,238,.24);
-    }
-
-    /* Right side: explainer */
-    .deck{
-      padding: 18px;
-      border-radius: 26px;
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 30px 100px rgba(0,0,0,.45);
-      backdrop-filter: blur(14px);
-    }
-    .deck h1{
-      font-size: 22px;
-      letter-spacing: -0.4px;
-      margin-bottom: 8px;
-    }
-    .deck p{
-      color: rgba(148,163,184,.92);
-      line-height: 1.55;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-    .pillRow{
-      display:flex; flex-wrap:wrap; gap: 8px; margin-top: 12px;
-    }
-    .pill2{
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: rgba(0,0,0,.28);
-      border: 1px solid rgba(255,255,255,.10);
-      font-size: 12px;
-      color: rgba(226,232,240,.92);
-    }
-    .pill2 b{color: var(--cyan)}
-    .hr{
-      height:1px;
-      background: rgba(255,255,255,.10);
-      margin: 14px 0;
-    }
-    .list{
-      display:grid;
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .row{
-      padding: 12px;
-      border-radius: 18px;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-    .row h4{font-size: 13px; margin-bottom: 6px}
-    .row .small{font-size: 12px; color: rgba(148,163,184,.92); line-height:1.45}
-    .mono{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
-      color: rgba(226,232,240,.90);
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      border-radius: 14px;
-      padding: 10px;
-      overflow:auto;
-      margin-top: 10px;
-      white-space: pre;
-    }
-
-    .hint{
-      margin-top: 10px;
-      font-size: 12px;
-      color: rgba(148,163,184,.9);
-    }
-    a{color: var(--cyan); text-decoration: none}
-    a:hover{text-decoration: underline}
-  </style>
+.text{
+ font-size:14px;
+ color:#94a3b8;
+ line-height:1.5;
+}
+</style>
 </head>
+
 <body>
 
-<div class="wrap">
-  <!-- PHONE DEMO -->
-  <div class="phone" id="phone">
-    <div class="statusbar">
-      <div class="pill"><span class="dot"></span><span id="todayLabel">Day 1 • Season 0</span></div>
-      <div class="pill">🔒 Demo</div>
-    </div>
+<div class="app">
 
-    <div class="app">
-      <!-- PLAY -->
-      <div class="screen active" id="screen-play">
-        <div class="top">
-          <div class="brand">
-            <div class="logo">MARKET IQ</div>
-            <div class="subtitle">Докажи, что ты умнее толпы.<br/>30 секунд в день → репутация.</div>
-          </div>
-          <div class="statsRow">
-            <div class="miniStat">
-              <div class="miniLabel">Market IQ</div>
-              <div class="miniValue"><span class="cyan" id="iq">1120</span> <span class="slate">• Gold</span></div>
-            </div>
-            <div class="miniStat">
-              <div class="miniLabel">Streak</div>
-              <div class="miniValue"><span class="gold">🔥</span> <span id="streak">6</span> days</div>
-            </div>
-          </div>
-        </div>
+<div class="progress">
+<div class="progress-bar" id="bar"></div>
+</div>
 
-        <div class="content scroll">
-          <div class="card">
-            <div class="hero">
-              <div class="assetRow">
-                <div class="asset">
-                  <div class="sym" id="assetSym">BTC / USD</div>
-                  <div class="px" id="assetPx">$98,500</div>
-                </div>
-                <span class="tag"><span class="star">★</span> Crowd: <span class="cyan" id="crowdPct">63%</span> UP</span>
-              </div>
+<!-- PAGES -->
+<div class="page active" id="p1">
+<h1>Market IQ</h1>
+<div class="text">
+Докажи что ты умнее толпы.<br>
+30 секунд в день → статус и репутация.
+</div>
+<button class="btn next" onclick="go(2)">Начать</button>
+</div>
 
-              <div class="chipRow">
-                <div class="chip">Close in: <b id="timer">18:42:11</b></div>
-                <div class="chip">Your chance: <b class="ok" id="chance">58%</b></div>
-                <div class="chip">Genesis: <span class="warn" id="genesis">ON</span></div>
-              </div>
-            </div>
+<div class="page" id="p2">
+<h1>Сегодняшний прогноз</h1>
+<div class="card">
+BTC / USD<br><br>
+Будет ли цена выше через 24 часа?
+</div>
+<button class="btn up" onclick="go(3)">UP</button>
+<button class="btn down" onclick="go(3)">DOWN</button>
+</div>
 
-            <div class="question">
-              <div class="qTitle" id="qTitle">Будет ли цена выше через 24 часа?</div>
-              <div class="qMeta">
-                <span id="qMetaLeft">Horizon: 24h</span>
-                <span id="qMetaRight">Crowd vote</span>
-              </div>
-              <div class="bar"><div id="barFill"></div></div>
-            </div>
+<div class="page" id="p3">
+<h1>Результат</h1>
+<div class="card" id="iqCard">
++12 Market IQ<br>
+Streak +1<br>
+Ты обошёл толпу
+</div>
+<button class="btn next" onclick="go(4)">Дальше</button>
+</div>
 
-            <div class="btnRow">
-              <button class="up" id="btnUp">⬆ UP</button>
-              <button class="down" id="btnDown">⬇ DOWN</button>
-              <button class="ghost" id="btnNext" style="grid-column:1/3;">Next question ▸</button>
-            </div>
-          </div>
+<div class="page" id="p4">
+<h1>Социальный уровень</h1>
+<div class="text">
+Top 20% игроков.<br>
+Играй против друзей.<br>
+Поднимайся в лигах.
+</div>
+<button class="btn next" onclick="go(5)">Дальше</button>
+</div>
 
-          <div class="grid2">
-            <div class="card panel">
-              <h3>Today’s Loop</h3>
-              <div class="kv"><span class="k">Answered</span><span class="v"><span id="answered">1</span>/5</span></div>
-              <div class="kv"><span class="k">Today score</span><span class="v"><span id="todayScore">+12</span> IQ</span></div>
-              <div class="kv"><span class="k">Crowd vs You</span><span class="v"><span class="green" id="cvy">+1</span></span></div>
-            </div>
-            <div class="card panel">
-              <h3>Modes</h3>
-              <div class="kv"><span class="k">Crowd vs Experts</span><span class="v">Live</span></div>
-              <div class="kv"><span class="k">Friends duel</span><span class="v">7 days</span></div>
-              <div class="kv"><span class="k">Seasons</span><span class="v">Weekly</span></div>
-            </div>
-          </div>
+<div class="page" id="p5">
+<h1>Endgame</h1>
+<div class="text">
+Signal Creator статус.<br>
+Подписчики.<br>
+Монетизация.
+</div>
+<button class="btn next" onclick="go(6)">Дальше</button>
+</div>
 
-          <div class="card panel">
-            <h3>Why it matters</h3>
-            <div class="kv"><span class="k">Ты строишь репутацию</span><span class="v">Market Passport</span></div>
-            <div class="kv"><span class="k">Топ игроки получают влияние</span><span class="v">Market Voice</span></div>
-            <div class="kv"><span class="k">Топ tier может монетизировать</span><span class="v">Signal Creator</span></div>
-          </div>
-        </div>
+<div class="page" id="p6">
+<h1>Leaderboard</h1>
+<div class="card">
+#1 TraderNeo — IQ 1820<br>
+#2 QuantFox — IQ 1650<br>
+#3 You — IQ 1240
+</div>
+<button class="btn next" onclick="go(7)">Дальше</button>
+</div>
 
-        <div class="nav">
-          <div class="item active" data-go="play"><div class="ico">🎮</div><div>Play</div></div>
-          <div class="item" data-go="recap"><div class="ico">📈</div><div>Recap</div></div>
-          <div class="item" data-go="leagues"><div class="ico">🏆</div><div>Leagues</div></div>
-          <div class="item" data-go="profile"><div class="ico">👤</div><div>Profile</div></div>
-        </div>
-      </div>
+<div class="page" id="p7">
+<h1>Профиль</h1>
+<div class="card">
+IQ: 1240<br>
+Accuracy: 58%<br>
+League: Gold
+</div>
+<button class="btn next" onclick="go(8)">Дальше</button>
+</div>
 
-      <!-- RECAP -->
-      <div class="screen" id="screen-recap">
-        <div class="top">
-          <div class="brand">
-            <div class="logo">RECAP</div>
-            <div class="subtitle">Итоги дня / недели. Контент для X.</div>
-          </div>
-          <div class="statsRow">
-            <div class="miniStat">
-              <div class="miniLabel">You today</div>
-              <div class="miniValue"><span class="green" id="youToday">3/5</span></div>
-            </div>
-            <div class="miniStat">
-              <div class="miniLabel">Crowd today</div>
-              <div class="miniValue"><span class="slate" id="crowdToday">2/5</span></div>
-            </div>
-          </div>
-        </div>
+<div class="page" id="p8">
+<h1>Creator Page</h1>
+<div class="text">
+Ты публикуешь сигналы.<br>
+Ритейл подписывается.<br>
+Ты получаешь доход.
+</div>
+<button class="btn next" onclick="go(1)">Сначала</button>
+</div>
 
-        <div class="content scroll">
-          <div class="card panel">
-            <h3>Daily headline</h3>
-            <div class="kv"><span class="k">“Толпа ошиблась на BTC”</span><span class="v">−4% ✅</span></div>
-            <div class="kv"><span class="k">“Эксперты проиграли толпе”</span><span class="v">4 : 1</span></div>
-            <div class="kv"><span class="k">“Топ 5% игрок недели”</span><span class="v">Share card</span></div>
-            <button class="ghost" id="btnShareX" style="margin-top:10px;width:100%;">Share to X (demo text)</button>
-          </div>
-
-          <div class="grid2">
-            <div class="card panel">
-              <h3>Crowd vs Experts</h3>
-              <div class="kv"><span class="k">30d winrate Crowd</span><span class="v">52%</span></div>
-              <div class="kv"><span class="k">30d winrate Experts</span><span class="v">49%</span></div>
-              <div class="kv"><span class="k">Today</span><span class="v"><span class="green">Crowd</span></span></div>
-            </div>
-            <div class="card panel">
-              <h3>Momentum</h3>
-              <div class="kv"><span class="k">Streak</span><span class="v"><span class="gold">🔥</span> <span id="streak2">6</span></span></div>
-              <div class="kv"><span class="k">League</span><span class="v">Gold</span></div>
-              <div class="kv"><span class="k">Trend</span><span class="v"><span class="green">↑</span></span></div>
-            </div>
-          </div>
-
-          <div class="card panel">
-            <h3>Friends duel</h3>
-            <div class="kv"><span class="k">You vs @friend</span><span class="v">2 : 1</span></div>
-            <div class="kv"><span class="k">Ends in</span><span class="v">4 days</span></div>
-            <button class="ghost" id="btnInvite" style="margin-top:10px;width:100%;">Invite friend (copy link)</button>
-            <div class="hint" id="inviteHint" style="display:none;">Ссылка скопирована (demo): <span class="cyan">?ref=Alex13Alex1</span></div>
-          </div>
-        </div>
-
-        <div class="nav">
-          <div class="item" data-go="play"><div class="ico">🎮</div><div>Play</div></div>
-          <div class="item active" data-go="recap"><div class="ico">📈</div><div>Recap</div></div>
-          <div class="item" data-go="leagues"><div class="ico">🏆</div><div>Leagues</div></div>
-          <div class="item" data-go="profile"><div class="ico">👤</div><div>Profile</div></div>
-        </div>
-      </div>
-
-      <!-- LEAGUES -->
-      <div class="screen" id="screen-leagues">
-        <div class="top">
-          <div class="brand">
-            <div class="logo">LEAGUES</div>
-            <div class="subtitle">Сезоны, ранги, элита. “Тапалка эффект”.</div>
-          </div>
-          <div class="statsRow">
-            <div class="miniStat">
-              <div class="miniLabel">Division</div>
-              <div class="miniValue"><span class="gold">Gold</span></div>
-            </div>
-            <div class="miniStat">
-              <div class="miniLabel">Top</div>
-              <div class="miniValue"><span class="cyan">12%</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="content scroll">
-          <div class="card panel">
-            <h3>Weekly season</h3>
-            <div class="kv"><span class="k">Season ends</span><span class="v">Sunday 23:59</span></div>
-            <div class="kv"><span class="k">Promotion</span><span class="v">Top 20%</span></div>
-            <div class="kv"><span class="k">Relegation</span><span class="v">Bottom 15%</span></div>
-          </div>
-
-          <div class="card panel">
-            <h3>Genesis + FOMO</h3>
-            <div class="kv"><span class="k">Genesis badge</span><span class="v"><span class="gold">Enabled</span></span></div>
-            <div class="kv"><span class="k">Why people invite</span><span class="v">Status</span></div>
-            <div class="kv"><span class="k">Early players boost</span><span class="v">+5% XP</span></div>
-          </div>
-
-          <div class="card panel">
-            <h3>Global leaderboard (demo)</h3>
-            <div class="kv"><span class="k">#1 NeoMacro</span><span class="v">IQ 1890</span></div>
-            <div class="kv"><span class="k">#2 QuantKid</span><span class="v">IQ 1772</span></div>
-            <div class="kv"><span class="k">#3 Alex13Alex1</span><span class="v"><span class="cyan">IQ <span id="iq2">1120</span></span></span></div>
-            <button class="ghost" id="btnSeeElite" style="margin-top:10px;width:100%;">Elite room preview</button>
-            <div class="hint" id="eliteHint" style="display:none;">Элита получает: закрытые вопросы, early signals, “Market Voice”.</div>
-          </div>
-
-          <div class="card panel">
-            <h3>Endgame</h3>
-            <div class="kv"><span class="k">Verified Mind</span><span class="v">Top 3%</span></div>
-            <div class="kv"><span class="k">Market Voice</span><span class="v">Top 1%</span></div>
-            <div class="kv"><span class="k">Signal Creator</span><span class="v"><span class="gold">Top 0.3%</span></span></div>
-            <div class="hint">Это “зачем”: статус → доступ → влияние → монетизация.</div>
-          </div>
-        </div>
-
-        <div class="nav">
-          <div class="item" data-go="play"><div class="ico">🎮</div><div>Play</div></div>
-          <div class="item" data-go="recap"><div class="ico">📈</div><div>Recap</div></div>
-          <div class="item active" data-go="leagues"><div class="ico">🏆</div><div>Leagues</div></div>
-          <div class="item" data-go="profile"><div class="ico">👤</div><div>Profile</div></div>
-        </div>
-      </div>
-
-      <!-- PROFILE -->
-      <div class="screen" id="screen-profile">
-        <div class="top">
-          <div class="brand">
-            <div class="logo">PROFILE</div>
-            <div class="subtitle">Market Passport: репутация, DNA, путь к Signal Creator.</div>
-          </div>
-          <div class="statsRow">
-            <div class="miniStat">
-              <div class="miniLabel">Accuracy</div>
-              <div class="miniValue"><span class="green" id="acc">57%</span></div>
-            </div>
-            <div class="miniStat">
-              <div class="miniLabel">Independence</div>
-              <div class="miniValue"><span class="cyan">0.61</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="content scroll">
-          <div class="card panel">
-            <h3>Market Passport</h3>
-            <div class="kv"><span class="k">User</span><span class="v">@Alex13Alex1</span></div>
-            <div class="kv"><span class="k">Market IQ</span><span class="v"><span class="cyan" id="iq3">1120</span> • Gold</span></div>
-            <div class="kv"><span class="k">Streak</span><span class="v"><span class="gold">🔥</span> <span id="streak3">6</span></span></div>
-            <div class="kv"><span class="k">Best market</span><span class="v">BTC 61%</span></div>
-            <div class="kv"><span class="k">Worst market</span><span class="v">Gold 44%</span></div>
-          </div>
-
-          <div class="grid2">
-            <div class="card panel">
-              <h3>Badges</h3>
-              <div class="kv"><span class="k">Genesis</span><span class="v">✅</span></div>
-              <div class="kv"><span class="k">Top 12%</span><span class="v">🏅</span></div>
-              <div class="kv"><span class="k">BTC Sniper</span><span class="v">🎯</span></div>
-            </div>
-            <div class="card panel">
-              <h3>Market DNA</h3>
-              <div class="kv"><span class="k">Type</span><span class="v">Contrarian</span></div>
-              <div class="kv"><span class="k">Horizon</span><span class="v">24h–7d</span></div>
-              <div class="kv"><span class="k">Risk style</span><span class="v">Medium</span></div>
-            </div>
-          </div>
-
-          <div class="card panel">
-            <h3>Path to Signal Creator</h3>
-            <div class="kv"><span class="k">90d consistency</span><span class="v">A-</span></div>
-            <div class="kv"><span class="k">Min accuracy</span><span class="v">≥ 55%</span></div>
-            <div class="kv"><span class="k">Min streak</span><span class="v">≥ 30 days</span></div>
-            <div class="kv"><span class="k">Eligibility</span><span class="v"><span class="gold">Not yet</span></span></div>
-            <button class="ghost" id="btnCreator" style="margin-top:10px;width:100%;">Preview: Creator page</button>
-            <div class="hint" id="creatorHint" style="display:none;">
-              Когда игрок достигает Tier “Signal Creator”, платформа предлагает открыть страницу сигналов, подписку для ритейла и revenue share.
-              Главное: доступ выдаётся по репутации, а не по маркетингу.
-            </div>
-          </div>
-        </div>
-
-        <div class="nav">
-          <div class="item" data-go="play"><div class="ico">🎮</div><div>Play</div></div>
-          <div class="item" data-go="recap"><div class="ico">📈</div><div>Recap</div></div>
-          <div class="item" data-go="leagues"><div class="ico">🏆</div><div>Leagues</div></div>
-          <div class="item active" data-go="profile"><div class="ico">👤</div><div>Profile</div></div>
-        </div>
-      </div>
-
-      <!-- Reward overlay -->
-      <div class="overlay" id="overlay">
-        <div class="sheet">
-          <div class="sheetTop">
-            <div>
-              <h2 id="sheetTitle">Answer submitted ✅</h2>
-              <p id="sheetDesc">Ты сделал прогноз. Завтра получишь результат и изменение Market IQ.</p>
-            </div>
-            <button class="xbtn" id="closeOverlay">✕</button>
-          </div>
-
-          <div class="sheetMid">
-            <div class="big">
-              <div class="lab">Market IQ change</div>
-              <div class="val"><span class="c" id="iqDelta">+12</span></div>
-            </div>
-            <div class="big">
-              <div class="lab">Streak</div>
-              <div class="val"><span class="y">🔥</span> <span id="streakDelta">+1</span></div>
-            </div>
-            <div class="big">
-              <div class="lab">You vs Crowd</div>
-              <div class="val"><span class="g" id="beatCrowd">+1</span></div>
-            </div>
-            <div class="big">
-              <div class="lab">Next unlock</div>
-              <div class="val"><span class="y">🏆</span> <span id="unlock">Elite</span></div>
-            </div>
-          </div>
-
-          <div class="sheetActions">
-            <button class="ghost" id="sheetShare">Share</button>
-            <button class="primary" id="sheetNext">Next</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXPLAINER -->
-  <div class="deck">
-    <h1>Market IQ — “Докажи, что ты умнее толпы”</h1>
-    <p>
-      Это интерактивный демо-прототип (без backend), чтобы ты мог <b>показать людям полную идею</b>:
-      игра на 30 секунд в день превращается в <b>репутацию</b>, затем в <b>доступ</b>, <b>влияние</b> и в итоге — в <b>Signal Creator</b>.
-    </p>
-
-    <div class="pillRow">
-      <div class="pill2"><b>Loop:</b> Daily predictions</div>
-      <div class="pill2"><b>Status:</b> IQ • Leagues • Badges</div>
-      <div class="pill2"><b>Social:</b> Friends duel</div>
-      <div class="pill2"><b>Narrative:</b> Crowd vs Experts</div>
-      <div class="pill2"><b>Endgame:</b> Signal Creator</div>
-    </div>
-
-    <div class="hr"></div>
-
-    <div class="list">
-      <div class="row">
-        <h4>Зачем человеку играть?</h4>
-        <div class="small">Статус и идентичность: ты строишь “Market Passport” — репутацию, которую нельзя купить.</div>
-      </div>
-      <div class="row">
-        <h4>Зачем звать друзей?</h4>
-        <div class="small">Сравнение и дуэли. Плюс FOMO “Genesis”: ранний бейдж + бонус навсегда (как у тапалок).</div>
-      </div>
-      <div class="row">
-        <h4>Что потом?</h4>
-        <div class="small">Лучшие игроки получают Verified Mind → Market Voice → Signal Creator с подпиской и revenue share (после доверия).</div>
-      </div>
-    </div>
-
-    <div class="hr"></div>
-
-    <p><b>Как использовать в X:</b> публикуешь ежедневные “итоги” (Recap) + карточки “Crowd vs Experts” + топ игроков недели.</p>
-
-    <div class="mono" id="xSample">
-Example X post (copy/paste):
-Толпа: 63% UP по BTC
-Факт: DOWN −4%
-Топ игрок дня: IQ 1420 (Top 5%)
-Ссылка: alex13alex1.github.io/market-iq-demo/
-    </div>
-
-    <div class="hint">Подсказка: открой на телефоне — будет ощущение приложения.</div>
-  </div>
 </div>
 
 <script>
-  // --- Demo data ---
-  const questions = [
-    { sym: "BTC / USD", px: "$98,500", title: "Будет ли цена выше через 24 часа?", crowdUp: 63, horizon:"24h", chance:"58%" },
-    { sym: "ETH / USD", px: "$3,420", title: "ETH: рост или падение к завтрашнему закрытию?", crowdUp: 56, horizon:"24h", chance:"54%" },
-    { sym: "NASDAQ / NQ", px: "18,210", title: "Nasdaq: будет ли выше на этой неделе?", crowdUp: 48, horizon:"7d", chance:"52%" },
-    { sym: "GOLD / XAU", px: "$2,340", title: "Gold: выше через месяц?", crowdUp: 60, horizon:"30d", chance:"55%" },
-    { sym: "USDJPY", px: "148.20", title: "USDJPY: выше через 48 часов?", crowdUp: 51, horizon:"48h", chance:"53%" },
-  ];
 
-  let idx = 0;
-  let answered = 1;
-  let iq = 1120;
-  let streak = 6;
-  let todayScore = 12;
-  let cvy = 1;
+let page = 1
+const total = 8
 
-  const $ = (id)=>document.getElementById(id);
+function go(n){
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+ document.getElementById('p'+n).classList.add('active')
+ page = n
+ updateBar()
+}
 
-  function renderQ(){
-    const q = questions[idx];
-    $("assetSym").textContent = q.sym;
-    $("assetPx").textContent = q.px;
-    $("qTitle").textContent = q.title;
-    $("crowdPct").textContent = q.crowdUp + "%";
-    $("barFill").style.width = q.crowdUp + "%";
-    $("qMetaLeft").textContent = "Horizon: " + q.horizon;
-    $("chance").textContent = q.chance;
-    $("answered").textContent = answered;
-  }
+function updateBar(){
+ document.getElementById('bar').style.width = (page/total*100)+'%'
+}
 
-  function navTo(name){
-    const screens = ["play","recap","leagues","profile"];
-    screens.forEach(s=>{
-      document.querySelector("#screen-"+s).classList.remove("active");
-      document.querySelectorAll('.nav .item').forEach(i=>i.classList.remove("active"));
-    });
+/* swipe */
+let startX = 0
+document.addEventListener('touchstart', e=>{
+ startX = e.touches[0].clientX
+})
 
-    document.querySelector("#screen-"+name).classList.add("active");
-    // activate nav in that screen
-    document.querySelectorAll("#screen-"+name+" .nav .item").forEach(i=>{
-      if(i.dataset.go===name) i.classList.add("active");
-    });
-  }
+document.addEventListener('touchend', e=>{
+ let dx = e.changedTouches[0].clientX - startX
+ if(dx < -50 && page < total) go(page+1)
+ if(dx > 50 && page > 1) go(page-1)
+})
 
-  // Bottom nav click
-  document.querySelectorAll(".nav .item").forEach(el=>{
-    el.addEventListener("click", ()=> navTo(el.dataset.go));
-  });
+updateBar()
 
-  function openReward(choice){
-    // simulate reward
-    const delta = choice === "UP" ? 12 : 9;
-    iq += delta;
-    streak += 1;
-    cvy += 1;
-    todayScore += delta;
-
-    $("iq").textContent = iq;
-    $("iq2").textContent = iq;
-    $("iq3").textContent = iq;
-
-    $("streak").textContent = streak;
-    $("streak2").textContent = streak;
-    $("streak3").textContent = streak;
-
-    $("todayScore").textContent = "+" + todayScore;
-    $("cvy").textContent = "+" + cvy;
-
-    $("sheetTitle").textContent = `Answer submitted ✅ (${choice})`;
-    $("iqDelta").textContent = "+" + delta;
-    $("streakDelta").textContent = "+1";
-    $("beatCrowd").textContent = "+1";
-    $("unlock").textContent = (iq >= 1300 ? "Verified Mind" : "Elite");
-
-    $("overlay").classList.add("show");
-  }
-
-  function closeReward(){ $("overlay").classList.remove("show"); }
-
-  $("btnUp").addEventListener("click", ()=>openReward("UP"));
-  $("btnDown").addEventListener("click", ()=>openReward("DOWN"));
-  $("closeOverlay").addEventListener("click", closeReward);
-
-  $("sheetNext").addEventListener("click", ()=>{
-    closeReward();
-    nextQ();
-  });
-
-  $("sheetShare").addEventListener("click", ()=>{
-    const text = `Market IQ demo: I answered ${answered}/5 today. IQ=${iq}. Crowd=${questions[idx].crowdUp}% UP. ${location.href}`;
-    if(navigator.share){
-      navigator.share({title:"Market IQ", text, url: location.href}).catch(()=>{});
-    }else{
-      navigator.clipboard?.writeText(text);
-      alert("Copied share text (demo).");
-    }
-  });
-
-  function nextQ(){
-    idx = (idx + 1) % questions.length;
-    answered = Math.min(5, answered + 1);
-    renderQ();
-  }
-  $("btnNext").addEventListener("click", nextQ);
-
-  // Recap actions
-  $("btnShareX").addEventListener("click", ()=>{
-    const text =
-`Толпа: ${questions[idx].crowdUp}% UP по ${questions[idx].sym}
-Факт: (demo) DOWN −4%
-Мой Market IQ: ${iq} • Streak: ${streak}
-Сайт: ${location.href}`;
-    // open X intent
-    const url = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text);
-    window.open(url, "_blank");
-  });
-
-  $("btnInvite").addEventListener("click", async ()=>{
-    const link = location.href.split("#")[0] + "?ref=Alex13Alex1";
-    try{
-      await navigator.clipboard.writeText(link);
-      $("inviteHint").style.display = "block";
-      setTimeout(()=> $("inviteHint").style.display="none", 2500);
-    }catch(e){
-      alert("Copy this link:\n" + link);
-    }
-  });
-
-  $("btnSeeElite").addEventListener("click", ()=>{
-    const el = $("eliteHint");
-    el.style.display = (el.style.display==="none" || !el.style.display) ? "block" : "none";
-  });
-
-  $("btnCreator").addEventListener("click", ()=>{
-    const el = $("creatorHint");
-    el.style.display = (el.style.display==="none" || !el.style.display) ? "block" : "none";
-  });
-
-  // Fake timer countdown just for vibe
-  let t = 18*3600 + 42*60 + 11;
-  setInterval(()=>{
-    if(t<=0) return;
-    t--;
-    const hh = String(Math.floor(t/3600)).padStart(2,'0');
-    const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
-    const ss = String(t%60).padStart(2,'0');
-    $("timer").textContent = `${hh}:${mm}:${ss}`;
-  }, 1000);
-
-  renderQ();
-
-  // Initialize hidden hints
-  $("eliteHint").style.display = "none";
-  $("creatorHint").style.display = "none";
 </script>
+
 </body>
-  </html>
+</html>
