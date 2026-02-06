@@ -1,213 +1,1403 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Market IQ Demo</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Market IQ — Super Demo</title>
+  <meta name="description" content="A 30-second daily market prediction game that becomes reputation, access, influence, and creator monetization." />
 
-<style>
-body{
- margin:0;
- font-family:system-ui;
- background:#020617;
- display:flex;
- justify-content:center;
- align-items:center;
- height:100vh;
- color:white;
-}
+  <style>
+    :root{
+      --bg0:#020617;
+      --bg1:#050b1a;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.085);
+      --stroke: rgba(255,255,255,.10);
+      --stroke2: rgba(34,211,238,.22);
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --cyan:#22d3ee;
+      --cyan2:#0891b2;
+      --gold:#fbbf24;
+      --green:#22c55e;
+      --red:#fb7185;
+      --shadow: 0 40px 120px rgba(0,0,0,.82);
+      --r32:32px;
+      --r24:24px;
+      --r18:18px;
+      --r14:14px;
+      --r12:12px;
+    }
 
-.app{
- width:390px;
- height:780px;
- background:#020617;
- border-radius:28px;
- overflow:hidden;
- position:relative;
- box-shadow:0 40px 120px rgba(0,0,0,.8);
-}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1100px 800px at 18% 15%, rgba(34,211,238,.18), transparent 60%),
+        radial-gradient(900px 700px at 82% 22%, rgba(251,191,36,.12), transparent 55%),
+        radial-gradient(900px 700px at 60% 92%, rgba(244,63,94,.10), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 18px 14px;
+    }
 
-/* progress */
-.progress{
- height:4px;
- background:#0b1222;
-}
-.progress-bar{
- height:100%;
- width:10%;
- background:#22d3ee;
- transition:.4s;
-}
+    /* Layout */
+    .wrap{
+      width: min(1120px, 100%);
+      display:grid;
+      grid-template-columns: 410px 1fr;
+      gap: 18px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      body{align-items:flex-start}
+      .wrap{grid-template-columns: 1fr; justify-items:center;}
+    }
 
-/* pages */
-.page{
- position:absolute;
- inset:0;
- padding:26px;
- display:flex;
- flex-direction:column;
- gap:18px;
- transform:translateX(100%);
- opacity:0;
- transition:.4s ease;
-}
+    /* Phone shell */
+    .phone{
+      width: 390px;
+      height: 820px;
+      border-radius: 34px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow), 0 0 70px rgba(34,211,238,.14);
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(14px);
+    }
+    .statusbar{
+      height: 44px;
+      padding: 14px 16px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color: rgba(229,231,235,.80);
+      font-size: 12px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--cyan);box-shadow:0 0 18px rgba(34,211,238,.7)}
+    .app{
+      height: calc(100% - 44px);
+      background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.98));
+      position:relative;
+    }
 
-.page.active{
- transform:translateX(0);
- opacity:1;
-}
+    /* Top header inside app */
+    .top{
+      padding: 14px 16px 10px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+      min-width: 0;
+    }
+    .logo{
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(34,211,238,.95);
+      white-space:nowrap;
+    }
+    .tagline{
+      font-size: 12px;
+      color: rgba(148,163,184,.92);
+      line-height: 1.25;
+    }
+    .miniStats{
+      display:flex;
+      gap: 8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .miniCard{
+      min-width: 110px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .miniLabel{font-size:10px; color: rgba(148,163,184,.86)}
+    .miniValue{margin-top:3px; font-weight:800; font-size: 14px}
+    .c{color:var(--cyan)} .g{color:var(--green)} .y{color:var(--gold)} .r{color:var(--red)}
 
-h1{margin:0;font-size:22px}
+    /* Progress */
+    .progressWrap{
+      padding: 0 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+    .progress{
+      flex:1;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .progress > div{
+      height: 100%;
+      width: 8%;
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.95));
+      transition: width .35s ease;
+    }
+    .stepHint{
+      font-size: 11px;
+      color: rgba(148,163,184,.92);
+      white-space:nowrap;
+    }
 
-.card{
- background:#0b1222;
- border-radius:18px;
- padding:18px;
- border:1px solid rgba(255,255,255,.08);
-}
+    /* Screens container */
+    .screen{
+      position:absolute;
+      inset: 116px 0 74px 0; /* below top area; above nav */
+      overflow:hidden;
+      opacity:0;
+      transform: translateX(8px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .screen.active{
+      opacity:1;
+      transform: translateX(0);
+      pointer-events:auto;
+    }
+    .scroll{
+      height:100%;
+      overflow:auto;
+      padding: 10px 16px 14px;
+      scrollbar-width:none;
+    }
+    .scroll::-webkit-scrollbar{display:none}
 
-.btn{
- height:64px;
- border-radius:16px;
- border:none;
- font-size:18px;
- font-weight:700;
- cursor:pointer;
-}
+    /* Cards */
+    .card{
+      border-radius: var(--r24);
+      background: linear-gradient(160deg, rgba(255,255,255,.085), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
+      overflow:hidden;
+    }
+    .card + .card{margin-top:12px}
+    .pad{padding: 16px}
+    .h1{font-size:18px; font-weight:900; margin:0 0 6px}
+    .h2{font-size:12px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.85); margin:0 0 10px}
+    .p{color: rgba(148,163,184,.92); font-size: 13px; line-height:1.5; margin:0}
+    .row{display:flex; gap: 10px}
+    .col{flex:1}
+    .kv{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding: 10px 0;
+      border-bottom: 1px dashed rgba(255,255,255,.10);
+      font-size: 13px;
+    }
+    .kv:last-child{border-bottom:0}
+    .kv .k{color: rgba(229,231,235,.92)}
+    .kv .v{color: rgba(148,163,184,.95); font-weight: 800}
 
-.next{ background:#22d3ee; color:black }
-.up{ background:#22c55e; color:black }
-.down{ background:#f43f5e }
+    .chipRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(229,231,235,.92);
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .chip.cyan{border-color: rgba(34,211,238,.24); background: rgba(34,211,238,.08)}
+    .chip.gold{border-color: rgba(251,191,36,.22); background: rgba(251,191,36,.10)}
+    .chip.green{border-color: rgba(34,197,94,.22); background: rgba(34,197,94,.10)}
+    .chip.red{border-color: rgba(244,63,94,.22); background: rgba(244,63,94,.10)}
 
-.text{
- font-size:14px;
- color:#94a3b8;
- line-height:1.5;
-}
-</style>
+    /* Play card */
+    .hero{
+      padding: 16px;
+      position:relative;
+      background:
+        radial-gradient(680px 380px at 15% 12%, rgba(34,211,238,.16), transparent 62%),
+        radial-gradient(680px 380px at 85% 18%, rgba(251,191,36,.12), transparent 60%),
+        rgba(255,255,255,.04);
+    }
+    .sym{font-size:12px;color: rgba(148,163,184,.92)}
+    .price{font-size:34px;font-weight:950; letter-spacing:-.5px; margin-top:4px}
+    .spark{
+      height: 56px; border-radius: 16px;
+      background: linear-gradient(90deg, rgba(34,211,238,.08), rgba(34,197,94,.06), rgba(251,191,36,.08));
+      border: 1px solid rgba(255,255,255,.08);
+      margin-top: 10px;
+      position:relative; overflow:hidden;
+    }
+    .spark:before{
+      content:"";
+      position:absolute; inset:-60px -160px;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,.12), transparent);
+      transform: translateX(-40%);
+      animation: shimmer 3.6s linear infinite;
+    }
+    @keyframes shimmer{
+      0%{transform: translateX(-40%)}
+      100%{transform: translateX(40%)}
+    }
+    .question{padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.06)}
+    .qTitle{font-size: 16px; font-weight: 900; line-height:1.25}
+    .qMeta{margin-top:8px; display:flex; justify-content:space-between; gap:10px; color: rgba(148,163,184,.92); font-size: 12px}
+    .bar{
+      height: 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-top: 8px;
+    }
+    .bar > div{
+      height:100%;
+      width: 63%;
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.95));
+      transition: width .35s ease;
+    }
+
+    .btnRow{
+      padding: 12px 16px 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    button{
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn{
+      height: 70px;
+      border-radius: 18px;
+      border: none;
+      font-size: 18px;
+      font-weight: 950;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease;
+    }
+    .btn:active{transform: scale(.985)}
+    .btn.up{background: linear-gradient(135deg, #22c55e, #16a34a); color:#06100a; box-shadow:0 16px 40px rgba(34,197,94,.22)}
+    .btn.down{background: linear-gradient(135deg, #fb7185, #e11d48); color:white; box-shadow:0 16px 40px rgba(244,63,94,.22)}
+    .btn.ghost{
+      grid-column: 1 / 3;
+      height: 46px;
+      font-size: 13px;
+      font-weight: 850;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(229,231,235,.92);
+      box-shadow:none;
+    }
+    .btn.primarySmall{
+      height: 46px;
+      font-size: 13px;
+      font-weight: 950;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(251,191,36,.22));
+      color:#041017;
+      border: 1px solid rgba(34,211,238,.25);
+    }
+
+    /* Bottom nav */
+    .nav{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 74px;
+      display:flex;
+      justify-content:space-around;
+      align-items:center;
+      background: rgba(0,0,0,.35);
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+    }
+    .nav .item{
+      width: 64px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap: 6px;
+      color: rgba(148,163,184,.92);
+      font-size: 10px;
+      cursor:pointer;
+    }
+    .nav .ico{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 18px;
+    }
+    .nav .item.active{color: rgba(229,231,235,.95)}
+    .nav .item.active .ico{
+      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(8,145,178,.95));
+      border-color: rgba(34,211,238,.30);
+      color:#041017;
+      box-shadow: 0 14px 40px rgba(34,211,238,.18);
+    }
+
+    /* Modal */
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 14px;
+      background: rgba(2,6,23,.65);
+      backdrop-filter: blur(10px);
+    }
+    .overlay.show{display:flex}
+    .sheet{
+      width:100%;
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 30px 120px rgba(0,0,0,.70);
+      overflow:hidden;
+    }
+    .sheetTop{
+      padding: 14px 14px 10px;
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .sheetTop h3{margin:0; font-size: 16px}
+    .sheetTop p{margin:6px 0 0; font-size: 12px; color: rgba(148,163,184,.92); line-height:1.35}
+    .xbtn{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(229,231,235,.92);
+      cursor:pointer;
+      font-weight: 950;
+    }
+    .sheetGrid{
+      padding: 0 14px 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .big{
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .big .lab{font-size: 10px; color: rgba(148,163,184,.86)}
+    .big .val{margin-top:4px; font-size: 18px; font-weight: 950}
+    .sheetActions{
+      padding: 0 14px 14px;
+      display:flex;
+      gap: 10px;
+    }
+    .sheetActions .btn.ghost{height: 44px; grid-column:auto; flex:1}
+    .sheetActions .btn.primarySmall{height: 44px; flex:1}
+
+    /* Right explainer */
+    .deck{
+      border-radius: 26px;
+      padding: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 30px 100px rgba(0,0,0,.45);
+      backdrop-filter: blur(14px);
+    }
+    .deck h1{
+      margin:0 0 8px;
+      font-size: 22px;
+      letter-spacing:-.4px;
+    }
+    .deck .sub{
+      margin:0;
+      color: rgba(148,163,184,.92);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+    .pillRow{display:flex; flex-wrap:wrap; gap:8px; margin-top: 12px}
+    .pill2{
+      padding: 8px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 12px;
+      color: rgba(229,231,235,.92);
+    }
+    .pill2 b{color: var(--cyan)}
+    .hr{height:1px;background: rgba(255,255,255,.10);margin: 14px 0}
+    .box{
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.10);
+      margin-top: 10px;
+    }
+    .box h4{margin:0 0 6px; font-size: 13px}
+    .box p{margin:0; font-size: 12px; color: rgba(148,163,184,.92); line-height:1.45}
+    .mono{
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 14px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.10);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: rgba(229,231,235,.92);
+    }
+    .hint{margin-top:10px;font-size:12px;color:rgba(148,163,184,.92)}
+    a{color: var(--cyan); text-decoration:none}
+    a:hover{text-decoration:underline}
+  </style>
 </head>
 
 <body>
+  <div class="wrap">
 
-<div class="app">
+    <!-- PHONE -->
+    <div class="phone" id="phone">
+      <div class="statusbar">
+        <div class="pill"><span class="dot"></span><span id="sbDay">Season 0 • Day 1</span></div>
+        <div class="pill">🧪 Demo</div>
+      </div>
 
-<div class="progress">
-<div class="progress-bar" id="bar"></div>
-</div>
+      <div class="app">
 
-<!-- PAGES -->
-<div class="page active" id="p1">
-<h1>Market IQ</h1>
-<div class="text">
-Докажи что ты умнее толпы.<br>
-30 секунд в день → статус и репутация.
-</div>
-<button class="btn next" onclick="go(2)">Начать</button>
-</div>
+        <div class="top">
+          <div class="brand">
+            <div class="logo">MARKET IQ</div>
+            <div class="tagline">A 30-second daily game that becomes reputation.</div>
+          </div>
 
-<div class="page" id="p2">
-<h1>Сегодняшний прогноз</h1>
-<div class="card">
-BTC / USD<br><br>
-Будет ли цена выше через 24 часа?
-</div>
-<button class="btn up" onclick="go(3)">UP</button>
-<button class="btn down" onclick="go(3)">DOWN</button>
-</div>
+          <div class="miniStats">
+            <div class="miniCard">
+              <div class="miniLabel">Market IQ</div>
+              <div class="miniValue"><span class="c" id="uiIQ">1000</span> <span style="color:rgba(148,163,184,.9)">•</span> <span class="y" id="uiLeague">Bronze</span></div>
+            </div>
+            <div class="miniCard">
+              <div class="miniLabel">Streak</div>
+              <div class="miniValue"><span class="y">🔥</span> <span id="uiStreak">0</span> days</div>
+            </div>
+          </div>
+        </div>
 
-<div class="page" id="p3">
-<h1>Результат</h1>
-<div class="card" id="iqCard">
-+12 Market IQ<br>
-Streak +1<br>
-Ты обошёл толпу
-</div>
-<button class="btn next" onclick="go(4)">Дальше</button>
-</div>
+        <div class="progressWrap">
+          <div class="progress"><div id="uiProg"></div></div>
+          <div class="stepHint" id="uiStepHint">Step 1/3</div>
+        </div>
 
-<div class="page" id="p4">
-<h1>Социальный уровень</h1>
-<div class="text">
-Top 20% игроков.<br>
-Играй против друзей.<br>
-Поднимайся в лигах.
-</div>
-<button class="btn next" onclick="go(5)">Дальше</button>
-</div>
+        <!-- ONBOARD 1 -->
+        <section class="screen active" id="s-on1">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Prove you’re smarter than the crowd.</div>
+                <p class="p">Pick <b>UP</b> or <b>DOWN</b> once per day. Build a track record.</p>
+                <div class="chipRow">
+                  <span class="chip cyan">30 seconds/day</span>
+                  <span class="chip gold">Status + leagues</span>
+                  <span class="chip green">No money needed</span>
+                </div>
+              </div>
+            </div>
 
-<div class="page" id="p5">
-<h1>Endgame</h1>
-<div class="text">
-Signal Creator статус.<br>
-Подписчики.<br>
-Монетизация.
-</div>
-<button class="btn next" onclick="go(6)">Дальше</button>
-</div>
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Why people share</div>
+                <div class="kv"><span class="k">“I’m Top 10% this week”</span><span class="v y">Status</span></div>
+                <div class="kv"><span class="k">Friends duel (7 days)</span><span class="v c">Rivalry</span></div>
+                <div class="kv"><span class="k">Genesis badge</span><span class="v y">FOMO</span></div>
+                <button class="btn primarySmall" id="btnOn1">Continue</button>
+              </div>
+            </div>
 
-<div class="page" id="p6">
-<h1>Leaderboard</h1>
-<div class="card">
-#1 TraderNeo — IQ 1820<br>
-#2 QuantFox — IQ 1650<br>
-#3 You — IQ 1240
-</div>
-<button class="btn next" onclick="go(7)">Дальше</button>
-</div>
+            <div class="hint">Tip: swipe left/right to move between steps.</div>
+          </div>
+        </section>
 
-<div class="page" id="p7">
-<h1>Профиль</h1>
-<div class="card">
-IQ: 1240<br>
-Accuracy: 58%<br>
-League: Gold
-</div>
-<button class="btn next" onclick="go(8)">Дальше</button>
-</div>
+        <!-- ONBOARD 2 -->
+        <section class="screen" id="s-on2">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">One tap. Instant feedback.</div>
+                <p class="p">Right after your pick you get a reward screen: IQ points, streak, and progress.</p>
+                <div class="chipRow">
+                  <span class="chip">Daily habit</span>
+                  <span class="chip cyan">Simple for kids</span>
+                  <span class="chip gold">Deep endgame</span>
+                </div>
+              </div>
+            </div>
 
-<div class="page" id="p8">
-<h1>Creator Page</h1>
-<div class="text">
-Ты публикуешь сигналы.<br>
-Ритейл подписывается.<br>
-Ты получаешь доход.
-</div>
-<button class="btn next" onclick="go(1)">Сначала</button>
-</div>
+            <div class="card">
+              <div class="pad">
+                <div class="h2">The endgame</div>
+                <div class="kv"><span class="k">Verified Mind</span><span class="v c">Access</span></div>
+                <div class="kv"><span class="k">Market Voice</span><span class="v y">Influence</span></div>
+                <div class="kv"><span class="k">Signal Creator</span><span class="v g">Monetize</span></div>
+                <button class="btn primarySmall" id="btnOn2">Continue</button>
+              </div>
+            </div>
+          </div>
+        </section>
 
-</div>
+        <!-- ONBOARD 3 -->
+        <section class="screen" id="s-on3">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Choose your beginner mode.</div>
+                <p class="p">Retail-friendly: one question per day. No charts needed.</p>
+                <div class="chipRow">
+                  <span class="chip cyan">Crypto</span>
+                  <span class="chip">Stocks</span>
+                  <span class="chip">FX</span>
+                  <span class="chip">Gold</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Ready?</div>
+                <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="uiGenesis">ON</span></div>
+                <div class="kv"><span class="k">Season reset</span><span class="v">Weekly</span></div>
+                <button class="btn primarySmall" id="btnStartPlay">Start playing</button>
+                <button class="btn ghost" id="btnResetAll">Reset demo</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PLAY -->
+        <section class="screen" id="s-play">
+          <div class="scroll">
+            <div class="card">
+              <div class="hero">
+                <div class="sym" id="qSym">BTC / USD</div>
+                <div class="price" id="qPx">$98,500</div>
+                <div class="spark" aria-hidden="true"></div>
+
+                <div class="chipRow">
+                  <span class="chip cyan">Daily Pulse</span>
+                  <span class="chip">Closes in <b id="qTimer">--:--:--</b></span>
+                  <span class="chip gold">Crowd <b id="qCrowd">63%</b> UP</span>
+                </div>
+              </div>
+
+              <div class="question">
+                <div class="qTitle" id="qTitle">Will price be higher in 24h?</div>
+                <div class="qMeta">
+                  <span id="qHorizon">Horizon: 24h</span>
+                  <span>Your chance: <b id="qChance">58%</b></span>
+                </div>
+                <div class="bar"><div id="qBar"></div></div>
+              </div>
+
+              <div class="btnRow">
+                <button class="btn up" id="btnUp">⬆ UP</button>
+                <button class="btn down" id="btnDown">⬇ DOWN</button>
+                <button class="btn ghost" id="btnNextQ">Next demo question ▸</button>
+              </div>
+            </div>
+
+            <div class="row" style="gap:12px;">
+              <div class="card col">
+                <div class="pad">
+                  <div class="h2">Today</div>
+                  <div class="kv"><span class="k">Answered</span><span class="v" id="uiAnswered">0/1</span></div>
+                  <div class="kv"><span class="k">Edge vs crowd</span><span class="v g" id="uiEdge">+0</span></div>
+                </div>
+              </div>
+              <div class="card col">
+                <div class="pad">
+                  <div class="h2">Short meaning</div>
+                  <div class="kv"><span class="k">Tap</span><span class="v">UP/DOWN</span></div>
+                  <div class="kv"><span class="k">Get</span><span class="v">Reputation</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Swipe tip</div>
+                <p class="p">Swipe right/left to move fast. Keep it simple. Make it daily.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- RECAP -->
+        <section class="screen" id="s-recap">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Recap</div>
+                <p class="p">This screen creates content for social: “Crowd vs you”, “Top %”, “Streak”.</p>
+                <div class="row" style="margin-top:10px;">
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">You</div>
+                      <div class="miniValue y" style="font-size:18px;" id="recYou">0/1</div>
+                      <div class="p" style="margin-top:6px;">Your correctness today.</div>
+                    </div>
+                  </div>
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Crowd</div>
+                      <div class="miniValue c" style="font-size:18px;" id="recCrowd">0/1</div>
+                      <div class="p" style="margin-top:6px;">Majority side correctness.</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chipRow">
+                  <span class="chip">Top <b id="recTop">—</b></span>
+                  <span class="chip">Streak <b id="recStreak">0</b></span>
+                  <span class="chip cyan">IQ <b id="recIQ">1000</b></span>
+                </div>
+
+                <div class="row" style="margin-top:12px;">
+                  <button class="btn primarySmall col" id="btnShare">Share text</button>
+                  <button class="btn ghost col" id="btnCopyInvite">Copy invite link</button>
+                </div>
+                <div class="hint" id="inviteHint" style="display:none;">Copied: <span class="c">?ref=marketIQ</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">History (demo)</div>
+                <div id="hist"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- LEAGUES -->
+        <section class="screen" id="s-leagues">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Leagues & Seasons</div>
+                <p class="p">Weekly reset keeps it alive. Leagues create status. Genesis creates FOMO.</p>
+
+                <div class="row" style="margin-top:10px;">
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Your league</div>
+                      <div class="miniValue y" style="font-size:18px;" id="lgLeague">Bronze</div>
+                      <div class="p" style="margin-top:6px;">Promotion: Top 20%</div>
+                    </div>
+                  </div>
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Season</div>
+                      <div class="miniValue c" style="font-size:18px;" id="lgSeason">0</div>
+                      <div class="p" style="margin-top:6px;">Ends Sunday 23:59</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="lgGenesis">Enabled</span></div>
+                <div class="kv"><span class="k">Verified Mind unlock</span><span class="v c" id="lgVerified">Locked</span></div>
+                <div class="kv"><span class="k">Signal Creator unlock</span><span class="v g" id="lgCreator">Locked</span></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Global leaderboard (demo)</div>
+                <div id="lb"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CROWD VS EXPERTS -->
+        <section class="screen" id="s-crowd">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Crowd vs Experts</div>
+                <p class="p">A narrative engine for X. Every day: who was right?</p>
+                <div class="chipRow">
+                  <span class="chip cyan">Crowd winrate 30d: <b>52%</b></span>
+                  <span class="chip gold">Experts winrate 30d: <b>49%</b></span>
+                </div>
+                <div class="kv"><span class="k">Today scoreboard</span><span class="v" id="cveScore">Crowd 0 — Experts 0</span></div>
+                <button class="btn primarySmall" id="btnHotPost">Copy hot X post</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Friends duel (demo)</div>
+                <div class="kv"><span class="k">7-day duel</span><span class="v" id="duelState">Inactive</span></div>
+                <div class="kv"><span class="k">You</span><span class="v y" id="duelYou">0</span></div>
+                <div class="kv"><span class="k">Friend</span><span class="v c" id="duelFriend">0</span></div>
+                <button class="btn ghost" id="btnStartDuel">Start demo duel</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PROFILE -->
+        <section class="screen" id="s-profile">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Your Market Passport</div>
+                <p class="p">This is what people screenshot. Identity + reputation.</p>
+
+                <div class="row" style="margin-top:10px;">
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Market IQ</div>
+                      <div class="miniValue c" style="font-size:18px;" id="pfIQ">1000</div>
+                      <div class="p" style="margin-top:6px;" id="pfLeague">Bronze</div>
+                    </div>
+                  </div>
+                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Accuracy</div>
+                      <div class="miniValue g" style="font-size:18px;" id="pfAcc">—</div>
+                      <div class="p" style="margin-top:6px;">Last 30 picks</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chipRow" id="pfBadges"></div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="pad">
+                <div class="h2">Path to Creator</div>
+                <div class="kv"><span class="k">Eligibility</span><span class="v" id="pfElig">Not yet</span></div>
+                <div class="kv"><span class="k">Requirement</span><span class="v">IQ ≥ 1200 + Streak ≥ 7</span></div>
+                <button class="btn primarySmall" id="btnCreator">Preview Creator page</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- CREATOR -->
+        <section class="screen" id="s-creator">
+          <div class="scroll">
+            <div class="card">
+              <div class="pad">
+                <div class="h1">Signal Creator (endgame)</div>
+                <p class="p">Monetize reputation. Retail subscribes because your history is measurable.</p>
+
+                <div class="kv"><span class="k">Creator status</span><span class="v" id="crStatus">Locked</span></div>
+                <div class="kv"><span class="k">Public page</span><span class="v">Signals + track record</span></div>
+                <div class="kv"><span class="k">Revenue share</span><span class="v g">Enabled</span></div>
+
+                <div class="card" style="margin-top:12px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                  <div class="pad">
+                    <div class="h2">What retail sees</div>
+                    <div class="kv"><span class="k">30d accuracy</span><span class="v" id="crAcc">—</span></div>
+                    <div class="kv"><span class="k">Streak</span><span class="v" id="crStreak">0</span></div>
+                    <div class="kv"><span class="k">League</span><span class="v" id="crLeague">Bronze</span></div>
+                  </div>
+                </div>
+
+                <button class="btn ghost" id="btnBackHome">Back to Play</button>
+              </div>
+            </div>
+
+            <div class="hint">This is demo UI only — the real product would use verified market data and anti-cheat.</div>
+          </div>
+        </section>
+
+        <!-- NAV -->
+        <div class="nav" id="nav">
+          <div class="item active" data-go="s-play"><div class="ico">🎮</div><div>Play</div></div>
+          <div class="item" data-go="s-recap"><div class="ico">📈</div><div>Recap</div></div>
+          <div class="item" data-go="s-leagues"><div class="ico">🏆</div><div>Leagues</div></div>
+          <div class="item" data-go="s-crowd"><div class="ico">⚔️</div><div>Crowd</div></div>
+          <div class="item" data-go="s-profile"><div class="ico">👤</div><div>You</div></div>
+        </div>
+
+        <!-- REWARD MODAL -->
+        <div class="overlay" id="overlay">
+          <div class="sheet">
+            <div class="sheetTop">
+              <div>
+                <h3 id="rwTitle">Pick submitted ✅</h3>
+                <p id="rwDesc">Instant reward (demo). Tomorrow you’d see the final result.</p>
+              </div>
+              <button class="xbtn" id="rwClose">✕</button>
+            </div>
+
+            <div class="sheetGrid">
+              <div class="big">
+                <div class="lab">Market IQ</div>
+                <div class="val c" id="rwIQ">+12</div>
+              </div>
+              <div class="big">
+                <div class="lab">Streak</div>
+                <div class="val y" id="rwStreak">+1</div>
+              </div>
+              <div class="big">
+                <div class="lab">Edge vs crowd</div>
+                <div class="val g" id="rwEdge">+1</div>
+              </div>
+              <div class="big">
+                <div class="lab">Next unlock</div>
+                <div class="val y" id="rwUnlock">Silver</div>
+              </div>
+            </div>
+
+            <div class="sheetActions">
+              <button class="btn ghost" id="rwShare">Share</button>
+              <button class="btn primarySmall" id="rwGoRecap">Go to Recap</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT EXPLAINER -->
+    <div class="deck">
+      <h1>Market IQ — Super Demo</h1>
+      <p class="sub">
+        Simple for retail: <b>one question</b>, <b>two buttons</b>, <b>daily streak</b>.<br/>
+        Deep idea: a <b>reputation network</b> that can unlock access, influence, and creator monetization.
+      </p>
+
+      <div class="pillRow">
+        <div class="pill2"><b>Loop:</b> UP / DOWN daily</div>
+        <div class="pill2"><b>Status:</b> IQ + leagues</div>
+        <div class="pill2"><b>Social:</b> duels + invites</div>
+        <div class="pill2"><b>Narrative:</b> Crowd vs Experts</div>
+        <div class="pill2"><b>Endgame:</b> Signal Creator</div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="box">
+        <h4>What you post on X</h4>
+        <p>Not “join my site”. You post daily stories: crowd was wrong/right, top players, and expert vs crowd.</p>
+        <div class="mono" id="xCopy">
+Crowd: 63% UP on BTC
+Outcome: (demo) DOWN ✅
+Top player today: IQ 1240 (Gold)
+Link: alex13alex1.github.io/market-iq-demo/
+        </div>
+      </div>
+
+      <div class="box">
+        <h4>Why people invite friends</h4>
+        <p>They want to prove they’re better + beat friends in duels. Genesis badge adds FOMO.</p>
+      </div>
+
+      <div class="hint">Open it on a phone for the “real app” feel.</div>
+    </div>
+
+  </div>
 
 <script>
+/* ========== State (fast, local, no lag) ========== */
+const KEY = "market_iq_super_demo_v1";
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const todayISO = ()=> new Date().toISOString().slice(0,10);
 
-let page = 1
-const total = 8
+const defaultState = () => ({
+  season: 0,
+  createdAt: Date.now(),
+  genesis: true,
+  iq: 1000,
+  streak: 0,
+  lastPlayDate: null,
+  answeredToday: 0,
+  edgeToday: 0,
+  picks: [], // {date,sym,horizon,choice,crowdUp,outcome,correct}
+  cve: { crowd: 0, experts: 0 },
+  duel: { active:false, you:0, friend:0 }
+});
 
-function go(n){
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
- document.getElementById('p'+n).classList.add('active')
- page = n
- updateBar()
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return defaultState();
+    const s = JSON.parse(raw);
+    return { ...defaultState(), ...s };
+  }catch{ return defaultState(); }
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+let state = load();
+
+/* ========== Demo questions ========== */
+const QUESTIONS = [
+  { sym:"BTC / USD", px:98500, horizon:"24h", crowdUp:63, title:"Will BTC be higher in 24h?", chance:"58%", mode:"Daily Pulse" },
+  { sym:"ETH / USD", px:3420, horizon:"24h", crowdUp:56, title:"Will ETH close higher tomorrow?", chance:"54%", mode:"Daily Pulse" },
+  { sym:"NASDAQ / QQQ", px:476, horizon:"7d", crowdUp:48, title:"Will Nasdaq be higher next week?", chance:"52%", mode:"Weekly Pulse" },
+  { sym:"GOLD / XAU", px:2340, horizon:"7d", crowdUp:60, title:"Will Gold be higher next week?", chance:"55%", mode:"Weekly Pulse" },
+  { sym:"USDJPY", px:148.2, horizon:"48h", crowdUp:51, title:"Will USDJPY be higher in 48h?", chance:"53%", mode:"Daily Pulse" }
+];
+let qIndex = 0;
+
+/* ========== Helpers ========== */
+const $ = (id)=>document.getElementById(id);
+const money = (n)=>{
+  const isInt = Math.abs(n) >= 100 || Number.isInteger(n);
+  const v = isInt ? Math.round(n).toLocaleString() : n.toFixed(2);
+  return "$" + v;
+};
+function leagueFromIQ(iq){
+  if(iq>=1550) return "Legend";
+  if(iq>=1400) return "Diamond";
+  if(iq>=1250) return "Gold";
+  if(iq>=1120) return "Silver";
+  return "Bronze";
+}
+function nextUnlock(iq){
+  if(iq<1120) return "Silver";
+  if(iq<1250) return "Gold";
+  if(iq<1400) return "Diamond";
+  if(iq<1550) return "Legend";
+  return "Legend";
+}
+function accuracyLast(n=30){
+  const slice = state.picks.slice(0,n);
+  if(slice.length===0) return null;
+  const ok = slice.filter(p=>p.correct).length;
+  return (ok/slice.length)*100;
+}
+function topPercentApprox(iq){
+  // just a demo mapping
+  if(iq>=1550) return "0.5%";
+  if(iq>=1400) return "2%";
+  if(iq>=1250) return "10%";
+  if(iq>=1120) return "25%";
+  return "60%";
+}
+function closeTimerText(){
+  const d = new Date();
+  const end = new Date(d);
+  end.setHours(23,59,59,999);
+  const ms = Math.max(0, end-d);
+  const h = String(Math.floor(ms/3600000)).padStart(2,"0");
+  const m = String(Math.floor((ms%3600000)/60000)).padStart(2,"0");
+  const s = String(Math.floor((ms%60000)/1000)).padStart(2,"0");
+  return `${h}:${m}:${s}`;
 }
 
-function updateBar(){
- document.getElementById('bar').style.width = (page/total*100)+'%'
+/* ========== Navigation & steps ========== */
+const screens = ["s-on1","s-on2","s-on3","s-play","s-recap","s-leagues","s-crowd","s-profile","s-creator"];
+let current = "s-on1";
+
+function show(id){
+  screens.forEach(s=>{
+    const el = document.getElementById(s);
+    if(el) el.classList.toggle("active", s===id);
+  });
+  current = id;
+
+  // nav highlight only for main tabs
+  document.querySelectorAll(".nav .item").forEach(i=>{
+    i.classList.toggle("active", i.dataset.go===id);
+  });
+
+  // progress only for onboarding steps
+  const prog = $("uiProg");
+  const hint = $("uiStepHint");
+  const onSteps = ["s-on1","s-on2","s-on3"];
+  if(onSteps.includes(id)){
+    const idx = onSteps.indexOf(id) + 1;
+    prog.style.width = (idx/onSteps.length*100) + "%";
+    hint.textContent = `Step ${idx}/${onSteps.length}`;
+  }else{
+    prog.style.width = "100%";
+    hint.textContent = "Ready";
+  }
+
+  render();
 }
 
-/* swipe */
-let startX = 0
-document.addEventListener('touchstart', e=>{
- startX = e.touches[0].clientX
-})
+document.querySelectorAll(".nav .item").forEach(i=>{
+  i.addEventListener("click", ()=> show(i.dataset.go));
+});
 
-document.addEventListener('touchend', e=>{
- let dx = e.changedTouches[0].clientX - startX
- if(dx < -50 && page < total) go(page+1)
- if(dx > 50 && page > 1) go(page-1)
-})
+// onboarding buttons
+$("btnOn1").addEventListener("click", ()=> show("s-on2"));
+$("btnOn2").addEventListener("click", ()=> show("s-on3"));
+$("btnStartPlay").addEventListener("click", ()=> show("s-play"));
 
-updateBar()
+$("btnCreator").addEventListener("click", ()=> show("s-creator"));
+$("btnBackHome").addEventListener("click", ()=> show("s-play"));
 
+$("btnResetAll").addEventListener("click", ()=>{
+  localStorage.removeItem(KEY);
+  state = defaultState();
+  save();
+  qIndex = 0;
+  show("s-on1");
+});
+
+/* Swipe (fast, no heavy libs) */
+let touchX = 0;
+document.addEventListener("touchstart", (e)=>{ touchX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener("touchend", (e)=>{
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) < 60) return;
+
+  // allow swipe inside onboarding and play/recap/leagues/crowd/profile/creator
+  const mainOrder = ["s-play","s-recap","s-leagues","s-crowd","s-profile","s-creator"];
+  const onOrder = ["s-on1","s-on2","s-on3"];
+
+  if(onOrder.includes(current)){
+    const idx = onOrder.indexOf(current);
+    if(dx < 0 && idx < onOrder.length-1) show(onOrder[idx+1]);
+    if(dx > 0 && idx > 0) show(onOrder[idx-1]);
+    return;
+  }
+  if(mainOrder.includes(current)){
+    const idx = mainOrder.indexOf(current);
+    if(dx < 0 && idx < mainOrder.length-1) show(mainOrder[idx+1]);
+    if(dx > 0 && idx > 0) show(mainOrder[idx-1]);
+  }
+}, {passive:true});
+
+/* ========== Play logic (demo) ========== */
+function setQuestion(i){
+  const q = QUESTIONS[i % QUESTIONS.length];
+  $("qSym").textContent = q.sym;
+  $("qPx").textContent = money(q.px);
+  $("qTitle").textContent = q.title;
+  $("qHorizon").textContent = `Horizon: ${q.horizon}`;
+  $("qCrowd").textContent = q.crowdUp + "%";
+  $("qChance").textContent = q.chance;
+  $("qBar").style.width = q.crowdUp + "%";
+}
+
+function simulateOutcome(q){
+  // slight bias to crowd for realism; small player edge with higher IQ
+  const crowdProb = q.crowdUp/100;
+  const iqEdge = clamp((state.iq-1000)/3000, -0.08, 0.08);
+  const upProb = clamp(crowdProb + iqEdge, 0.35, 0.65);
+  const isUp = Math.random() < upProb;
+  return isUp ? "UP" : "DOWN";
+}
+
+function scorePick(correct){
+  const base = 10;
+  const delta = correct ? (base + Math.floor(Math.random()*6)) : -(base - 3);
+  return delta;
+}
+
+function play(choice){
+  const t = todayISO();
+  if(state.lastPlayDate === t){
+    // already played today
+    showReward("Already played today", "Come back tomorrow for the next daily pulse.", 0, 0, 0);
+    return;
+  }
+
+  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  const outcome = simulateOutcome(q);
+  const correct = (choice === outcome);
+
+  const delta = scorePick(correct);
+  state.iq = Math.max(700, state.iq + delta);
+
+  // streak
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(state.lastPlayDate === yesterday) state.streak += 1;
+  else state.streak = 1;
+
+  state.lastPlayDate = t;
+  state.answeredToday = 1;
+
+  // edge vs crowd (demo)
+  const crowdPick = (q.crowdUp >= 50) ? "UP" : "DOWN";
+  const crowdCorrect = (crowdPick === outcome);
+  state.edgeToday = (correct?1:0) - (crowdCorrect?1:0);
+
+  // crowd vs experts scoreboard (demo)
+  const expertPick = (q.crowdUp >= 50) ? "DOWN" : "UP";
+  if(outcome === crowdPick) state.cve.crowd += 1;
+  if(outcome === expertPick) state.cve.experts += 1;
+
+  // duel (demo)
+  if(state.duel.active){
+    state.duel.you += correct ? 1 : 0;
+    state.duel.friend += (Math.random() < 0.52) ? 1 : 0;
+  }
+
+  // store pick
+  state.picks.unshift({
+    date: t,
+    sym: q.sym,
+    horizon: q.horizon,
+    choice,
+    crowdUp: q.crowdUp,
+    outcome,
+    correct
+  });
+  state.picks = state.picks.slice(0, 60);
+
+  save();
+
+  // reward modal
+  const unlock = nextUnlock(state.iq);
+  showReward(
+    correct ? "Nice! ✅" : "Not this time ❌",
+    `You picked ${choice}. Outcome: ${outcome}.`,
+    delta,
+    1,
+    state.edgeToday,
+    unlock
+  );
+}
+
+$("btnUp").addEventListener("click", ()=> play("UP"));
+$("btnDown").addEventListener("click", ()=> play("DOWN"));
+
+$("btnNextQ").addEventListener("click", ()=>{
+  qIndex = (qIndex + 1) % QUESTIONS.length;
+  setQuestion(qIndex);
+});
+
+/* Reward modal */
+function showReward(title, desc, iqDelta, streakDelta, edgeDelta, unlock=""){
+  $("rwTitle").textContent = title;
+  $("rwDesc").textContent = desc;
+  $("rwIQ").textContent = (iqDelta>=0?"+":"") + iqDelta;
+  $("rwStreak").textContent = "+" + streakDelta;
+  $("rwEdge").textContent = (edgeDelta>=0?"+":"") + edgeDelta;
+  $("rwUnlock").textContent = unlock || leagueFromIQ(state.iq);
+  $("overlay").classList.add("show");
+}
+function hideReward(){ $("overlay").classList.remove("show"); }
+
+$("rwClose").addEventListener("click", hideReward);
+$("rwGoRecap").addEventListener("click", ()=>{
+  hideReward();
+  show("s-recap");
+});
+$("rwShare").addEventListener("click", ()=>{
+  const text = shareText();
+  shareOrCopy(text);
+});
+
+/* Share + invite */
+function shareText(){
+  const acc = accuracyLast(30);
+  const accTxt = acc===null ? "—" : Math.round(acc) + "%";
+  const top = topPercentApprox(state.iq);
+  return [
+    `Market IQ`,
+    `IQ: ${state.iq} (${leagueFromIQ(state.iq)})`,
+    `Streak: ${state.streak} day(s)`,
+    `Accuracy: ${accTxt}`,
+    `Top: ${top}`,
+    ``,
+    `Can you beat me?`,
+    location.href
+  ].join("\n");
+}
+
+function shareOrCopy(text){
+  if(navigator.share){
+    navigator.share({ title:"Market IQ", text, url: location.href }).catch(()=>{});
+    return;
+  }
+  navigator.clipboard?.writeText(text);
+}
+
+$("btnShare").addEventListener("click", ()=>{
+  const text = shareText();
+  shareOrCopy(text);
+});
+
+$("btnCopyInvite").addEventListener("click", async ()=>{
+  const link = location.href.split("#")[0] + "?ref=marketIQ";
+  try{
+    await navigator.clipboard.writeText(link);
+    $("inviteHint").style.display = "block";
+    setTimeout(()=> $("inviteHint").style.display = "none", 1600);
+  }catch{
+    alert(link);
+  }
+});
+
+/* Crowd hot post */
+$("btnHotPost").addEventListener("click", async ()=>{
+  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  const text =
+`Crowd: ${q.crowdUp}% UP on ${q.sym}
+Scoreboard: Crowd ${state.cve.crowd} — Experts ${state.cve.experts}
+My IQ: ${state.iq} (${leagueFromIQ(state.iq)})
+${location.href}`;
+  await navigator.clipboard?.writeText(text);
+});
+
+/* Duel */
+$("btnStartDuel").addEventListener("click", ()=>{
+  state.duel.active = true;
+  state.duel.you = 0;
+  state.duel.friend = 0;
+  save();
+  render();
+});
+
+/* ========== Render ========== */
+function render(){
+  $("uiIQ").textContent = state.iq;
+  $("uiLeague").textContent = leagueFromIQ(state.iq);
+  $("uiStreak").textContent = state.streak;
+  $("uiGenesis").textContent = state.genesis ? "ON" : "OFF";
+
+  $("sbDay").textContent = `Season ${state.season} • ${state.lastPlayDate===todayISO() ? "Played today" : "Not played"}`;
+
+  // play
+  $("uiAnswered").textContent = `${state.answeredToday}/1`;
+  $("uiEdge").textContent = (state.edgeToday>=0?"+":"") + state.edgeToday;
+
+  // recap
+  const you = state.answeredToday ? (state.picks[0]?.correct ? 1 : 0) : 0;
+  const crowd = state.answeredToday ? (((state.picks[0]?.crowdUp ?? 50) >= 50 ? "UP":"DOWN") === (state.picks[0]?.outcome) ? 1 : 0) : 0;
+  $("recYou").textContent = `${you}/1`;
+  $("recCrowd").textContent = `${crowd}/1`;
+  $("recTop").textContent = topPercentApprox(state.iq);
+  $("recStreak").textContent = state.streak;
+  $("recIQ").textContent = state.iq;
+
+  // history
+  const hist = $("hist");
+  hist.innerHTML = "";
+  const items = state.picks.slice(0, 6);
+  if(items.length===0){
+    hist.innerHTML = `<div class="kv"><span class="k">No picks yet</span><span class="v">Make a pick on Play</span></div>`;
+  }else{
+    items.forEach(p=>{
+      const badge = p.correct ? `<span class="chip green">✅</span>` : `<span class="chip red">❌</span>`;
+      hist.insertAdjacentHTML("beforeend", `
+        <div class="kv">
+          <span class="k">${p.sym} • ${p.date} • You: ${p.choice} • Outcome: ${p.outcome}</span>
+          <span class="v">${badge}</span>
+        </div>
+      `);
+    });
+  }
+
+  // leagues
+  $("lgLeague").textContent = leagueFromIQ(state.iq);
+  $("lgSeason").textContent = state.season;
+  $("lgGenesis").textContent = state.genesis ? "Enabled" : "Disabled";
+
+  const verified = (state.iq >= 1250 && state.streak >= 10);
+  const creator = (state.iq >= 1200 && state.streak >= 7);
+
+  $("lgVerified").textContent = verified ? "Unlocked" : "Locked";
+  $("lgCreator").textContent = creator ? "Eligible" : "Locked";
+
+  // leaderboard (demo)
+  const lb = $("lb");
+  lb.innerHTML = "";
+  const demoLB = [
+    {name:"NeoMacro", iq:1820},
+    {name:"QuantFox", iq:1650},
+    {name:"You", iq:state.iq},
+    {name:"CandleKid", iq:1180},
+    {name:"RetailPro", iq:1125}
+  ].sort((a,b)=>b.iq-a.iq);
+
+  demoLB.forEach((u,i)=>{
+    lb.insertAdjacentHTML("beforeend", `
+      <div class="kv">
+        <span class="k">#${i+1} ${u.name}</span>
+        <span class="v">${u.iq} • ${leagueFromIQ(u.iq)}</span>
+      </div>
+    `);
+  });
+
+  // crowd vs experts
+  $("cveScore").textContent = `Crowd ${state.cve.crowd} — Experts ${state.cve.experts}`;
+  $("duelState").textContent = state.duel.active ? "Active" : "Inactive";
+  $("duelYou").textContent = state.duel.you;
+  $("duelFriend").textContent = state.duel.friend;
+
+  // profile
+  $("pfIQ").textContent = state.iq;
+  $("pfLeague").textContent = leagueFromIQ(state.iq);
+  const acc = accuracyLast(30);
+  $("pfAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
+
+  const badges = [];
+  if(state.genesis) badges.push({t:"Genesis", cls:"gold"});
+  if(state.streak>=7) badges.push({t:"7-day streak", cls:"gold"});
+  if(verified) badges.push({t:"Verified Mind", cls:"cyan"});
+  if(creator) badges.push({t:"Creator eligible", cls:"green"});
+
+  const pfBadges = $("pfBadges");
+  pfBadges.innerHTML = "";
+  if(badges.length===0){
+    pfBadges.innerHTML = `<span class="chip">No badges yet</span>`;
+  }else{
+    badges.forEach(b=>{
+      pfBadges.insertAdjacentHTML("beforeend", `<span class="chip ${b.cls}">${b.t}</span>`);
+    });
+  }
+  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
+
+  // creator
+  $("crStatus").textContent = creator ? "Eligible ✅" : "Locked";
+  $("crAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
+  $("crStreak").textContent = state.streak;
+  $("crLeague").textContent = leagueFromIQ(state.iq);
+
+  // update X sample box on right
+  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  $("xCopy").textContent =
+`Crowd: ${q.crowdUp}% UP on ${q.sym}
+Scoreboard: Crowd ${state.cve.crowd} — Experts ${state.cve.experts}
+Top: ${topPercentApprox(state.iq)} | IQ ${state.iq} (${leagueFromIQ(state.iq)})
+Link: ${location.href}`;
+}
+
+/* Timer */
+setInterval(()=>{ $("qTimer").textContent = closeTimerText(); }, 1000);
+
+/* init */
+setQuestion(qIndex);
+$("qTimer").textContent = closeTimerText();
+save();
+render();
+
+/* Start screen logic: if user already used demo, go to Play */
+if(state.picks.length > 0 || state.lastPlayDate){
+  // keep onboarding accessible by swipe, but default to Play for returning viewers
+  show("s-play");
+}
 </script>
-
 </body>
 </html>
