@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#020617" />
   <title>Market IQ — Super Demo</title>
-  <meta name="description" content="A 30-second daily market prediction game that becomes reputation, status, and creator monetization." />
+  <meta name="description" content="A 30-second daily prediction game with live crowd movement, rank shifts, identity evolution, and share cards." />
 
   <style>
     :root{
@@ -17,12 +16,11 @@
       --cyan:#22d3ee; --cyan2:#0891b2;
       --gold:#fbbf24; --green:#22c55e; --red:#fb7185;
       --shadow: 0 40px 120px rgba(0,0,0,.82);
-
-      /* dynamic measured heights (JS sets these) */
-      --chromeH: 140px;  /* status + top + progress */
-      --navH: 74px;
+      --safeT: env(safe-area-inset-top, 0px);
+      --safeB: env(safe-area-inset-bottom, 0px);
+      --safeL: env(safe-area-inset-left, 0px);
+      --safeR: env(safe-area-inset-right, 0px);
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -34,87 +32,68 @@
         radial-gradient(900px 650px at 82% 22%, rgba(251,191,36,.12), transparent 55%),
         radial-gradient(900px 650px at 60% 92%, rgba(244,63,94,.08), transparent 55%),
         linear-gradient(180deg, var(--bg0), var(--bg1));
-
       display:flex;
       align-items:center;
       justify-content:center;
-
-      /* IMPORTANT for phones with safe area */
-      padding:
-        calc(18px + env(safe-area-inset-top))
-        calc(14px + env(safe-area-inset-right))
-        calc(18px + env(safe-area-inset-bottom))
-        calc(14px + env(safe-area-inset-left));
-
-      overscroll-behavior: none;
+      padding: calc(14px + var(--safeT)) calc(12px + var(--safeL)) calc(14px + var(--safeB)) calc(12px + var(--safeR));
     }
 
-    /* ONLY PHONE (no right deck anymore) */
-    .wrap{
-      width:min(460px,100%);
+    /* Make it feel like a native app on phones */
+    .stage{
+      width: min(430px, 100%);
       display:flex;
-      justify-content:center;
       align-items:center;
+      justify-content:center;
     }
 
-    /* phone */
     .phone{
-      width:390px;
-      height:840px;
-      border-radius:34px;
+      width: 100%;
+      max-width: 410px;
+      border-radius: 34px;
       border:1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       box-shadow: var(--shadow), 0 0 70px rgba(34,211,238,.12);
       overflow:hidden;
       position:relative;
-      backdrop-filter: blur(14px);
-      -webkit-font-smoothing: antialiased;
-      text-rendering: geometricPrecision;
     }
 
-    /* Mobile: make it feel like a real app */
-    @media (max-width: 520px){
-      body{
-        padding: 0;
-        align-items:stretch;
-        justify-content:stretch;
-      }
-      .wrap{width:100%; height: 100dvh;}
-      .phone{
-        width:100%;
-        height:100dvh;
-        border-radius:0;
-        border:none;
-        box-shadow:none;
-        background: linear-gradient(180deg, rgba(2,6,23,.98), rgba(2,6,23,.98));
-      }
+    /* dynamic viewport height without iOS safari jumps */
+    .phone{
+      height: min(860px, calc(100dvh - 28px));
+    }
+
+    @supports not (height: 100dvh){
+      .phone{ height: min(860px, calc(100vh - 28px)); }
+    }
+
+    /* Backdrop filter is heavy on mobile; keep it soft and gated */
+    @supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))){
+      .phone{ -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
     }
 
     .statusbar{
-      height:44px;
-      padding: calc(14px + env(safe-area-inset-top)) 16px 0;
+      height: 44px;
+      padding: 14px 16px 0;
       display:flex;
       align-items:center;
       justify-content:space-between;
       color: rgba(229,231,235,.80);
       font-size: 12px;
     }
-
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding: 6px 10px;
       border-radius:999px;
       background: rgba(0,0,0,.25);
       border:1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(10px);
+      white-space:nowrap;
     }
     .dot{width:8px;height:8px;border-radius:999px;background:var(--cyan);box-shadow:0 0 18px rgba(34,211,238,.65)}
-
+    .dotGreen{width:8px;height:8px;border-radius:999px;background:var(--green);box-shadow:0 0 16px rgba(34,197,94,.45)}
     .app{
-      height: calc(100% - 44px - env(safe-area-inset-top));
+      height: calc(100% - 44px);
       background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.98));
       position:relative;
-      overflow:hidden;
     }
 
     /* top */
@@ -133,19 +112,6 @@
     }
     .tagline{font-size:12px; color: rgba(148,163,184,.92); line-height:1.25}
 
-    .miniStats{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
-    .miniCard{
-      min-width:112px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(255,255,255,.06);
-      border: 1px solid rgba(255,255,255,.10);
-      backdrop-filter: blur(10px);
-    }
-    .miniLabel{font-size:10px; color: rgba(148,163,184,.86)}
-    .miniValue{margin-top:3px; font-weight:900; font-size: 14px}
-    .c{color:var(--cyan)} .g{color:var(--green)} .y{color:var(--gold)} .r{color:var(--red)}
-
     .topRight{display:flex; flex-direction:column; gap:8px; align-items:flex-end}
     .topBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
     .topBtn{
@@ -160,7 +126,6 @@
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     .topBtn.primary{
       background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(8,145,178,.95));
@@ -172,6 +137,18 @@
       border-color: rgba(251,191,36,.25);
       color:#1b1100;
     }
+
+    .miniStats{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .miniCard{
+      min-width:112px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .miniLabel{font-size:10px; color: rgba(148,163,184,.86)}
+    .miniValue{margin-top:3px; font-weight:900; font-size: 14px}
+    .c{color:var(--cyan)} .g{color:var(--green)} .y{color:var(--gold)} .r{color:var(--red)}
 
     /* progress */
     .progressWrap{
@@ -193,30 +170,23 @@
     }
     .stepHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
 
-    /* screens (FIX: use measured chrome height to avoid overlay/“lag line”) */
+    /* screens */
     .screen{
       position:absolute;
-      top: var(--chromeH);
-      left: 0; right: 0;
-      bottom: var(--navH);
+      inset: 140px 0 74px 0; /* below top; above nav */
       overflow:hidden;
       opacity:0;
       transform: translateX(8px);
       pointer-events:none;
       transition: opacity .18s ease, transform .18s ease;
-      /* ensure screen is fully opaque above header area (prevents “ghost line”) */
-      background: transparent;
     }
     .screen.active{opacity:1; transform:translateX(0); pointer-events:auto;}
-
     .scroll{
       height:100%;
       overflow:auto;
       padding: 10px 16px 14px;
       scrollbar-width:none;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
     }
     .scroll::-webkit-scrollbar{display:none}
 
@@ -226,7 +196,6 @@
       border: 1px solid rgba(255,255,255,.10);
       box-shadow: 0 18px 60px rgba(0,0,0,.28);
       overflow:hidden;
-      backdrop-filter: blur(12px);
     }
     .card + .card{margin-top:12px}
     .pad{padding:16px}
@@ -260,8 +229,9 @@
     .chip.gold{border-color: rgba(251,191,36,.22); background: rgba(251,191,36,.10)}
     .chip.green{border-color: rgba(34,197,94,.22); background: rgba(34,197,94,.10)}
     .chip.red{border-color: rgba(244,63,94,.22); background: rgba(244,63,94,.10)}
+    .chip.live{border-color: rgba(34,197,94,.26); background: rgba(34,197,94,.08)}
 
-    /* Play card */
+    /* hero */
     .hero{
       padding: 16px;
       background:
@@ -345,7 +315,6 @@
       cursor:pointer;
       transition: transform .12s ease, filter .12s ease;
       user-select:none;
-      touch-action: manipulation;
     }
     .btn:active{transform: scale(.985)}
     .btn.up{background: linear-gradient(135deg, #22c55e, #16a34a); color:#06100a; box-shadow:0 16px 40px rgba(34,197,94,.18)}
@@ -374,12 +343,12 @@
     /* bottom nav */
     .nav{
       position:absolute; left:0; right:0; bottom:0;
-      height: var(--navH);
-      padding-bottom: env(safe-area-inset-bottom);
+      height: 74px;
       display:flex; justify-content:space-around; align-items:center;
       background: rgba(0,0,0,.35);
       border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(16px);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
     .nav .item{
       width: 64px;
@@ -389,8 +358,6 @@
       font-size: 10px;
       cursor:pointer;
       user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     .nav .ico{
       width: 40px; height: 40px;
@@ -415,9 +382,9 @@
       align-items:flex-end;
       justify-content:center;
       padding: 14px;
-      padding-bottom: calc(14px + env(safe-area-inset-bottom));
       background: rgba(2,6,23,.65);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .overlay.show{display:flex}
     .sheet{
@@ -443,7 +410,6 @@
       cursor:pointer;
       font-weight: 980;
       user-select:none;
-      touch-action: manipulation;
     }
     .sheetGrid{
       padding: 0 14px 14px;
@@ -478,34 +444,85 @@
       color: rgba(229,231,235,.92);
       cursor:pointer;
       user-select:none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     .tab.active{background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.28); color: rgba(229,231,235,.95)}
     .hint{margin-top:10px;font-size:12px;color:rgba(148,163,184,.92)}
 
+    /* Live feed */
+    .feed{
+      margin-top: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .feedTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .feedTitle{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
+    .feedRight{font-size:11px; color: rgba(148,163,184,.92)}
+    .feedItem{
+      padding: 10px 12px;
+      font-size: 12px;
+      color: rgba(229,231,235,.92);
+      border-bottom: 1px dashed rgba(255,255,255,.10);
+      display:flex; gap:10px; align-items:flex-start;
+    }
+    .feedItem:last-child{border-bottom:0}
+    .feedTime{color: rgba(148,163,184,.92); min-width:48px}
+    .feedTxt b{color: var(--cyan)}
+    .feedTxt .warn{color: var(--gold); font-weight:900}
+    .feedTxt .good{color: var(--green); font-weight:900}
+
+    /* Identity bar */
+    .idBox{
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .idTop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
+    .idName{font-weight:950; font-size: 14px;}
+    .idSub{font-size:12px; color: rgba(148,163,184,.92); margin-top:2px;}
+    .idPct{font-size:12px; color: rgba(148,163,184,.92); white-space:nowrap}
+    .idBar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-top: 10px;
+    }
+    .idBar > div{
+      height:100%;
+      width: 20%;
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(251,191,36,.80));
+      transition: width .25s ease;
+    }
+
     @media (prefers-reduced-motion: reduce){
-      .screen, .progress > div, .bar > div, .spark:before { transition:none !important; animation:none !important; }
+      .screen, .progress > div, .bar > div, .spark:before, .idBar > div { transition:none !important; animation:none !important; }
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-
-    <!-- PHONE ONLY -->
+  <div class="stage">
     <div class="phone" id="phone">
-      <div class="statusbar" id="statusbar">
+      <div class="statusbar">
         <div class="pill"><span class="dot"></span><span id="sbSeason">Season 0</span></div>
         <div class="pill" id="sbReset">Reset in --:--:--</div>
       </div>
 
       <div class="app">
 
-        <div class="top" id="topbar">
+        <div class="top">
           <div class="brand">
             <div class="logo">MARKET IQ</div>
-            <div class="tagline">UP / DOWN → reputation → status → creator.</div>
+            <div class="tagline">UP / DOWN → status → identity → creator.</div>
           </div>
 
           <div class="topRight">
@@ -520,14 +537,14 @@
                 <div class="miniValue"><span class="c" id="uiIQ">1000</span> • <span class="y" id="uiLeague">Bronze</span></div>
               </div>
               <div class="miniCard">
-                <div class="miniLabel">Identity</div>
-                <div class="miniValue" id="uiType">—</div>
+                <div class="miniLabel">Top rank</div>
+                <div class="miniValue"><span class="g" id="uiTopPct">60%</span> <span style="color:rgba(148,163,184,.92);">•</span> <span class="y" id="uiType">—</span></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="progressWrap" id="progressWrap">
+        <div class="progressWrap">
           <div class="progress"><div id="uiProg"></div></div>
           <div class="stepHint" id="uiStepHint">Step 1/3</div>
         </div>
@@ -537,11 +554,11 @@
           <div class="scroll">
             <div class="card">
               <div class="pad">
-                <div class="h1">Are you smarter than the crowd?</div>
-                <p class="p">One question per day. Two buttons. No charts needed.</p>
+                <div class="h1">Can you beat the crowd today?</div>
+                <p class="p">One question. Two buttons. No charts needed.</p>
                 <div class="chipRow">
                   <span class="chip cyan">30 seconds/day</span>
-                  <span class="chip gold">Status & leagues</span>
+                  <span class="chip gold">Leagues & status</span>
                   <span class="chip green">Share to flex</span>
                 </div>
               </div>
@@ -550,14 +567,14 @@
             <div class="card">
               <div class="pad">
                 <div class="h2>Why people invite friends</div>
-                <div class="kv"><span class="k">“I beat 80% of traders”</span><span class="v y">Status</span></div>
-                <div class="kv"><span class="k">7-day duel</span><span class="v c">Rivalry</span></div>
+                <div class="kv"><span class="k">“I beat the crowd”</span><span class="v y">Status</span></div>
+                <div class="kv"><span class="k">Live shifts</span><span class="v c">Drama</span></div>
                 <div class="kv"><span class="k">Weekly seasons</span><span class="v y">Fresh start</span></div>
                 <button class="btn primarySmall" id="btnOn1">Continue</button>
               </div>
             </div>
 
-            <div class="hint">Swipe left/right to move. (Pitch mode runs this automatically.)</div>
+            <div class="hint">Swipe left/right. (Pitch mode runs automatically.)</div>
           </div>
         </section>
 
@@ -567,9 +584,9 @@
             <div class="card">
               <div class="pad">
                 <div class="h1">You get an identity (not just a score).</div>
-                <p class="p">Your choices reveal your mind style: Momentum, Contrarian, Data-Mind…</p>
+                <p class="p">Your choices shape your archetype: Rebel, Wave Rider, Crowd Shadow…</p>
                 <div class="chipRow">
-                  <span class="chip cyan">Easy gameplay</span>
+                  <span class="chip cyan">Simple play</span>
                   <span class="chip gold">Deep meaning</span>
                   <span class="chip">Evolves weekly</span>
                 </div>
@@ -593,12 +610,12 @@
           <div class="scroll">
             <div class="card">
               <div class="pad">
-                <div class="h1">Daily Market Battle.</div>
-                <p class="p">You vs Crowd vs Experts. Every day creates a shareable story.</p>
+                <div class="h1">Daily Battle + Live Drama.</div>
+                <p class="p">Crowd shifts all day. Your rank moves. You check because it’s alive.</p>
                 <div class="chipRow">
                   <span class="chip gold">Crowd vs You</span>
-                  <span class="chip cyan">Share cards</span>
-                  <span class="chip green">Duel friends</span>
+                  <span class="chip cyan">Live movement</span>
+                  <span class="chip green">Share cards</span>
                 </div>
               </div>
             </div>
@@ -625,25 +642,51 @@
                 <div class="spark" aria-hidden="true"></div>
 
                 <div class="chipRow">
+                  <span class="chip live"><span class="dotGreen"></span> LIVE <b id="uiLiveUsers">1,284</b></span>
                   <span class="chip cyan" id="qMode">Daily Pulse</span>
                   <span class="chip">Closes in <b id="qTimer">--:--:--</b></span>
-                  <span class="chip gold">Crowd <b id="qCrowd">63%</b> UP</span>
+                </div>
+
+                <div class="chipRow" style="margin-top:8px;">
+                  <span class="chip gold">Crowd now <b id="qCrowdNow">63%</b> UP</span>
+                  <span class="chip">Was <b id="qCrowdWas">63%</b></span>
+                  <span class="chip">You rank <b id="uiRankNow">Top 60%</b></span>
                 </div>
 
                 <div class="context">
                   <div class="contextTop">
                     <div class="ctxTitle">Context</div>
-                    <div class="ctxHint" id="ctxRefresh">tap “Next demo question”</div>
+                    <div class="ctxHint" id="uiPhase">Pre-result: —</div>
                   </div>
                   <div id="ctxLines"></div>
                 </div>
+
+                <div class="idBox">
+                  <div class="idTop">
+                    <div>
+                      <div class="idName" id="idName">Identity: —</div>
+                      <div class="idSub" id="idSub">Become a “Crowd Breaker” by picking against the majority.</div>
+                    </div>
+                    <div class="idPct" id="idPct">0%</div>
+                  </div>
+                  <div class="idBar"><div id="idBarFill"></div></div>
+                </div>
+
+                <div class="feed">
+                  <div class="feedTop">
+                    <div class="feedTitle">Live feed</div>
+                    <div class="feedRight" id="feedHint">updates all day</div>
+                  </div>
+                  <div id="feedItems"></div>
+                </div>
+
               </div>
 
               <div class="question">
                 <div class="qTitle" id="qTitle">Will price be higher in 24h?</div>
                 <div class="qMeta">
                   <span id="qHorizon">Horizon: 24h</span>
-                  <span>You: <b id="qChance">58%</b> edge</span>
+                  <span id="uiRare">Only <b>—</b> picked your choice</span>
                 </div>
                 <div class="bar"><div id="qBar"></div></div>
               </div>
@@ -660,7 +703,7 @@
                 <div class="pad">
                   <div class="h2">Today</div>
                   <div class="kv"><span class="k">Answered</span><span class="v" id="uiAnswered">0/1</span></div>
-                  <div class="kv"><span class="k">Edge vs crowd</span><span class="v g" id="uiEdge">+0</span></div>
+                  <div class="kv"><span class="k">Streak</span><span class="v y" id="uiStreak">0</span></div>
                 </div>
               </div>
               <div class="card col">
@@ -674,8 +717,8 @@
 
             <div class="card">
               <div class="pad">
-                <div class="h2>Simple rule</div>
-                <p class="p">Tap UP/DOWN → earn Market IQ → climb leagues → unlock Creator.</p>
+                <div class="h2">Simple rule</div>
+                <p class="p">Tap UP/DOWN → your rank moves all day → share the drama.</p>
               </div>
             </div>
           </div>
@@ -687,7 +730,7 @@
             <div class="card">
               <div class="pad">
                 <div class="h1">Recap (share this)</div>
-                <p class="p">This is your daily flex. People share status, not analysis.</p>
+                <p class="p">People share status, not analysis.</p>
 
                 <div class="row" style="margin-top:10px;">
                   <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
@@ -742,14 +785,14 @@
             <div class="card">
               <div class="pad">
                 <div class="h1">Leagues & Seasons</div>
-                <p class="p">Weekly reset makes it alive. Fresh drama every week.</p>
+                <p class="p">Weekly reset keeps it alive. Promotion pressure brings you back.</p>
 
                 <div class="row" style="margin-top:10px;">
                   <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
                     <div class="pad">
                       <div class="h2">Your league</div>
                       <div class="miniValue y" style="font-size:18px;" id="lgLeague">Bronze</div>
-                      <div class="p" style="margin-top:6px;">Promotion: Top 20%</div>
+                      <div class="p" style="margin-top:6px;" id="lgPromo">3 pts to promotion</div>
                     </div>
                   </div>
                   <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
@@ -765,13 +808,13 @@
                 <div class="kv"><span class="k">Verified Mind unlock</span><span class="v c" id="lgVerified">Locked</span></div>
                 <div class="kv"><span class="k">Signal Creator unlock</span><span class="v g" id="lgCreator">Locked</span></div>
 
-                <div class="hint">Demo reset uses your device time. (No backend.)</div>
+                <div class="hint">Demo uses device time. No backend.</div>
               </div>
             </div>
 
             <div class="card">
               <div class="pad">
-                <div class="h2">Global leaderboard (demo)</div>
+                <div class="h2>Global leaderboard (demo)</div>
                 <div id="lb"></div>
               </div>
             </div>
@@ -784,7 +827,7 @@
             <div class="card">
               <div class="pad">
                 <div class="h1">Crowd vs Experts (X machine)</div>
-                <p class="p">Every day you can post one line: “Crowd was wrong/right”.</p>
+                <p class="p">Copy a post. Create drama. Bring people back.</p>
                 <div class="chipRow">
                   <span class="chip cyan">Crowd score <b id="cveCrowd">0</b></span>
                   <span class="chip gold">Experts score <b id="cveExperts">0</b></span>
@@ -796,7 +839,7 @@
 
             <div class="card">
               <div class="pad">
-                <div class="h2">Friends duel (demo)</div>
+                <div class="h2>Friends duel (demo)</div>
                 <div class="kv"><span class="k">7-day duel</span><span class="v" id="duelState">Inactive</span></div>
                 <div class="kv"><span class="k">You</span><span class="v y" id="duelYou">0</span></div>
                 <div class="kv"><span class="k">Friend</span><span class="v c" id="duelFriend">0</span></div>
@@ -806,9 +849,9 @@
 
             <div class="card">
               <div class="pad">
-                <div class="h2">Random reward (dopamine)</div>
+                <div class="h2>Random reward (dopamine)</div>
                 <div class="kv"><span class="k">Mystery drops</span><span class="v y" id="dropState">—</span></div>
-                <p class="p">Sometimes you unlock a tiny bonus. This creates “one more day” behavior.</p>
+                <p class="p">Sometimes you unlock a tiny bonus. Creates “one more check”.</p>
               </div>
             </div>
           </div>
@@ -819,8 +862,8 @@
           <div class="scroll">
             <div class="card">
               <div class="pad">
-                <div class="h1">Your Market Passport</div>
-                <p class="p">Your identity + reputation. Built for screenshots.</p>
+                <div class="h1">Your Passport</div>
+                <p class="p">Identity + reputation. Built for screenshots.</p>
 
                 <div class="row" style="margin-top:10px;">
                   <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
@@ -845,16 +888,16 @@
 
             <div class="card">
               <div class="pad">
-                <div class="h2">Identity evolution</div>
+                <div class="h2>Identity evolution</div>
                 <div class="kv"><span class="k">Current</span><span class="v y" id="pfType">—</span></div>
-                <div class="kv"><span class="k">Path</span><span class="v" id="pfEvo">—</span></div>
-                <p class="p">Your mind style changes week to week as you play.</p>
+                <div class="kv"><span class="k">Progress</span><span class="v" id="pfProg">0%</span></div>
+                <p class="p">Your archetype progress grows when you play and when you check live movement.</p>
               </div>
             </div>
 
             <div class="card">
               <div class="pad">
-                <div class="h2">Path to Creator</div>
+                <div class="h2>Path to Creator</div>
                 <div class="kv"><span class="k">Eligibility</span><span class="v" id="pfElig">Not yet</span></div>
                 <div class="kv"><span class="k">Requirement</span><span class="v">IQ ≥ 1200 + Streak ≥ 7</span></div>
                 <button class="btn primarySmall" id="btnCreator">Preview Creator</button>
@@ -869,7 +912,7 @@
             <div class="card">
               <div class="pad">
                 <div class="h1">Signal Creator (endgame)</div>
-                <p class="p">Monetize reputation. Retail subscribes because your history is measurable.</p>
+                <p class="p">Monetize reputation. Retail subscribes because history is measurable.</p>
 
                 <div class="kv"><span class="k">Creator status</span><span class="v" id="crStatus">Locked</span></div>
                 <div class="kv"><span class="k">Public page</span><span class="v">Signals + track record</span></div>
@@ -877,11 +920,11 @@
 
                 <div class="card" style="margin-top:12px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
                   <div class="pad">
-                    <div class="h2">What retail sees</div>
+                    <div class="h2>What retail sees</div>
                     <div class="kv"><span class="k">Accuracy</span><span class="v" id="crAcc">—</span></div>
                     <div class="kv"><span class="k">Streak</span><span class="v" id="crStreak">0</span></div>
                     <div class="kv"><span class="k">League</span><span class="v" id="crLeague">Bronze</span></div>
-                    <div class="kv"><span class="k">Mind type</span><span class="v y" id="crType">—</span></div>
+                    <div class="kv"><span class="k">Type</span><span class="v y" id="crType">—</span></div>
                   </div>
                 </div>
 
@@ -908,7 +951,7 @@
             <div class="sheetTop">
               <div>
                 <h3 id="rwTitle">Pick submitted ✅</h3>
-                <p id="rwDesc">Instant reward (demo). Tomorrow you’d see the final result.</p>
+                <p id="rwDesc">Instant reward (demo). Live movement continues all day.</p>
               </div>
               <button class="xbtn" id="rwClose">✕</button>
             </div>
@@ -923,8 +966,8 @@
                 <div class="val y" id="rwStreak">+1</div>
               </div>
               <div class="big">
-                <div class="lab">Edge vs crowd</div>
-                <div class="val g" id="rwEdge">+1</div>
+                <div class="lab">Rank shift</div>
+                <div class="val g" id="rwRank">+0</div>
               </div>
               <div class="big">
                 <div class="lab">Mystery drop</div>
@@ -941,38 +984,14 @@
 
       </div>
     </div>
-
   </div>
 
 <script>
 /* ================== State ================== */
-const KEY = "market_iq_super_demo_v3";
+const KEY = "market_iq_super_demo_v4_live";
 const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const todayISO = ()=> new Date().toISOString().slice(0,10);
 const $ = (id)=>document.getElementById(id);
-
-/* ===== FIX #1: dynamic chrome height to prevent “lag line” overlays ===== */
-function measureChrome(){
-  const status = $("statusbar");
-  const top = $("topbar");
-  const prog = $("progressWrap");
-  const nav = $("nav");
-  if(!status || !top || !prog) return;
-
-  const phone = $("phone");
-  const root = phone || document.documentElement;
-
-  const chromeH = status.offsetHeight + top.offsetHeight + prog.offsetHeight;
-  const navH = nav ? nav.offsetHeight : 74;
-
-  root.style.setProperty("--chromeH", chromeH + "px");
-  root.style.setProperty("--navH", navH + "px");
-}
-window.addEventListener("resize", ()=>{ measureChrome(); }, {passive:true});
-window.addEventListener("orientationchange", ()=>{ setTimeout(measureChrome, 60); }, {passive:true});
-if(window.visualViewport){
-  window.visualViewport.addEventListener("resize", ()=>{ measureChrome(); }, {passive:true});
-}
 
 const defaultState = () => ({
   season: 0,
@@ -981,25 +1000,42 @@ const defaultState = () => ({
   streak: 0,
   lastPlayDate: null,
   answeredToday: 0,
-  edgeToday: 0,
-  picks: [],
-  battle: { you:0, crowd:0 },
-  cve: { crowd:0, experts:0 },
-  duel: { active:false, you:0, friend:0 },
+
+  picks: [], // {date,sym,horizon,choice,crowdUpAtPick,crowdUpNow,outcome,correct,crowdCorrect,rarePct}
+
+  battle: { you:0, crowd:0 }, // season
+  cve: { crowd:0, experts:0 }, // season
+  duel: { active:false, you:0, friend:0 }, // season
+
   drops: { last:"—", unlocked:0 },
   sound: false,
   shareCardMode: "status",
+
   identity: {
     type: "—",
+    target: "Crowd Breaker",
+    progress: 0, // 0..100
     evo: [],
     weekStart: "",
     stats: { momentum:0, contrarian:0, crowdFollow:0 }
   },
-  seasonKey: ""
+
+  live: {
+    qId: "",
+    crowdNow: 63,
+    crowdWas: 63,
+    rankNow: 60,   // Top %
+    rankWas: 60,
+    phase: "—",
+    liveUsers: 1284,
+    lastCheckAt: 0,
+    feed: [] // {t, msg}
+  },
+
+  seasonKey: "" // weekly reset detection
 });
 
 let state = load();
-
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
@@ -1011,24 +1047,22 @@ function load(){
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
 
-/* ================== Weekly season reset ================== */
+/* ================== Weekly season reset (Sunday 23:59 local) ================== */
 function getWeekKey(d=new Date()){
   const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const day = (date.getDay() + 6) % 7;
+  const day = (date.getDay() + 6) % 7; // Monday=0
   date.setDate(date.getDate() - day + 3);
   const firstThursday = new Date(date.getFullYear(),0,4);
   const diff = date - firstThursday;
   const week = 1 + Math.round(diff / 604800000);
   return `${date.getFullYear()}-W${String(week).padStart(2,"0")}`;
 }
-
 function weeklyResetIfNeeded(){
   const wk = getWeekKey();
   if(!state.seasonKey){
     state.seasonKey = wk;
     if(!state.identity.weekStart) state.identity.weekStart = wk;
-    save();
-    return;
+    save(); return;
   }
   if(state.seasonKey !== wk){
     state.season += 1;
@@ -1037,9 +1071,12 @@ function weeklyResetIfNeeded(){
     state.cve = { crowd:0, experts:0 };
     state.duel = { active:false, you:0, friend:0 };
     state.answeredToday = 0;
-    state.edgeToday = 0;
     state.drops.last = "—";
     finalizeWeeklyIdentity(wk);
+    // soften identity progress each new week (keeps long-term but resets drama)
+    state.identity.progress = Math.floor(state.identity.progress * 0.55);
+    state.live.feed = [];
+    pushFeed("⏱️", "New season started. Fresh drama.");
     save();
   }
 }
@@ -1055,7 +1092,7 @@ function msToHMS(ms){
 function nextSundayEnd(){
   const now = new Date();
   const end = new Date(now);
-  const day = now.getDay();
+  const day = now.getDay(); // 0..6 (Sun=0)
   const daysToSunday = (7 - day) % 7;
   end.setDate(now.getDate() + daysToSunday);
   end.setHours(23,59,59,999);
@@ -1066,10 +1103,8 @@ function updateResetBadge(){
   const end = nextSundayEnd();
   const ms = end - new Date();
   const txt = "Reset in " + msToHMS(ms);
-  const sb = $("sbReset");
-  if(sb) sb.textContent = txt;
-  const lg = $("lgReset");
-  if(lg) lg.textContent = msToHMS(ms);
+  const sb = $("sbReset"); if(sb) sb.textContent = txt;
+  const lg = $("lgReset"); if(lg) lg.textContent = msToHMS(ms);
 }
 
 /* ================== Questions + Context ================== */
@@ -1095,6 +1130,7 @@ const CONTEXT_POOL = [
 ];
 
 let qIndex = 0;
+let currentContext = [];
 
 /* ================== Helpers ================== */
 const money = (n)=>{
@@ -1116,11 +1152,11 @@ function accuracyLast(n=30){
   return (ok/slice.length)*100;
 }
 function topPercentApprox(iq){
-  if(iq>=1550) return "0.5%";
-  if(iq>=1400) return "2%";
-  if(iq>=1250) return "10%";
-  if(iq>=1120) return "25%";
-  return "60%";
+  if(iq>=1550) return 1;
+  if(iq>=1400) return 2;
+  if(iq>=1250) return 10;
+  if(iq>=1120) return 25;
+  return 60;
 }
 function closeTimerText(){
   const d = new Date();
@@ -1130,18 +1166,40 @@ function closeTimerText(){
   return msToHMS(ms);
 }
 function crowdPickFromPct(crowdUp){ return (crowdUp >= 50) ? "UP" : "DOWN"; }
+function fmtTop(n){ return `Top ${n}%`; }
+
+/* ================== Live feed ================== */
+function timeShort(ts=Date.now()){
+  const d = new Date(ts);
+  const h = String(d.getHours()).padStart(2,"0");
+  const m = String(d.getMinutes()).padStart(2,"0");
+  return `${h}:${m}`;
+}
+function pushFeed(emoji, msg){
+  state.live.feed.unshift({ t: Date.now(), msg: `${emoji} ${msg}` });
+  state.live.feed = state.live.feed.slice(0, 6);
+}
 
 /* ================== Identity ================== */
+const ARCHETYPES = [
+  { key:"Crowd Breaker", hint:"Pick against the majority.", rule:"contrarian" },
+  { key:"Wave Rider", hint:"Ride the majority momentum.", rule:"follow" },
+  { key:"Signal Brain", hint:"Balance picks; avoid extremes.", rule:"balanced" }
+];
+
 function recomputeIdentity(){
   const last = state.picks.slice(0, 20);
   if(last.length === 0){
     state.identity.type = "Newbie";
+    state.identity.target = "Crowd Breaker";
+    state.identity.progress = clamp(state.identity.progress, 0, 100);
     return;
   }
-  let contra = 0, follow = 0, mom = 0;
+
+  let contra=0, follow=0, mom=0;
   for(let i=0;i<last.length;i++){
     const p = last[i];
-    const crowd = crowdPickFromPct(p.crowdUp);
+    const crowd = crowdPickFromPct(p.crowdUpAtPick ?? p.crowdUp ?? 50);
     if(p.choice !== crowd) contra++;
     else follow++;
     if(i>0 && last[i-1].choice === p.choice) mom++;
@@ -1154,17 +1212,24 @@ function recomputeIdentity(){
   const contraRate = contra / total;
   const followRate = follow / total;
 
-  let type = "Data Mind";
-  if(contraRate >= 0.62) type = "Contrarian Mind";
-  else if(followRate >= 0.62) type = "Crowd Follower";
-  else if(mom >= Math.min(6, Math.floor(last.length/2))) type = "Momentum Hunter";
+  let type = "Signal Brain";
+  if(contraRate >= 0.62) type = "Crowd Breaker";
+  else if(followRate >= 0.62) type = "Wave Rider";
 
   state.identity.type = type;
+  state.identity.target = type;
+
+  // progress grows with behavior + light daily checks (simulated)
+  // keep it understandable: 0..100
+  const base = clamp(Math.floor((last.length/20)*100), 0, 100);
+  const style = (type==="Crowd Breaker") ? Math.floor(contraRate*100) : (type==="Wave Rider") ? Math.floor(followRate*100) : 55;
+  const blended = Math.floor((base*0.55) + (style*0.45));
+  state.identity.progress = clamp(Math.max(state.identity.progress, blended), 0, 100);
 }
 
 function finalizeWeeklyIdentity(newWeekKey){
   recomputeIdentity();
-  const type = state.identity.type || "Data Mind";
+  const type = state.identity.type || "Signal Brain";
   const evo = state.identity.evo || [];
   const prevWeek = state.identity.weekStart || state.seasonKey || getWeekKey();
   if(evo.length===0 || evo[0].week !== prevWeek){
@@ -1224,6 +1289,9 @@ function show(id){
     $("uiProg").style.width = "100%";
     $("uiStepHint").textContent = "Ready";
   }
+
+  // a "check" increases identity stickiness a tiny bit (intraday loop)
+  onSoftCheck();
 
   render();
 }
@@ -1318,14 +1386,13 @@ document.querySelectorAll(".tab").forEach(t=>{
   });
 });
 
-/* ================== Context lines ================== */
+/* ================== Context ================== */
 function pickContextLines(){
   const a = Math.floor(Math.random() * CONTEXT_POOL.length);
   let b = Math.floor(Math.random() * CONTEXT_POOL.length);
   if(b === a) b = (b + 1) % CONTEXT_POOL.length;
   return [CONTEXT_POOL[a], CONTEXT_POOL[b]];
 }
-let currentContext = pickContextLines();
 function renderContext(){
   const box = $("ctxLines");
   if(!box) return;
@@ -1338,19 +1405,156 @@ function renderContext(){
   });
 }
 
+/* ================== Live engine ==================
+   - Crowd shifts all day (simulated)
+   - Rank shifts all day (simulated)
+   - Pre-result phase messages
+   - Live users counter
+*/
+function qKey(q){
+  return `${q.sym}|${q.horizon}|${todayISO()}`;
+}
+function initLiveForQuestion(q){
+  const id = qKey(q);
+  if(state.live.qId !== id){
+    state.live.qId = id;
+    state.live.crowdWas = q.crowdUp;
+    state.live.crowdNow = q.crowdUp;
+    state.live.rankWas = topPercentApprox(state.iq);
+    state.live.rankNow = topPercentApprox(state.iq);
+    state.live.phase = "—";
+    state.live.feed = [];
+    pushFeed("🟢", "Live day started. Crowd will shift.");
+  }
+}
+
+function driftCrowd(){
+  const q = QUESTIONS[qIndex % QUESTIONS.length];
+  initLiveForQuestion(q);
+
+  // drift with small random walk, anchored around original crowdUp
+  const anchor = q.crowdUp;
+  const now = state.live.crowdNow;
+  const step = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random()*2)); // 1..2
+  let next = now + step;
+
+  // pull back toward anchor slowly
+  if(Math.random() < 0.35){
+    next += (anchor > next) ? 1 : (anchor < next ? -1 : 0);
+  }
+  next = clamp(next, 35, 75);
+
+  if(next !== now){
+    state.live.crowdNow = next;
+    // feed only on meaningful changes
+    if(Math.abs(next-now) >= 2){
+      pushFeed("👥", `Crowd shifted to <b>${next}%</b> UP`);
+    }
+  }
+}
+
+function driftRank(){
+  // rank "moves" based on live checking + IQ + randomness
+  const base = topPercentApprox(state.iq);
+  let now = state.live.rankNow;
+
+  // small movement
+  const nudge = (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.7 ? 1 : 2);
+  now = clamp(now + nudge, 1, 90);
+
+  // keep around base with gentle pull
+  if(Math.random() < 0.50){
+    now += (base > now) ? 1 : (base < now ? -1 : 0);
+  }
+  now = clamp(now, 1, 90);
+
+  const prev = state.live.rankNow;
+  state.live.rankNow = now;
+
+  if(now !== prev && Math.abs(now-prev) >= 2){
+    const dir = (now < prev) ? "UP" : "DOWN"; // lower top% = better
+    pushFeed("🏆", `You moved <span class="${dir==="UP"?"good":"warn"}">${dir}</span> to <b>${fmtTop(now)}</b>`);
+  }
+}
+
+function updatePhase(){
+  // pre-result narrative: if user answered today, tension revolves around their pick vs crowd
+  const last = state.picks[0];
+  if(!last || last.date !== todayISO()){
+    // if not answered: streak danger near midnight
+    const d = new Date();
+    const minsLeft = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999) - d)/60000);
+    if(minsLeft <= 120){
+      state.live.phase = "⚠ Streak in danger. Check before midnight.";
+    } else {
+      state.live.phase = "Make your pick. Live drama starts.";
+    }
+    return;
+  }
+
+  // answered: build tension relative to crowd movement
+  const crowdNow = state.live.crowdNow;
+  const crowdPickNow = crowdPickFromPct(crowdNow);
+  if(last.choice !== crowdPickNow){
+    state.live.phase = "😈 You are against the crowd right now.";
+  } else {
+    state.live.phase = "🟢 You are with the crowd right now.";
+  }
+
+  // extra spice
+  if(Math.random() < 0.18){
+    state.live.phase = (Math.random() < 0.5)
+      ? "⚡ Crowd is flipping. Still sure?"
+      : "🔥 Your pick is holding. Keep watching.";
+  }
+}
+
+function driftLiveUsers(){
+  // simulate active users
+  let u = state.live.liveUsers || 1200;
+  u += (Math.random()<0.5?-1:1) * (5 + Math.floor(Math.random()*18));
+  u = clamp(u, 420, 9900);
+  state.live.liveUsers = Math.round(u);
+}
+
+function onSoftCheck(){
+  // each time user navigates, tiny identity progression
+  const now = Date.now();
+  if(now - (state.live.lastCheckAt||0) < 25000) return; // no spam
+  state.live.lastCheckAt = now;
+
+  // tiny progress bump encourages checking behavior
+  const bump = (Math.random() < 0.6) ? 1 : 2;
+  state.identity.progress = clamp(state.identity.progress + bump, 0, 100);
+  save();
+}
+
 /* ================== Question ================== */
 function setQuestion(i){
   const q = QUESTIONS[i % QUESTIONS.length];
+  initLiveForQuestion(q);
+
   $("qSym").textContent = q.sym;
   $("qPx").textContent = money(q.px);
   $("qTitle").textContent = q.title;
   $("qHorizon").textContent = `Horizon: ${q.horizon}`;
-  $("qCrowd").textContent = q.crowdUp + "%";
-  $("qChance").textContent = q.chance;
-  $("qBar").style.width = q.crowdUp + "%";
+
+  // bar shows current crowdNow
+  $("qBar").style.width = state.live.crowdNow + "%";
   $("qMode").textContent = q.mode;
+
+  // live crowd
+  $("qCrowdNow").textContent = state.live.crowdNow + "%";
+  $("qCrowdWas").textContent = state.live.crowdWas + "%";
+
+  // context
   currentContext = pickContextLines();
   renderContext();
+
+  // rare indicator placeholder
+  $("uiRare").innerHTML = `Only <b>—</b> picked your choice`;
+
+  render();
 }
 $("btnNextQ").addEventListener("click", ()=>{
   qIndex = (qIndex+1) % QUESTIONS.length;
@@ -1360,11 +1564,11 @@ $("btnNextQ").addEventListener("click", ()=>{
 
 /* ================== Mystery drops ================== */
 const DROPS = [
-  "🎁 Early Signal Preview",
+  "🎁 Bonus insight unlocked",
   "🎁 +5 Bonus IQ",
+  "🎁 Streak shield",
   "🎁 “Genesis Spark” badge",
-  "🎁 Double streak protection",
-  "🎁 Access: Pro context (demo)"
+  "🎁 Early recap preview"
 ];
 function rollDrop(){
   if(Math.random() > 0.22) return "—";
@@ -1373,10 +1577,19 @@ function rollDrop(){
   state.drops.last = d;
   return d;
 }
+// Intraday micro-reward (for checking), low chance
+function rollMicroDrop(){
+  if(Math.random() > 0.08) return null;
+  const d = ["🎁 Tiny bonus", "🎁 Extra context", "🎁 Rank boost"][Math.floor(Math.random()*3)];
+  state.drops.unlocked += 1;
+  state.drops.last = d;
+  pushFeed("🎁", `Mystery drop: <b>${d.replace("🎁 ","")}</b>`);
+  return d;
+}
 
 /* ================== Outcome simulation ================== */
 function simulateOutcome(q){
-  const crowdProb = q.crowdUp/100;
+  const crowdProb = (state.live.crowdNow ?? q.crowdUp) / 100;
   const iqEdge = clamp((state.iq-1000)/3000, -0.08, 0.08);
   const upProb = clamp(crowdProb + iqEdge, 0.35, 0.65);
   return (Math.random() < upProb) ? "UP" : "DOWN";
@@ -1386,25 +1599,41 @@ function scorePick(correct){
   return correct ? (base + Math.floor(Math.random()*6)) : -(base - 3);
 }
 
+/* ================== Rare choice % ================== */
+function rarePctFor(choice, crowdNowUp){
+  // if crowd is 70% UP, then DOWN is rare=30%
+  const up = clamp(crowdNowUp, 5, 95);
+  const rare = (choice==="UP") ? up : (100-up);
+  // make it feel “real”: tiny noise
+  const noise = (Math.random()<0.5?-1:1) * Math.floor(Math.random()*3); // -2..+2
+  return clamp(rare + noise, 5, 95);
+}
+
 /* ================== Play ================== */
 function play(choice){
   weeklyResetIfNeeded();
 
   const t = todayISO();
   if(state.lastPlayDate === t){
-    showReward("Already played today", "Come back tomorrow for the next daily battle.", 0, 0, 0, "—");
+    showReward("Already played today", "Come back later — live crowd movement continues.", 0, 0, 0, "—");
     return;
   }
 
   sPick();
 
   const q = QUESTIONS[qIndex % QUESTIONS.length];
+  initLiveForQuestion(q);
+
+  const crowdAtPick = state.live.crowdNow; // capture
+  const rare = rarePctFor(choice, crowdAtPick);
+
   const outcome = simulateOutcome(q);
   const correct = (choice === outcome);
 
   const delta = scorePick(correct);
   state.iq = Math.max(700, state.iq + delta);
 
+  // streak
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
   if(state.lastPlayDate === yesterday) state.streak += 1;
   else state.streak = 1;
@@ -1412,35 +1641,65 @@ function play(choice){
   state.lastPlayDate = t;
   state.answeredToday = 1;
 
-  const crowdPick = crowdPickFromPct(q.crowdUp);
+  // crowd result (based on crowd at pick, not now)
+  const crowdPick = crowdPickFromPct(crowdAtPick);
   const crowdCorrect = (crowdPick === outcome);
 
-  state.edgeToday = (correct?1:0) - (crowdCorrect?1:0);
-
+  // battle score (season)
   if(correct) state.battle.you += 1;
   if(crowdCorrect) state.battle.crowd += 1;
 
-  const expertPick = (q.crowdUp >= 50) ? "DOWN" : "UP";
+  // crowd vs experts season score
+  const expertPick = (crowdAtPick >= 50) ? "DOWN" : "UP";
   if(outcome === crowdPick) state.cve.crowd += 1;
   if(outcome === expertPick) state.cve.experts += 1;
 
+  // duel
   if(state.duel.active){
     state.duel.you += correct ? 1 : 0;
     state.duel.friend += (Math.random() < 0.52) ? 1 : 0;
   }
 
-  state.picks.unshift({ date:t, sym:q.sym, horizon:q.horizon, choice });
-  // enrich (keeping backwards compatibility)
-  state.picks[0].crowdUp = q.crowdUp;
-  state.picks[0].outcome = outcome;
-  state.picks[0].correct = correct;
-  state.picks[0].crowdCorrect = crowdCorrect;
+  // rank movement on pick (instant dopamine)
+  const prevRank = state.live.rankNow;
+  // If correct, improve rank; if wrong, worsen slightly (demo feel)
+  const rankDelta = correct ? -(2 + Math.floor(Math.random()*3)) : (1 + Math.floor(Math.random()*3));
+  state.live.rankNow = clamp(state.live.rankNow + rankDelta, 1, 90);
 
+  // identity progress from pick style
+  const contra = (choice !== crowdPick);
+  const progGain = contra ? (4 + Math.floor(Math.random()*4)) : (2 + Math.floor(Math.random()*3));
+  state.identity.progress = clamp(state.identity.progress + progGain, 0, 100);
+
+  // store pick
+  state.picks.unshift({
+    date:t,
+    sym:q.sym,
+    horizon:q.horizon,
+    choice,
+    crowdUpAtPick:crowdAtPick,
+    crowdUpNow:state.live.crowdNow,
+    outcome,
+    correct,
+    crowdCorrect,
+    rarePct: rare
+  });
   state.picks = state.picks.slice(0, 60);
 
+  // update identity type
   recomputeIdentity();
 
+  // push feed highlights
+  pushFeed("🎯", `You picked <b>${choice}</b>. Only <b>${rare}%</b> did the same.`);
+  pushFeed("👥", `Crowd at pick: <b>${crowdAtPick}%</b> UP`);
+  if(state.live.rankNow !== prevRank){
+    const dir = (state.live.rankNow < prevRank) ? "UP" : "DOWN";
+    pushFeed("🏆", `Rank moved <span class="${dir==="UP"?"good":"warn"}">${dir}</span> to <b>${fmtTop(state.live.rankNow)}</b>`);
+  }
+
+  // drop
   const drop = rollDrop();
+  if(drop !== "—") pushFeed("🎁", `Drop: <b>${drop.replace("🎁 ","")}</b>`);
 
   save();
 
@@ -1448,23 +1707,29 @@ function play(choice){
 
   showReward(
     correct ? "Win ✅" : "Loss ❌",
-    `You picked ${choice}. Outcome: ${outcome}. Crowd picked ${crowdPick}.`,
+    `You picked ${choice}. Outcome: ${outcome}. Crowd at pick: ${crowdAtPick}% UP.`,
     delta,
     1,
-    state.edgeToday,
+    (state.live.rankNow - prevRank),
     drop
   );
+
+  // update rare UI
+  $("uiRare").innerHTML = `Only <b>${rare}%</b> picked your choice`;
 }
+
 $("btnUp").addEventListener("click", ()=> play("UP"));
 $("btnDown").addEventListener("click", ()=> play("DOWN"));
 
 /* ================== Reward modal ================== */
-function showReward(title, desc, iqDelta, streakDelta, edgeDelta, dropText){
+function showReward(title, desc, iqDelta, streakDelta, rankDelta, dropText){
   $("rwTitle").textContent = title;
   $("rwDesc").textContent = desc;
   $("rwIQ").textContent = (iqDelta>=0?"+":"") + iqDelta;
   $("rwStreak").textContent = "+" + streakDelta;
-  $("rwEdge").textContent = (edgeDelta>=0?"+":"") + edgeDelta;
+  const rd = rankDelta;
+  const sign = (rd<=0?"+":""); // lower top% is better, so negative means improvement
+  $("rwRank").textContent = `${sign}${rd}`;
   $("rwDrop").textContent = dropText || "—";
   $("overlay").classList.add("show");
 }
@@ -1477,14 +1742,13 @@ $("rwShareText").addEventListener("click", async ()=>{ await shareOrCopyText(sha
 function shareText(){
   const acc = accuracyLast(30);
   const accTxt = acc===null ? "—" : Math.round(acc) + "%";
-  const top = topPercentApprox(state.iq);
-
+  const top = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
   const last = state.picks[0];
-  const lastLine = last ? `Crowd: ${last.crowdUp}% UP • I chose ${last.choice} • Outcome: ${last.outcome}` : "No picks yet";
+  const lastLine = last ? `Crowd: ${last.crowdUpAtPick}% UP • I chose ${last.choice} • Only ${last.rarePct}% did the same` : "No picks yet";
 
   return [
     `Market IQ`,
-    `I beat ${top} of traders (demo).`,
+    `I’m currently ${top} (demo).`,
     `IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}`,
     `Streak: ${state.streak} day(s) • Accuracy: ${accTxt}`,
     lastLine,
@@ -1517,23 +1781,22 @@ function drawRounded(ctx, x, y, w, h, r){
   ctx.arcTo(x,y,x+w,y,rr);
   ctx.closePath();
 }
-
 function buildCardPayload(mode){
   const acc = accuracyLast(30);
-  return {
+  const d = {
     mode,
     iq: state.iq,
     league: leagueFromIQ(state.iq),
     streak: state.streak,
-    top: topPercentApprox(state.iq),
+    top: fmtTop(state.live.rankNow || topPercentApprox(state.iq)),
     acc: acc===null ? "—" : (Math.round(acc) + "%"),
-    type: state.identity.type || "Data Mind",
+    type: state.identity.type || "Signal Brain",
     season: state.season,
     battle: { you: state.battle.you, crowd: state.battle.crowd },
     last: state.picks[0] || null
   };
+  return d;
 }
-
 function cardTitle(mode){
   if(mode==="battle") return "YOU vs CROWD";
   if(mode==="streak") return "STREAK FLEX";
@@ -1541,16 +1804,15 @@ function cardTitle(mode){
 }
 function cardHeadline(d){
   if(d.mode==="battle"){
-    const crowdLine = d.last ? `Crowd: ${d.last.crowdUp}% UP` : "Crowd: —";
-    const youLine = d.last ? `Me: ${d.last.choice}` : "Me: —";
-    return [crowdLine, youLine, "Who was right?"];
+    const crowdLine = d.last ? `Crowd: ${d.last.crowdUpAtPick}% UP` : "Crowd: —";
+    const youLine = d.last ? `Me: ${d.last.choice} (only ${d.last.rarePct}%)` : "Me: —";
+    return [crowdLine, youLine, "Can you beat me?"];
   }
   if(d.mode==="streak"){
     return [`${d.streak}-DAY STREAK`, "Still alive.", "Can you beat me?"];
   }
-  return [`I beat ${d.top} of traders`, `IQ ${d.iq} • ${d.league}`, `Type: ${d.type}`];
+  return [`I’m currently ${d.top}`, `IQ ${d.iq} • ${d.league}`, `Type: ${d.type}`];
 }
-
 async function generateShareCardPNG(mode){
   const d = buildCardPayload(mode);
 
@@ -1596,11 +1858,11 @@ async function generateShareCardPNG(mode){
   ctx.fillText(lines[2], 110, 340);
 
   const blocks = [
-    {k:"IQ", v:String(d.iq), c:"#22d3ee"},
-    {k:"League", v:d.league, c:"#fbbf24"},
-    {k:"Type", v:d.type, c:"rgba(229,231,235,0.92)"},
     {k:"Top", v:d.top, c:"#22c55e"},
+    {k:"IQ", v:String(d.iq), c:"#22d3ee"},
+    {k:"Type", v:d.type, c:"rgba(229,231,235,0.92)"},
     {k:"Accuracy", v:d.acc, c:"#22c55e"},
+    {k:"Streak", v:String(d.streak), c:"#fbbf24"},
     {k:"Season", v:String(d.season), c:"rgba(229,231,235,0.92)"}
   ];
 
@@ -1622,28 +1884,22 @@ async function generateShareCardPNG(mode){
     ctx.fillStyle = b.c;
     ctx.font = "980 26px ui-sans-serif, system-ui";
     let vv = b.v;
-    if(b.k==="Type" && vv.length>16) vv = vv.slice(0,16) + "…";
+    if(b.k==="Type" && vv.length>18) vv = vv.slice(0,18) + "…";
     ctx.fillText(vv, x+18, y+62);
   }
 
   statBox(0, bx, by);
   statBox(1, bx+colW+gap, by);
   statBox(2, bx+(colW+gap)*2, by);
+
   statBox(3, bx, by+bh+gap);
   statBox(4, bx+colW+gap, by+bh+gap);
   statBox(5, bx+(colW+gap)*2, by+bh+gap);
 
-  if(d.mode==="battle"){
-    ctx.fillStyle = "rgba(148,163,184,0.95)";
-    ctx.font = "900 16px ui-sans-serif, system-ui";
-    ctx.fillText(`Season battle score — You: ${d.battle.you} | Crowd: ${d.battle.crowd}`, 110, 625);
-  } else {
-    ctx.fillStyle = "rgba(148,163,184,0.95)";
-    ctx.font = "900 16px ui-sans-serif, system-ui";
-    const txt = d.last ? `Last: ${d.last.sym || ""} • Me: ${d.last.choice} • Outcome: ${d.last.outcome}` : "Last: —";
-    const short = txt.length>86 ? txt.slice(0,86)+"…" : txt;
-    ctx.fillText(short, 110, 625);
-  }
+  ctx.fillStyle = "rgba(148,163,184,0.95)";
+  ctx.font = "900 16px ui-sans-serif, system-ui";
+  const footer = d.last ? `Last: ${d.last.sym} • Me: ${d.last.choice} (only ${d.last.rarePct}%)` : "Last: —";
+  ctx.fillText(footer.length>90 ? footer.slice(0,90)+"…" : footer, 110, 625);
 
   ctx.fillStyle = "rgba(34,211,238,0.92)";
   ctx.font = "900 16px ui-sans-serif, system-ui";
@@ -1653,18 +1909,15 @@ async function generateShareCardPNG(mode){
     canvas.toBlob((blob)=> resolve(blob), "image/png", 0.92);
   });
 }
-
 async function shareCardPNG(mode){
   const blob = await generateShareCardPNG(mode);
   const file = new File([blob], `market-iq-${mode}.png`, {type:"image/png"});
-
   try{
     if(navigator.canShare && navigator.canShare({ files:[file] })){
       await navigator.share({ title:"Market IQ", text:"Can you beat me?", files:[file] });
       return true;
     }
   }catch{}
-
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -1675,7 +1928,6 @@ async function shareCardPNG(mode){
   setTimeout(()=> URL.revokeObjectURL(url), 1500);
   return true;
 }
-
 async function shareCardAndHint(){
   beep(520,0.03,"triangle",0.03);
   const mode = state.shareCardMode || "status";
@@ -1695,11 +1947,11 @@ $("btnHotPost").addEventListener("click", async ()=>{
   const q = QUESTIONS[qIndex % QUESTIONS.length];
   const last = state.picks[0];
   const line = last
-    ? `Crowd: ${last.crowdUp}% UP • I chose ${last.choice} • Outcome: ${last.outcome}`
-    : `Crowd: ${q.crowdUp}% UP on ${q.sym}`;
+    ? `Crowd: ${last.crowdUpAtPick}% UP • I chose ${last.choice} (only ${last.rarePct}%)`
+    : `Crowd: ${state.live.crowdNow}% UP on ${q.sym}`;
   const text =
 `${line}
-Battle score: You ${state.battle.you} — Crowd ${state.battle.crowd}
+Rank: ${fmtTop(state.live.rankNow || topPercentApprox(state.iq))}
 My IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}
 ${location.href}`;
   try{ await navigator.clipboard.writeText(text); }catch{ alert(text); }
@@ -1710,39 +1962,98 @@ $("btnStartDuel").addEventListener("click", ()=>{
   state.duel.active = true;
   state.duel.you = 0;
   state.duel.friend = 0;
+  pushFeed("⚔️", "Duel started. Beat your friend.");
   save();
   render();
 });
+
+/* ================== Render helpers ================== */
+function renderFeed(){
+  const box = $("feedItems");
+  if(!box) return;
+  box.innerHTML = "";
+  const items = state.live.feed || [];
+  if(items.length===0){
+    box.innerHTML = `<div class="feedItem"><div class="feedTime">—</div><div class="feedTxt">No events yet. Crowd will move soon.</div></div>`;
+    return;
+  }
+  items.forEach(it=>{
+    box.insertAdjacentHTML("beforeend", `
+      <div class="feedItem">
+        <div class="feedTime">${timeShort(it.t)}</div>
+        <div class="feedTxt">${it.msg}</div>
+      </div>
+    `);
+  });
+}
+
+function promoText(){
+  // simple promo pressure: closer when your seasonal score increases
+  const you = state.battle.you || 0;
+  const need = clamp(5 - you, 0, 9);
+  return (need===0) ? "Promotion secured ✅" : `${need} pts to promotion`;
+}
 
 /* ================== Render ================== */
 function render(){
   weeklyResetIfNeeded();
 
+  // recompute identity occasionally
+  recomputeIdentity();
+
+  // header mini stats
   $("uiIQ").textContent = state.iq;
   $("uiLeague").textContent = leagueFromIQ(state.iq);
   $("uiType").textContent = state.identity.type || "—";
   $("uiGenesis").textContent = state.genesis ? "ON" : "OFF";
 
+  // top %
+  $("uiTopPct").textContent = `${state.live.rankNow || topPercentApprox(state.iq)}%`;
+
+  // season badges
   $("sbSeason").textContent = `Season ${state.season}`;
   updateResetBadge();
   updateSoundBtn();
 
-  $("uiAnswered").textContent = `${state.answeredToday}/1`;
-  $("uiEdge").textContent = (state.edgeToday>=0?"+":"") + state.edgeToday;
+  // live block
+  $("uiLiveUsers").textContent = state.live.liveUsers.toLocaleString();
+  $("qCrowdNow").textContent = state.live.crowdNow + "%";
+  $("qCrowdWas").textContent = state.live.crowdWas + "%";
+  $("uiRankNow").textContent = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
 
+  // phase text
+  $("uiPhase").textContent = state.live.phase;
+
+  // identity bar
+  $("idName").textContent = `Identity: ${state.identity.type || "—"}`;
+  const hint = (state.identity.type==="Crowd Breaker")
+    ? "You thrive against the majority."
+    : (state.identity.type==="Wave Rider")
+      ? "You ride the crowd momentum."
+      : "You stay balanced and calm.";
+  $("idSub").textContent = hint;
+  $("idPct").textContent = `${state.identity.progress || 0}%`;
+  $("idBarFill").style.width = clamp(state.identity.progress || 0, 0, 100) + "%";
+
+  // today stats
+  $("uiAnswered").textContent = `${state.answeredToday}/1`;
+  $("uiStreak").textContent = state.streak;
+
+  // battle scores
   $("uiYouScore").textContent = state.battle.you;
   $("uiCrowdScore").textContent = state.battle.crowd;
 
+  // recap
   const you = state.answeredToday ? (state.picks[0]?.correct ? 1 : 0) : 0;
   const crowd = state.answeredToday ? (state.picks[0]?.crowdCorrect ? 1 : 0) : 0;
-
   $("recYou").textContent = `${you}/1`;
   $("recCrowd").textContent = `${crowd}/1`;
-  $("recTop").textContent = topPercentApprox(state.iq);
+  $("recTop").textContent = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
   $("recStreak").textContent = state.streak;
   $("recIQ").textContent = state.iq;
   $("recType").textContent = state.identity.type || "—";
 
+  // history
   const hist = $("hist");
   hist.innerHTML = "";
   const items = state.picks.slice(0, 6);
@@ -1753,22 +2064,25 @@ function render(){
       const badge = p.correct ? `<span class="chip green">✅</span>` : `<span class="chip red">❌</span>`;
       hist.insertAdjacentHTML("beforeend", `
         <div class="kv">
-          <span class="k">${p.sym || ""} • ${p.date} • You: ${p.choice} • Outcome: ${p.outcome} • Crowd: ${p.crowdUp}% UP</span>
+          <span class="k">${p.sym} • ${p.date} • You: ${p.choice} (only ${p.rarePct}%) • Crowd: ${p.crowdUpAtPick}% UP • Outcome: ${p.outcome}</span>
           <span class="v">${badge}</span>
         </div>
       `);
     });
   }
 
+  // leagues
   const verified = (state.iq >= 1250 && state.streak >= 10);
   const creator = (state.iq >= 1200 && state.streak >= 7);
 
   $("lgLeague").textContent = leagueFromIQ(state.iq);
+  $("lgPromo").textContent = promoText();
   $("lgSeason").textContent = `Season ${state.season}`;
   $("lgGenesis").textContent = state.genesis ? "Enabled" : "Disabled";
   $("lgVerified").textContent = verified ? "Unlocked" : "Locked";
   $("lgCreator").textContent = creator ? "Eligible" : "Locked";
 
+  // leaderboard
   const lb = $("lb");
   lb.innerHTML = "";
   const demoLB = [
@@ -1787,21 +2101,29 @@ function render(){
     `);
   });
 
+  // crowd vs experts
   $("cveCrowd").textContent = state.cve.crowd;
   $("cveExperts").textContent = state.cve.experts;
   $("cveScore").textContent = `Crowd ${state.cve.crowd} — Experts ${state.cve.experts}`;
 
+  // duel
   $("duelState").textContent = state.duel.active ? "Active" : "Inactive";
   $("duelYou").textContent = state.duel.you;
   $("duelFriend").textContent = state.duel.friend;
 
+  // drops
   $("dropState").textContent = state.drops.last || "—";
 
+  // profile
   $("pfIQ").textContent = state.iq;
   $("pfLeague").textContent = leagueFromIQ(state.iq);
   const acc = accuracyLast(30);
   $("pfAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
+  $("pfType").textContent = state.identity.type || "—";
+  $("pfProg").textContent = `${state.identity.progress || 0}%`;
+  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
 
+  // badges
   const badges = [];
   if(state.genesis) badges.push({t:"Genesis", cls:"gold"});
   if(state.streak>=7) badges.push({t:"7-day streak", cls:"gold"});
@@ -1817,40 +2139,75 @@ function render(){
     badges.forEach(b=> pfBadges.insertAdjacentHTML("beforeend", `<span class="chip ${b.cls}">${b.t}</span>`));
   }
 
-  $("pfType").textContent = state.identity.type || "—";
-  const evo = state.identity.evo || [];
-  const evoText = evo.length
-    ? evo.slice(0,4).map(e=>`${e.week}: ${e.type}`).join(" → ")
-    : `This week: ${state.seasonKey || getWeekKey()} (${state.identity.type || "—"})`;
-  $("pfEvo").textContent = evoText.length>70 ? evoText.slice(0,70) + "…" : evoText;
-
-  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
-
+  // creator
   $("crStatus").textContent = creator ? "Eligible ✅" : "Locked";
   $("crAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
   $("crStreak").textContent = state.streak;
   $("crLeague").textContent = leagueFromIQ(state.iq);
   $("crType").textContent = state.identity.type || "—";
+
+  // feed
+  renderFeed();
+
+  // rare indicator if played today
+  const last = state.picks[0];
+  if(last && last.date===todayISO()){
+    $("uiRare").innerHTML = `Only <b>${last.rarePct}%</b> picked your choice`;
+  }
 }
 
 /* ================== Timer ticks ================== */
-function tick(){
+function tick1s(){
   const tEl = $("qTimer");
   if(tEl) tEl.textContent = closeTimerText();
   updateResetBadge();
-  setTimeout(tick, 1000);
+  setTimeout(tick1s, 1000);
+}
+
+/* ================== Live tick (intraday loop) ==================
+   Slow + safe to avoid mobile lag
+*/
+function tickLive(){
+  weeklyResetIfNeeded();
+
+  driftLiveUsers();
+
+  // crowd/rank drift even if user doesn't act
+  if(Math.random() < 0.85) driftCrowd();
+  if(Math.random() < 0.65) driftRank();
+
+  // micro reward occasionally
+  rollMicroDrop();
+
+  // sometimes simulate friend move (social pressure)
+  if(Math.random() < 0.12){
+    const names = ["Alex","Mia","Noah","Lena","Max"];
+    const n = names[Math.floor(Math.random()*names.length)];
+    const p = (Math.random() < 0.5) ? "UP" : "DOWN";
+    pushFeed("👤", `${n} picked <b>${p}</b>`);
+  }
+
+  updatePhase();
+  save();
+  render();
+
+  // 20–35s feels “alive” without looking fake
+  const next = 20000 + Math.floor(Math.random()*15000);
+  setTimeout(tickLive, next);
 }
 
 /* ================== Init ================== */
 weeklyResetIfNeeded();
 recomputeIdentity();
 updateSoundBtn();
+
+const startQ = QUESTIONS[qIndex % QUESTIONS.length];
+initLiveForQuestion(startQ);
 setQuestion(qIndex);
-renderContext();
 save();
-measureChrome();
 render();
-tick();
+tick1s();
+tickLive();
 
 /* first-run behavior */
 if(state.picks.length > 0 || state.lastPlayDate){
@@ -1859,7 +2216,7 @@ if(state.picks.length > 0 || state.lastPlayDate){
   show("s-on1");
 }
 
-/* sync tabs */
+/* ================== Share-card mode sync ================== */
 (function syncTabs(){
   const mode = state.shareCardMode || "status";
   document.querySelectorAll(".tab").forEach(t=>{
@@ -1868,4 +2225,4 @@ if(state.picks.length > 0 || state.lastPlayDate){
 })();
 </script>
 </body>
-  </html>
+                    </html>
