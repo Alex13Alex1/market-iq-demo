@@ -189,12 +189,12 @@
     .stepHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
 
     /* MAIN area where screens live (fix overlap by using flow, not absolute inset hacks) */
-    .main{
-      position:relative;
-      flex: 1 1 auto;
-      min-height:0;
-      padding-bottom: calc(var(--navH) + var(--safeB));
-    }
+   .main{
+  position:relative;
+  flex: 1 1 auto;
+  min-height:0;
+  padding-bottom: calc(var(--navH) + var(--safeB) + 24px);
+} 
 
     /* screens */
     .screen{
@@ -208,8 +208,9 @@
     }
     .screen.active{opacity:1; transform:translateX(0); pointer-events:auto;}
     .scroll{
-      height:100%;
-      overflow:auto;
+  height:100%;
+  overflow:auto;
+  padding-bottom: calc(var(--navH) + var(--safeB) + 40px);
       padding: 10px 16px 14px;
       padding-left: calc(16px + var(--safeL));
       padding-right: calc(16px + var(--safeR));
