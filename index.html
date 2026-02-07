@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>Market IQ — Super Demo</title>
-  <meta name="description" content="A 30-second daily prediction game with live crowd movement, rank shifts, identity evolution, and share cards." />
+  <title>Market IQ — V6 Mobile</title>
+  <meta name="description" content="A 30-second daily market prediction game that becomes reputation, status, and creator monetization." />
+  <meta name="theme-color" content="#020617" />
 
   <style>
     :root{
@@ -16,10 +17,11 @@
       --cyan:#22d3ee; --cyan2:#0891b2;
       --gold:#fbbf24; --green:#22c55e; --red:#fb7185;
       --shadow: 0 40px 120px rgba(0,0,0,.82);
-      --safeT: env(safe-area-inset-top, 0px);
-      --safeB: env(safe-area-inset-bottom, 0px);
-      --safeL: env(safe-area-inset-left, 0px);
-      --safeR: env(safe-area-inset-right, 0px);
+      --navH: 74px;
+      --safeT: env(safe-area-inset-top);
+      --safeB: env(safe-area-inset-bottom);
+      --safeL: env(safe-area-inset-left);
+      --safeR: env(safe-area-inset-right);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -35,74 +37,80 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      padding: calc(14px + var(--safeT)) calc(12px + var(--safeL)) calc(14px + var(--safeB)) calc(12px + var(--safeR));
+      padding: 14px;
+      padding-top: calc(14px + var(--safeT));
+      padding-bottom: calc(14px + var(--safeB));
+      overflow:hidden;
+      touch-action: manipulation;
     }
 
-    /* Make it feel like a native app on phones */
-    .stage{
-      width: min(430px, 100%);
+    /* MOBILE-ONLY WRAP */
+    .wrap{
+      width: min(420px, calc(100vw - 28px));
+      height: min(920px, calc(100dvh - 28px - var(--safeT) - var(--safeB)));
+      max-height: calc(var(--vh, 1vh) * 100 - 28px);
       display:flex;
-      align-items:center;
+      align-items:stretch;
       justify-content:center;
     }
 
+    /* phone */
     .phone{
-      width: 100%;
-      max-width: 410px;
-      border-radius: 34px;
+      width:100%;
+      height:100%;
+      border-radius:34px;
       border:1px solid rgba(255,255,255,.12);
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
       box-shadow: var(--shadow), 0 0 70px rgba(34,211,238,.12);
       overflow:hidden;
       position:relative;
-    }
-
-    /* dynamic viewport height without iOS safari jumps */
-    .phone{
-      height: min(860px, calc(100dvh - 28px));
-    }
-
-    @supports not (height: 100dvh){
-      .phone{ height: min(860px, calc(100vh - 28px)); }
-    }
-
-    /* Backdrop filter is heavy on mobile; keep it soft and gated */
-    @supports ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))){
-      .phone{ -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+      backdrop-filter: blur(14px);
     }
 
     .statusbar{
-      height: 44px;
+      height:44px;
       padding: 14px 16px 0;
       display:flex;
       align-items:center;
       justify-content:space-between;
       color: rgba(229,231,235,.80);
       font-size: 12px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
     }
+
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       padding: 6px 10px;
       border-radius:999px;
       background: rgba(0,0,0,.25);
       border:1px solid rgba(255,255,255,.08);
+      max-width: 62vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
       white-space:nowrap;
     }
     .dot{width:8px;height:8px;border-radius:999px;background:var(--cyan);box-shadow:0 0 18px rgba(34,211,238,.65)}
-    .dotGreen{width:8px;height:8px;border-radius:999px;background:var(--green);box-shadow:0 0 16px rgba(34,197,94,.45)}
+
     .app{
       height: calc(100% - 44px);
       background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.98));
       position:relative;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
     }
 
     /* top */
     .top{
       padding: 14px 16px 10px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
       gap: 10px;
+      flex: 0 0 auto;
     }
     .brand{display:flex; flex-direction:column; gap:6px; min-width:0}
     .logo{
@@ -112,7 +120,7 @@
     }
     .tagline{font-size:12px; color: rgba(148,163,184,.92); line-height:1.25}
 
-    .topRight{display:flex; flex-direction:column; gap:8px; align-items:flex-end}
+    .topRight{display:flex; flex-direction:column; gap:8px; align-items:flex-end; min-width: 164px}
     .topBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
     .topBtn{
       height:34px;
@@ -126,6 +134,7 @@
       cursor:pointer;
       user-select:none;
       -webkit-tap-highlight-color: transparent;
+      white-space:nowrap;
     }
     .topBtn.primary{
       background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(8,145,178,.95));
@@ -138,22 +147,31 @@
       color:#1b1100;
     }
 
-    .miniStats{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    /* compact stats (NO OVERLAP) */
+    .miniStats{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      width: 100%;
+    }
     .miniCard{
-      min-width:112px;
       padding: 8px 10px;
       border-radius: 14px;
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
     }
     .miniLabel{font-size:10px; color: rgba(148,163,184,.86)}
-    .miniValue{margin-top:3px; font-weight:900; font-size: 14px}
+    .miniValue{margin-top:3px; font-weight:900; font-size: 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
     .c{color:var(--cyan)} .g{color:var(--green)} .y{color:var(--gold)} .r{color:var(--red)}
 
     /* progress */
     .progressWrap{
       padding: 0 16px 10px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
       display:flex; align-items:center; justify-content:space-between; gap:10px;
+      flex: 0 0 auto;
     }
     .progress{
       flex:1;
@@ -170,10 +188,18 @@
     }
     .stepHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
 
+    /* MAIN area where screens live (fix overlap by using flow, not absolute inset hacks) */
+    .main{
+      position:relative;
+      flex: 1 1 auto;
+      min-height:0;
+      padding-bottom: calc(var(--navH) + var(--safeB));
+    }
+
     /* screens */
     .screen{
       position:absolute;
-      inset: 140px 0 74px 0; /* below top; above nav */
+      inset: 0;
       overflow:hidden;
       opacity:0;
       transform: translateX(8px);
@@ -185,6 +211,8 @@
       height:100%;
       overflow:auto;
       padding: 10px 16px 14px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
       scrollbar-width:none;
       -webkit-overflow-scrolling: touch;
     }
@@ -204,7 +232,7 @@
     .p{color: rgba(148,163,184,.92); font-size: 13px; line-height:1.5; margin:0}
 
     .row{display:flex; gap:10px}
-    .col{flex:1}
+    .col{flex:1; min-width:0}
     .kv{
       display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding: 10px 0;
@@ -213,7 +241,7 @@
     }
     .kv:last-child{border-bottom:0}
     .kv .k{color: rgba(229,231,235,.92)}
-    .kv .v{color: rgba(148,163,184,.95); font-weight: 900}
+    .kv .v{color: rgba(148,163,184,.95); font-weight: 900; text-align:right}
 
     .chipRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
     .chip{
@@ -224,14 +252,15 @@
       color: rgba(229,231,235,.92);
       background: rgba(0,0,0,.28);
       border: 1px solid rgba(255,255,255,.10);
+      white-space:nowrap;
     }
+    .chip b{font-weight:950}
     .chip.cyan{border-color: rgba(34,211,238,.24); background: rgba(34,211,238,.08)}
     .chip.gold{border-color: rgba(251,191,36,.22); background: rgba(251,191,36,.10)}
     .chip.green{border-color: rgba(34,197,94,.22); background: rgba(34,197,94,.10)}
     .chip.red{border-color: rgba(244,63,94,.22); background: rgba(244,63,94,.10)}
-    .chip.live{border-color: rgba(34,197,94,.26); background: rgba(34,197,94,.08)}
 
-    /* hero */
+    /* Play card */
     .hero{
       padding: 16px;
       background:
@@ -269,7 +298,7 @@
       margin-bottom: 8px;
     }
     .ctxTitle{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
-    .ctxHint{font-size:11px; color: rgba(148,163,184,.92)}
+    .ctxHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
     .ctxLine{
       font-size: 13px;
       color: rgba(229,231,235,.92);
@@ -340,15 +369,59 @@
       border: 1px solid rgba(34,211,238,.25);
     }
 
+    /* small action row */
+    .miniActions{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .miniActions .topBtn{height:36px}
+    .miniActions .topBtn.primary{color:#041017}
+    .miniActions .topBtn.warn{color:#1b1100}
+
+    /* toast */
+    .toast{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: calc(var(--navH) + 12px + var(--safeB));
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+      z-index: 30;
+    }
+    .toast.show{display:flex}
+    .toast .tIcon{width:28px; height:28px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10)}
+    .toast .tText{flex:1}
+    .toast .tTitle{font-weight:950; font-size:13px}
+    .toast .tDesc{margin-top:2px; font-size:12px; color:rgba(148,163,184,.95); line-height:1.35}
+    .toast .tX{
+      width:38px; height:38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(229,231,235,.92);
+      cursor:pointer;
+      font-weight: 980;
+    }
+
     /* bottom nav */
     .nav{
       position:absolute; left:0; right:0; bottom:0;
-      height: 74px;
+      height: var(--navH);
+      padding-bottom: var(--safeB);
       display:flex; justify-content:space-around; align-items:center;
       background: rgba(0,0,0,.35);
       border-top: 1px solid rgba(255,255,255,.08);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(16px);
+      z-index: 20;
     }
     .nav .item{
       width: 64px;
@@ -382,9 +455,10 @@
       align-items:flex-end;
       justify-content:center;
       padding: 14px;
+      padding-bottom: calc(14px + var(--safeB));
       background: rgba(2,6,23,.65);
       backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      z-index: 40;
     }
     .overlay.show{display:flex}
     .sheet{
@@ -394,6 +468,7 @@
       border: 1px solid rgba(255,255,255,.12);
       box-shadow: 0 30px 120px rgba(0,0,0,.70);
       overflow:hidden;
+      max-height: 72vh;
     }
     .sheetTop{
       padding: 14px 14px 10px;
@@ -422,9 +497,10 @@
       border-radius: 18px;
       background: rgba(0,0,0,.28);
       border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
     }
     .big .lab{font-size: 10px; color: rgba(148,163,184,.86)}
-    .big .val{margin-top:4px; font-size: 18px; font-weight: 980}
+    .big .val{margin-top:4px; font-size: 18px; font-weight: 980; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
     .sheetActions{
       padding: 0 14px 14px;
       display:flex; gap: 10px;
@@ -448,69 +524,43 @@
     .tab.active{background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.28); color: rgba(229,231,235,.95)}
     .hint{margin-top:10px;font-size:12px;color:rgba(148,163,184,.92)}
 
-    /* Live feed */
-    .feed{
-      margin-top: 12px;
-      border-radius: 18px;
-      background: rgba(0,0,0,.22);
-      border: 1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-    }
-    .feedTop{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding: 10px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .feedTitle{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
-    .feedRight{font-size:11px; color: rgba(148,163,184,.92)}
-    .feedItem{
-      padding: 10px 12px;
-      font-size: 12px;
-      color: rgba(229,231,235,.92);
-      border-bottom: 1px dashed rgba(255,255,255,.10);
-      display:flex; gap:10px; align-items:flex-start;
-    }
-    .feedItem:last-child{border-bottom:0}
-    .feedTime{color: rgba(148,163,184,.92); min-width:48px}
-    .feedTxt b{color: var(--cyan)}
-    .feedTxt .warn{color: var(--gold); font-weight:900}
-    .feedTxt .good{color: var(--green); font-weight:900}
-
-    /* Identity bar */
-    .idBox{
-      margin-top: 10px;
+    /* identity progress */
+    .progCard{
+      margin-top:12px;
       padding: 12px;
       border-radius: 18px;
-      background: rgba(0,0,0,.22);
+      background: rgba(0,0,0,.26);
       border: 1px solid rgba(255,255,255,.10);
     }
-    .idTop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px;}
-    .idName{font-weight:950; font-size: 14px;}
-    .idSub{font-size:12px; color: rgba(148,163,184,.92); margin-top:2px;}
-    .idPct{font-size:12px; color: rgba(148,163,184,.92); white-space:nowrap}
-    .idBar{
+    .progTop{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .progTop .lab{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
+    .progTop .pct{font-size:12px; color: rgba(148,163,184,.92)}
+    .progBar{
       height: 10px;
       border-radius: 999px;
       background: rgba(255,255,255,.06);
       border: 1px solid rgba(255,255,255,.08);
       overflow:hidden;
-      margin-top: 10px;
+      margin-top: 8px;
     }
-    .idBar > div{
+    .progBar > div{
       height:100%;
-      width: 20%;
-      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(251,191,36,.80));
+      width: 0%;
+      background: linear-gradient(90deg, rgba(251,191,36,.95), rgba(34,211,238,.95), rgba(34,197,94,.95));
       transition: width .25s ease;
     }
 
+    a{color: var(--cyan); text-decoration:none}
+    a:hover{text-decoration:underline}
+
     @media (prefers-reduced-motion: reduce){
-      .screen, .progress > div, .bar > div, .spark:before, .idBar > div { transition:none !important; animation:none !important; }
+      .screen, .progress > div, .bar > div, .spark:before, .progBar>div { transition:none !important; animation:none !important; }
     }
   </style>
 </head>
 
 <body>
-  <div class="stage">
+  <div class="wrap">
     <div class="phone" id="phone">
       <div class="statusbar">
         <div class="pill"><span class="dot"></span><span id="sbSeason">Season 0</span></div>
@@ -518,7 +568,6 @@
       </div>
 
       <div class="app">
-
         <div class="top">
           <div class="brand">
             <div class="logo">MARKET IQ</div>
@@ -531,14 +580,15 @@
               <button class="topBtn" id="btnSound">Sound: OFF</button>
               <button class="topBtn warn" id="btnShareCardTop">Share-card</button>
             </div>
+
             <div class="miniStats">
               <div class="miniCard">
                 <div class="miniLabel">Market IQ</div>
-                <div class="miniValue"><span class="c" id="uiIQ">1000</span> • <span class="y" id="uiLeague">Bronze</span></div>
+                <div class="miniValue"><span class="c" id="uiIQ">1000</span> • <span class="y" id="uiLeague">Bronze</span> • <span class="g" id="uiTop">Top 60%</span></div>
               </div>
               <div class="miniCard">
-                <div class="miniLabel">Top rank</div>
-                <div class="miniValue"><span class="g" id="uiTopPct">60%</span> <span style="color:rgba(148,163,184,.92);">•</span> <span class="y" id="uiType">—</span></div>
+                <div class="miniLabel">Identity</div>
+                <div class="miniValue" id="uiType">—</div>
               </div>
             </div>
           </div>
@@ -549,446 +599,473 @@
           <div class="stepHint" id="uiStepHint">Step 1/3</div>
         </div>
 
-        <!-- ONBOARD 1 -->
-        <section class="screen active" id="s-on1">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Can you beat the crowd today?</div>
-                <p class="p">One question. Two buttons. No charts needed.</p>
-                <div class="chipRow">
-                  <span class="chip cyan">30 seconds/day</span>
-                  <span class="chip gold">Leagues & status</span>
-                  <span class="chip green">Share to flex</span>
-                </div>
-              </div>
+        <div class="main">
+          <!-- TOASTS -->
+          <div class="toast" id="toast">
+            <div class="tIcon" id="toastIcon">⚡</div>
+            <div class="tText">
+              <div class="tTitle" id="toastTitle">Update</div>
+              <div class="tDesc" id="toastDesc">…</div>
             </div>
-
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Why people invite friends</div>
-                <div class="kv"><span class="k">“I beat the crowd”</span><span class="v y">Status</span></div>
-                <div class="kv"><span class="k">Live shifts</span><span class="v c">Drama</span></div>
-                <div class="kv"><span class="k">Weekly seasons</span><span class="v y">Fresh start</span></div>
-                <button class="btn primarySmall" id="btnOn1">Continue</button>
-              </div>
-            </div>
-
-            <div class="hint">Swipe left/right. (Pitch mode runs automatically.)</div>
+            <button class="tX" id="toastX">✕</button>
           </div>
-        </section>
 
-        <!-- ONBOARD 2 -->
-        <section class="screen" id="s-on2">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">You get an identity (not just a score).</div>
-                <p class="p">Your choices shape your archetype: Rebel, Wave Rider, Crowd Shadow…</p>
-                <div class="chipRow">
-                  <span class="chip cyan">Simple play</span>
-                  <span class="chip gold">Deep meaning</span>
-                  <span class="chip">Evolves weekly</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Endgame</div>
-                <div class="kv"><span class="k">Verified Mind</span><span class="v c">Access</span></div>
-                <div class="kv"><span class="k">Market Voice</span><span class="v y">Influence</span></div>
-                <div class="kv"><span class="k">Signal Creator</span><span class="v g">Monetize</span></div>
-                <button class="btn primarySmall" id="btnOn2">Continue</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- ONBOARD 3 -->
-        <section class="screen" id="s-on3">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Daily Battle + Live Drama.</div>
-                <p class="p">Crowd shifts all day. Your rank moves. You check because it’s alive.</p>
-                <div class="chipRow">
-                  <span class="chip gold">Crowd vs You</span>
-                  <span class="chip cyan">Live movement</span>
-                  <span class="chip green">Share cards</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Ready?</div>
-                <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="uiGenesis">ON</span></div>
-                <div class="kv"><span class="k">Season reset</span><span class="v">Sunday 23:59</span></div>
-                <button class="btn primarySmall" id="btnStartPlay">Start playing</button>
-                <button class="btn ghost" id="btnResetAll">Reset demo</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- PLAY -->
-        <section class="screen" id="s-play">
-          <div class="scroll">
-            <div class="card">
-              <div class="hero">
-                <div class="sym" id="qSym">BTC / USD</div>
-                <div class="price" id="qPx">$98,500</div>
-                <div class="spark" aria-hidden="true"></div>
-
-                <div class="chipRow">
-                  <span class="chip live"><span class="dotGreen"></span> LIVE <b id="uiLiveUsers">1,284</b></span>
-                  <span class="chip cyan" id="qMode">Daily Pulse</span>
-                  <span class="chip">Closes in <b id="qTimer">--:--:--</b></span>
-                </div>
-
-                <div class="chipRow" style="margin-top:8px;">
-                  <span class="chip gold">Crowd now <b id="qCrowdNow">63%</b> UP</span>
-                  <span class="chip">Was <b id="qCrowdWas">63%</b></span>
-                  <span class="chip">You rank <b id="uiRankNow">Top 60%</b></span>
-                </div>
-
-                <div class="context">
-                  <div class="contextTop">
-                    <div class="ctxTitle">Context</div>
-                    <div class="ctxHint" id="uiPhase">Pre-result: —</div>
-                  </div>
-                  <div id="ctxLines"></div>
-                </div>
-
-                <div class="idBox">
-                  <div class="idTop">
-                    <div>
-                      <div class="idName" id="idName">Identity: —</div>
-                      <div class="idSub" id="idSub">Become a “Crowd Breaker” by picking against the majority.</div>
-                    </div>
-                    <div class="idPct" id="idPct">0%</div>
-                  </div>
-                  <div class="idBar"><div id="idBarFill"></div></div>
-                </div>
-
-                <div class="feed">
-                  <div class="feedTop">
-                    <div class="feedTitle">Live feed</div>
-                    <div class="feedRight" id="feedHint">updates all day</div>
-                  </div>
-                  <div id="feedItems"></div>
-                </div>
-
-              </div>
-
-              <div class="question">
-                <div class="qTitle" id="qTitle">Will price be higher in 24h?</div>
-                <div class="qMeta">
-                  <span id="qHorizon">Horizon: 24h</span>
-                  <span id="uiRare">Only <b>—</b> picked your choice</span>
-                </div>
-                <div class="bar"><div id="qBar"></div></div>
-              </div>
-
-              <div class="btnRow">
-                <button class="btn up" id="btnUp">⬆ UP</button>
-                <button class="btn down" id="btnDown">⬇ DOWN</button>
-                <button class="btn ghost" id="btnNextQ">Next demo question ▸</button>
-              </div>
-            </div>
-
-            <div class="row" style="gap:12px;">
-              <div class="card col">
+          <!-- ONBOARD 1 -->
+          <section class="screen active" id="s-on1">
+            <div class="scroll">
+              <div class="card">
                 <div class="pad">
-                  <div class="h2">Today</div>
-                  <div class="kv"><span class="k">Answered</span><span class="v" id="uiAnswered">0/1</span></div>
-                  <div class="kv"><span class="k">Streak</span><span class="v y" id="uiStreak">0</span></div>
+                  <div class="h1">Are you smarter than the crowd?</div>
+                  <p class="p">One question per day. Two buttons. No charts needed.</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">30 seconds/day</span>
+                    <span class="chip gold">Status & leagues</span>
+                    <span class="chip green">Share to flex</span>
+                  </div>
                 </div>
               </div>
-              <div class="card col">
+
+              <div class="card">
                 <div class="pad">
-                  <div class="h2">Battle</div>
-                  <div class="kv"><span class="k">You</span><span class="v y" id="uiYouScore">0</span></div>
-                  <div class="kv"><span class="k">Crowd</span><span class="v c" id="uiCrowdScore">0</span></div>
+                  <div class="h2>Why people invite friends</div>
+                  <div class="kv"><span class="k">“I beat 80%”</span><span class="v y">Status</span></div>
+                  <div class="kv"><span class="k">Live crowd swings</span><span class="v c">Drama</span></div>
+                  <div class="kv"><span class="k">Weekly seasons</span><span class="v y">Fresh start</span></div>
+                  <button class="btn primarySmall" id="btnOn1">Continue</button>
                 </div>
               </div>
+
+              <div class="hint">Swipe left/right to move. (Pitch mode runs this automatically.)</div>
             </div>
+          </section>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2">Simple rule</div>
-                <p class="p">Tap UP/DOWN → your rank moves all day → share the drama.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- RECAP -->
-        <section class="screen" id="s-recap">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Recap (share this)</div>
-                <p class="p">People share status, not analysis.</p>
-
-                <div class="row" style="margin-top:10px;">
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">You</div>
-                      <div class="miniValue y" style="font-size:18px;" id="recYou">0/1</div>
-                      <div class="p" style="margin-top:6px;">Your result today.</div>
-                    </div>
-                  </div>
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">Crowd</div>
-                      <div class="miniValue c" style="font-size:18px;" id="recCrowd">0/1</div>
-                      <div class="p" style="margin-top:6px;">Majority result.</div>
-                    </div>
+          <!-- ONBOARD 2 -->
+          <section class="screen" id="s-on2">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">You get an identity (not just a score).</div>
+                  <p class="p">Your choices reveal your mind style: Momentum, Contrarian, Data-Mind…</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">Easy gameplay</span>
+                    <span class="chip gold">Deep meaning</span>
+                    <span class="chip">Evolves weekly</span>
                   </div>
                 </div>
+              </div>
 
-                <div class="chipRow" style="margin-top:10px;">
-                  <span class="chip">Top <b id="recTop">—</b></span>
-                  <span class="chip">Streak <b id="recStreak">0</b></span>
-                  <span class="chip cyan">IQ <b id="recIQ">1000</b></span>
-                  <span class="chip gold">Type <b id="recType">—</b></span>
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Endgame</div>
+                  <div class="kv"><span class="k">Verified Mind</span><span class="v c">Access</span></div>
+                  <div class="kv"><span class="k">Market Voice</span><span class="v y">Influence</span></div>
+                  <div class="kv"><span class="k">Signal Creator</span><span class="v g">Monetize</span></div>
+                  <button class="btn primarySmall" id="btnOn2">Continue</button>
                 </div>
-
-                <div class="tabs">
-                  <div class="tab active" data-card="status">STATUS</div>
-                  <div class="tab" data-card="battle">YOU vs CROWD</div>
-                  <div class="tab" data-card="streak">STREAK</div>
-                </div>
-
-                <div class="row" style="margin-top:12px;">
-                  <button class="btn primarySmall col" id="btnShareText">Share text</button>
-                  <button class="btn ghost col" id="btnSharePNG">Share-card PNG</button>
-                </div>
-                <div class="hint" id="shareHint" style="display:none;">Saved / shared ✅</div>
               </div>
             </div>
+          </section>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2">Recent picks (demo)</div>
-                <div id="hist"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- LEAGUES -->
-        <section class="screen" id="s-leagues">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Leagues & Seasons</div>
-                <p class="p">Weekly reset keeps it alive. Promotion pressure brings you back.</p>
-
-                <div class="row" style="margin-top:10px;">
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">Your league</div>
-                      <div class="miniValue y" style="font-size:18px;" id="lgLeague">Bronze</div>
-                      <div class="p" style="margin-top:6px;" id="lgPromo">3 pts to promotion</div>
-                    </div>
-                  </div>
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">Reset</div>
-                      <div class="miniValue c" style="font-size:18px;" id="lgReset">--:--:--</div>
-                      <div class="p" style="margin-top:6px;" id="lgSeason">Season 0</div>
-                    </div>
+          <!-- ONBOARD 3 -->
+          <section class="screen" id="s-on3">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Daily Market Battle.</div>
+                  <p class="p">You vs Crowd vs Experts. Every day creates a shareable story.</p>
+                  <div class="chipRow">
+                    <span class="chip gold">Crowd vs You</span>
+                    <span class="chip cyan">Share cards</span>
+                    <span class="chip green">Duel friends</span>
                   </div>
                 </div>
-
-                <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="lgGenesis">Enabled</span></div>
-                <div class="kv"><span class="k">Verified Mind unlock</span><span class="v c" id="lgVerified">Locked</span></div>
-                <div class="kv"><span class="k">Signal Creator unlock</span><span class="v g" id="lgCreator">Locked</span></div>
-
-                <div class="hint">Demo uses device time. No backend.</div>
               </div>
-            </div>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Global leaderboard (demo)</div>
-                <div id="lb"></div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CROWD -->
-        <section class="screen" id="s-crowd">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Crowd vs Experts (X machine)</div>
-                <p class="p">Copy a post. Create drama. Bring people back.</p>
-                <div class="chipRow">
-                  <span class="chip cyan">Crowd score <b id="cveCrowd">0</b></span>
-                  <span class="chip gold">Experts score <b id="cveExperts">0</b></span>
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Ready?</div>
+                  <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="uiGenesis">ON</span></div>
+                  <div class="kv"><span class="k">Season reset</span><span class="v">Sunday 23:59</span></div>
+                  <button class="btn primarySmall" id="btnStartPlay">Start playing</button>
+                  <button class="btn ghost" id="btnResetAll">Reset demo</button>
                 </div>
-                <div class="kv"><span class="k">Post ready</span><span class="v" id="cveScore">Crowd 0 — Experts 0</span></div>
-                <button class="btn primarySmall" id="btnHotPost">Copy X post</button>
               </div>
             </div>
+          </section>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Friends duel (demo)</div>
-                <div class="kv"><span class="k">7-day duel</span><span class="v" id="duelState">Inactive</span></div>
-                <div class="kv"><span class="k">You</span><span class="v y" id="duelYou">0</span></div>
-                <div class="kv"><span class="k">Friend</span><span class="v c" id="duelFriend">0</span></div>
-                <button class="btn ghost" id="btnStartDuel">Start demo duel</button>
-              </div>
-            </div>
+          <!-- PLAY -->
+          <section class="screen" id="s-play">
+            <div class="scroll">
+              <div class="card">
+                <div class="hero">
+                  <div class="sym" id="qSym">BTC / USD</div>
+                  <div class="price" id="qPx">$98,500</div>
+                  <div class="spark" aria-hidden="true"></div>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Random reward (dopamine)</div>
-                <div class="kv"><span class="k">Mystery drops</span><span class="v y" id="dropState">—</span></div>
-                <p class="p">Sometimes you unlock a tiny bonus. Creates “one more check”.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- PROFILE -->
-        <section class="screen" id="s-profile">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Your Passport</div>
-                <p class="p">Identity + reputation. Built for screenshots.</p>
-
-                <div class="row" style="margin-top:10px;">
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">Market IQ</div>
-                      <div class="miniValue c" style="font-size:18px;" id="pfIQ">1000</div>
-                      <div class="p" style="margin-top:6px;" id="pfLeague">Bronze</div>
-                    </div>
+                  <div class="chipRow">
+                    <span class="chip cyan" id="qMode">Daily Pulse</span>
+                    <span class="chip">Closes in <b id="qTimer">--:--:--</b></span>
+                    <span class="chip gold">Crowd <b id="qCrowd">63%</b> <span id="qCrowdDir">UP</span></span>
+                    <span class="chip">Live <b id="qLive">●</b></span>
                   </div>
-                  <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
-                    <div class="pad">
-                      <div class="h2">Accuracy</div>
-                      <div class="miniValue g" style="font-size:18px;" id="pfAcc">—</div>
-                      <div class="p" style="margin-top:6px;">Last picks</div>
+
+                  <div class="context">
+                    <div class="contextTop">
+                      <div class="ctxTitle">Context</div>
+                      <div class="ctxHint" id="ctxRefresh">tap “Next demo question”</div>
                     </div>
+                    <div id="ctxLines"></div>
+                  </div>
+
+                  <div class="progCard">
+                    <div class="progTop">
+                      <div class="lab">Identity evolution</div>
+                      <div class="pct"><span id="idNext">—</span> • <b id="idPct">0%</b></div>
+                    </div>
+                    <div class="progBar"><div id="idBar"></div></div>
+                    <div class="hint" style="margin-top:8px">You evolve by being rare, consistent, or contrarian.</div>
+                  </div>
+
+                  <div class="miniActions">
+                    <button class="topBtn" id="btnCheckIn">Check-in (+1)</button>
+                    <button class="topBtn" id="btnInvite">Copy invite link</button>
+                    <button class="topBtn" id="btnTG">Telegram updates</button>
                   </div>
                 </div>
 
-                <div class="chipRow" id="pfBadges"></div>
+                <div class="question">
+                  <div class="qTitle" id="qTitle">Will price be higher in 24h?</div>
+                  <div class="qMeta">
+                    <span id="qHorizon">Horizon: 24h</span>
+                    <span>You: <b id="qChance">58%</b> edge</span>
+                  </div>
+                  <div class="bar"><div id="qBar"></div></div>
+                </div>
+
+                <div class="btnRow">
+                  <button class="btn up" id="btnUp">⬆ UP</button>
+                  <button class="btn down" id="btnDown">⬇ DOWN</button>
+                  <button class="btn ghost" id="btnNextQ">Next demo question ▸</button>
+                </div>
               </div>
-            </div>
 
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Identity evolution</div>
-                <div class="kv"><span class="k">Current</span><span class="v y" id="pfType">—</span></div>
-                <div class="kv"><span class="k">Progress</span><span class="v" id="pfProg">0%</span></div>
-                <p class="p">Your archetype progress grows when you play and when you check live movement.</p>
-              </div>
-            </div>
-
-            <div class="card">
-              <div class="pad">
-                <div class="h2>Path to Creator</div>
-                <div class="kv"><span class="k">Eligibility</span><span class="v" id="pfElig">Not yet</span></div>
-                <div class="kv"><span class="k">Requirement</span><span class="v">IQ ≥ 1200 + Streak ≥ 7</span></div>
-                <button class="btn primarySmall" id="btnCreator">Preview Creator</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- CREATOR -->
-        <section class="screen" id="s-creator">
-          <div class="scroll">
-            <div class="card">
-              <div class="pad">
-                <div class="h1">Signal Creator (endgame)</div>
-                <p class="p">Monetize reputation. Retail subscribes because history is measurable.</p>
-
-                <div class="kv"><span class="k">Creator status</span><span class="v" id="crStatus">Locked</span></div>
-                <div class="kv"><span class="k">Public page</span><span class="v">Signals + track record</span></div>
-                <div class="kv"><span class="k">Revenue share</span><span class="v g">Enabled</span></div>
-
-                <div class="card" style="margin-top:12px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+              <div class="row" style="gap:12px;">
+                <div class="card col">
                   <div class="pad">
-                    <div class="h2>What retail sees</div>
-                    <div class="kv"><span class="k">Accuracy</span><span class="v" id="crAcc">—</span></div>
-                    <div class="kv"><span class="k">Streak</span><span class="v" id="crStreak">0</span></div>
-                    <div class="kv"><span class="k">League</span><span class="v" id="crLeague">Bronze</span></div>
-                    <div class="kv"><span class="k">Type</span><span class="v y" id="crType">—</span></div>
+                    <div class="h2">Today</div>
+                    <div class="kv"><span class="k">Answered</span><span class="v" id="uiAnswered">0/1</span></div>
+                    <div class="kv"><span class="k">Edge vs crowd</span><span class="v g" id="uiEdge">+0</span></div>
                   </div>
                 </div>
+                <div class="card col">
+                  <div class="pad">
+                    <div class="h2">Battle</div>
+                    <div class="kv"><span class="k">You</span><span class="v y" id="uiYouScore">0</span></div>
+                    <div class="kv"><span class="k">Crowd</span><span class="v c" id="uiCrowdScore">0</span></div>
+                  </div>
+                </div>
+              </div>
 
-                <button class="btn ghost" id="btnBackHome">Back to Play</button>
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Simple rule</div>
+                  <p class="p">Tap UP/DOWN → earn Market IQ → climb leagues → unlock Creator.</p>
+                </div>
               </div>
             </div>
+          </section>
 
-            <div class="hint">Demo only — real product needs verified market data + anti-cheat.</div>
+          <!-- RECAP -->
+          <section class="screen" id="s-recap">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Recap (share this)</div>
+                  <p class="p">This is your daily flex. People share status, not analysis.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">You</div>
+                        <div class="miniValue y" style="font-size:18px;" id="recYou">0/1</div>
+                        <div class="p" style="margin-top:6px;">Your result today.</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Crowd</div>
+                        <div class="miniValue c" style="font-size:18px;" id="recCrowd">0/1</div>
+                        <div class="p" style="margin-top:6px;">Majority result.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chipRow" style="margin-top:10px;">
+                    <span class="chip">Top <b id="recTop">—</b></span>
+                    <span class="chip">Streak <b id="recStreak">0</b></span>
+                    <span class="chip cyan">IQ <b id="recIQ">1000</b></span>
+                    <span class="chip gold">Type <b id="recType">—</b></span>
+                    <span class="chip">Live rank <b id="recRankMove">—</b></span>
+                  </div>
+
+                  <div class="tabs">
+                    <div class="tab active" data-card="status">STATUS</div>
+                    <div class="tab" data-card="battle">YOU vs CROWD</div>
+                    <div class="tab" data-card="streak">STREAK</div>
+                  </div>
+
+                  <div class="row" style="margin-top:12px;">
+                    <button class="btn primarySmall col" id="btnShareText">Share text</button>
+                    <button class="btn ghost col" id="btnSharePNG">Share-card PNG</button>
+                  </div>
+                  <div class="hint" id="shareHint" style="display:none;">Saved / shared ✅</div>
+
+                  <div class="card" style="margin-top:12px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Daily story arc</div>
+                      <div id="storyFeed"></div>
+                      <div class="hint">These updates simulate “pre-result phase” to make people check back.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Recent picks (demo)</div>
+                  <div id="hist"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- LEAGUES -->
+          <section class="screen" id="s-leagues">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Leagues & Seasons</div>
+                  <p class="p">Weekly reset makes it alive. Fresh drama every week.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Your league</div>
+                        <div class="miniValue y" style="font-size:18px;" id="lgLeague">Bronze</div>
+                        <div class="p" style="margin-top:6px;">Promotion: Top 20%</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Reset</div>
+                        <div class="miniValue c" style="font-size:18px;" id="lgReset">--:--:--</div>
+                        <div class="p" style="margin-top:6px;" id="lgSeason">Season 0</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="lgGenesis">Enabled</span></div>
+                  <div class="kv"><span class="k">Verified Mind unlock</span><span class="v c" id="lgVerified">Locked</span></div>
+                  <div class="kv"><span class="k">Signal Creator unlock</span><span class="v g" id="lgCreator">Locked</span></div>
+
+                  <div class="hint">Demo reset uses your device time. (No backend.)</div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Global leaderboard (demo)</div>
+                  <div id="lb"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CROWD -->
+          <section class="screen" id="s-crowd">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Crowd vs Experts (X machine)</div>
+                  <p class="p">Every day you can post one line: “Crowd was wrong/right”.</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">Crowd score <b id="cveCrowd">0</b></span>
+                    <span class="chip gold">Experts score <b id="cveExperts">0</b></span>
+                    <span class="chip">Live crowd <b id="cveLive">—</b></span>
+                  </div>
+                  <div class="kv"><span class="k">Post ready</span><span class="v" id="cveScore">Crowd 0 — Experts 0</span></div>
+                  <button class="btn primarySmall" id="btnHotPost">Copy X post</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Friends duel (demo)</div>
+                  <div class="kv"><span class="k">7-day duel</span><span class="v" id="duelState">Inactive</span></div>
+                  <div class="kv"><span class="k">You</span><span class="v y" id="duelYou">0</span></div>
+                  <div class="kv"><span class="k">Friend</span><span class="v c" id="duelFriend">0</span></div>
+                  <button class="btn ghost" id="btnStartDuel">Start demo duel</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Random reward (dopamine)</div>
+                  <div class="kv"><span class="k">Mystery drops</span><span class="v y" id="dropState">—</span></div>
+                  <p class="p">Sometimes you unlock a tiny bonus. This creates “one more day” behavior.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PROFILE -->
+          <section class="screen" id="s-profile">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Your Market Passport</div>
+                  <p class="p">Your identity + reputation. Built for screenshots.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Market IQ</div>
+                        <div class="miniValue c" style="font-size:18px;" id="pfIQ">1000</div>
+                        <div class="p" style="margin-top:6px;" id="pfLeague">Bronze</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Accuracy</div>
+                        <div class="miniValue g" style="font-size:18px;" id="pfAcc">—</div>
+                        <div class="p" style="margin-top:6px;">Last picks</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chipRow" id="pfBadges"></div>
+
+                  <div class="progCard">
+                    <div class="progTop">
+                      <div class="lab">Evolution</div>
+                      <div class="pct"><span id="pfNext">—</span> • <b id="pfPct">0%</b></div>
+                    </div>
+                    <div class="progBar"><div id="pfBar"></div></div>
+                    <div class="hint" style="margin-top:8px" id="pfEvoHint">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Identity history</div>
+                  <div class="kv"><span class="k">Current</span><span class="v y" id="pfType">—</span></div>
+                  <div class="kv"><span class="k">Path</span><span class="v" id="pfEvo">—</span></div>
+                  <p class="p">Your mind style changes week to week as you play.</p>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Path to Creator</div>
+                  <div class="kv"><span class="k">Eligibility</span><span class="v" id="pfElig">Not yet</span></div>
+                  <div class="kv"><span class="k">Requirement</span><span class="v">IQ ≥ 1200 + Streak ≥ 7</span></div>
+                  <button class="btn primarySmall" id="btnCreator">Preview Creator</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CREATOR -->
+          <section class="screen" id="s-creator">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Signal Creator (endgame)</div>
+                  <p class="p">Monetize reputation. Retail subscribes because your history is measurable.</p>
+
+                  <div class="kv"><span class="k">Creator status</span><span class="v" id="crStatus">Locked</span></div>
+                  <div class="kv"><span class="k">Public page</span><span class="v">Signals + track record</span></div>
+                  <div class="kv"><span class="k">Revenue share</span><span class="v g">Enabled</span></div>
+
+                  <div class="card" style="margin-top:12px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">What retail sees</div>
+                      <div class="kv"><span class="k">Accuracy</span><span class="v" id="crAcc">—</span></div>
+                      <div class="kv"><span class="k">Streak</span><span class="v" id="crStreak">0</span></div>
+                      <div class="kv"><span class="k">League</span><span class="v" id="crLeague">Bronze</span></div>
+                      <div class="kv"><span class="k">Mind type</span><span class="v y" id="crType">—</span></div>
+                    </div>
+                  </div>
+
+                  <button class="btn ghost" id="btnBackHome">Back to Play</button>
+                </div>
+              </div>
+
+              <div class="hint">Demo only — real product needs verified market data + anti-cheat.</div>
+            </div>
+          </section>
+
+          <!-- NAV -->
+          <div class="nav" id="nav">
+            <div class="item" data-go="s-play"><div class="ico">🎮</div><div>Play</div></div>
+            <div class="item" data-go="s-recap"><div class="ico">📈</div><div>Recap</div></div>
+            <div class="item" data-go="s-leagues"><div class="ico">🏆</div><div>Leagues</div></div>
+            <div class="item" data-go="s-crowd"><div class="ico">⚔️</div><div>Crowd</div></div>
+            <div class="item" data-go="s-profile"><div class="ico">👤</div><div>You</div></div>
           </div>
-        </section>
 
-        <!-- NAV -->
-        <div class="nav" id="nav">
-          <div class="item" data-go="s-play"><div class="ico">🎮</div><div>Play</div></div>
-          <div class="item" data-go="s-recap"><div class="ico">📈</div><div>Recap</div></div>
-          <div class="item" data-go="s-leagues"><div class="ico">🏆</div><div>Leagues</div></div>
-          <div class="item" data-go="s-crowd"><div class="ico">⚔️</div><div>Crowd</div></div>
-          <div class="item" data-go="s-profile"><div class="ico">👤</div><div>You</div></div>
-        </div>
+          <!-- REWARD MODAL -->
+          <div class="overlay" id="overlay">
+            <div class="sheet">
+              <div class="sheetTop">
+                <div>
+                  <h3 id="rwTitle">Pick submitted ✅</h3>
+                  <p id="rwDesc">Instant reward (demo). Tomorrow you’d see the final result.</p>
+                </div>
+                <button class="xbtn" id="rwClose">✕</button>
+              </div>
 
-        <!-- REWARD MODAL -->
-        <div class="overlay" id="overlay">
-          <div class="sheet">
-            <div class="sheetTop">
-              <div>
-                <h3 id="rwTitle">Pick submitted ✅</h3>
-                <p id="rwDesc">Instant reward (demo). Live movement continues all day.</p>
+              <div class="sheetGrid">
+                <div class="big">
+                  <div class="lab">Market IQ</div>
+                  <div class="val c" id="rwIQ">+12</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Streak</div>
+                  <div class="val y" id="rwStreak">+1</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Edge vs crowd</div>
+                  <div class="val g" id="rwEdge">+1</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Mystery drop</div>
+                  <div class="val y" id="rwDrop">—</div>
+                </div>
               </div>
-              <button class="xbtn" id="rwClose">✕</button>
-            </div>
 
-            <div class="sheetGrid">
-              <div class="big">
-                <div class="lab">Market IQ</div>
-                <div class="val c" id="rwIQ">+12</div>
+              <div class="sheetActions">
+                <button class="btn ghost" id="rwShareText">Share text</button>
+                <button class="btn primarySmall" id="rwGoRecap">Go to Recap</button>
               </div>
-              <div class="big">
-                <div class="lab">Streak</div>
-                <div class="val y" id="rwStreak">+1</div>
-              </div>
-              <div class="big">
-                <div class="lab">Rank shift</div>
-                <div class="val g" id="rwRank">+0</div>
-              </div>
-              <div class="big">
-                <div class="lab">Mystery drop</div>
-                <div class="val y" id="rwDrop">—</div>
-              </div>
-            </div>
-
-            <div class="sheetActions">
-              <button class="btn ghost" id="rwShareText">Share text</button>
-              <button class="btn primarySmall" id="rwGoRecap">Go to Recap</button>
             </div>
           </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
+        </div><!-- /main -->
+      </div><!-- /app -->
+    </div><!-- /phone -->
+  </div><!-- /wrap -->
 
 <script>
+/* ================== Viewport fix (iOS/Android) ================== */
+(function setVH(){
+  const set = ()=> document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  set();
+  window.addEventListener('resize', set, {passive:true});
+})();
+
 /* ================== State ================== */
-const KEY = "market_iq_super_demo_v4_live";
+const KEY = "market_iq_super_demo_v6";
 const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
 const todayISO = ()=> new Date().toISOString().slice(0,10);
 const $ = (id)=>document.getElementById(id);
@@ -1000,54 +1077,61 @@ const defaultState = () => ({
   streak: 0,
   lastPlayDate: null,
   answeredToday: 0,
-
-  picks: [], // {date,sym,horizon,choice,crowdUpAtPick,crowdUpNow,outcome,correct,crowdCorrect,rarePct}
-
+  edgeToday: 0,
+  picks: [], // {date,sym,horizon,choice,crowdUp,outcome,correct,crowdCorrect, crowdAtPick}
   battle: { you:0, crowd:0 }, // season
   cve: { crowd:0, experts:0 }, // season
   duel: { active:false, you:0, friend:0 }, // season
-
   drops: { last:"—", unlocked:0 },
   sound: false,
   shareCardMode: "status",
-
   identity: {
     type: "—",
-    target: "Crowd Breaker",
-    progress: 0, // 0..100
     evo: [],
     weekStart: "",
-    stats: { momentum:0, contrarian:0, crowdFollow:0 }
+    stats: { momentum:0, contrarian:0, crowdFollow:0 },
+    progress: 0,      // 0..100
+    next: "—"         // next identity label
   },
-
+  seasonKey: "", // to detect weekly reset
+  // V6 additions
+  inviteCode: "",
+  checkins: { date:"", used:0 }, // 0..3 per day
+  story: [], // feed items newest first
   live: {
-    qId: "",
-    crowdNow: 63,
-    crowdWas: 63,
-    rankNow: 60,   // Top %
-    rankWas: 60,
-    phase: "—",
-    liveUsers: 1284,
-    lastCheckAt: 0,
-    feed: [] // {t, msg}
+    crowdPct: 63,        // live crowd %
+    crowdBase: 63,       // question base
+    lastCrowdSnap: null, // for “changed”
+    rankTop: "60%",      // live top %
+    rankDelta: "—"       // e.g. +6
   },
-
-  seasonKey: "" // weekly reset detection
+  tg: { username:"" } // local-only placeholder
 });
 
 let state = load();
+
 function load(){
   try{
     const raw = localStorage.getItem(KEY);
-    if(!raw) return defaultState();
-    return { ...defaultState(), ...JSON.parse(raw) };
+    if(!raw) return initDefaults(defaultState());
+    return initDefaults({ ...defaultState(), ...JSON.parse(raw) });
   }catch{
-    return defaultState();
+    return initDefaults(defaultState());
   }
+}
+function initDefaults(s){
+  if(!s.inviteCode){
+    s.inviteCode = Math.random().toString(36).slice(2,8).toUpperCase();
+  }
+  if(!s.checkins) s.checkins = { date:"", used:0 };
+  if(!s.story) s.story = [];
+  if(!s.live) s.live = { crowdPct:63, crowdBase:63, lastCrowdSnap:null, rankTop:"60%", rankDelta:"—" };
+  if(!s.tg) s.tg = { username:"" };
+  return s;
 }
 function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
 
-/* ================== Weekly season reset (Sunday 23:59 local) ================== */
+/* ================== Weekly season reset ================== */
 function getWeekKey(d=new Date()){
   const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const day = (date.getDay() + 6) % 7; // Monday=0
@@ -1057,12 +1141,26 @@ function getWeekKey(d=new Date()){
   const week = 1 + Math.round(diff / 604800000);
   return `${date.getFullYear()}-W${String(week).padStart(2,"0")}`;
 }
+
+function finalizeWeeklyIdentity(newWeekKey){
+  recomputeIdentity();
+  const type = state.identity.type || "Data Mind";
+  const evo = state.identity.evo || [];
+  const prevWeek = state.identity.weekStart || state.seasonKey || getWeekKey();
+  if(evo.length===0 || evo[0].week !== prevWeek){
+    evo.unshift({ week: prevWeek, type });
+    state.identity.evo = evo.slice(0, 8);
+  }
+  state.identity.weekStart = newWeekKey;
+}
+
 function weeklyResetIfNeeded(){
   const wk = getWeekKey();
   if(!state.seasonKey){
     state.seasonKey = wk;
     if(!state.identity.weekStart) state.identity.weekStart = wk;
-    save(); return;
+    save();
+    return;
   }
   if(state.seasonKey !== wk){
     state.season += 1;
@@ -1071,12 +1169,10 @@ function weeklyResetIfNeeded(){
     state.cve = { crowd:0, experts:0 };
     state.duel = { active:false, you:0, friend:0 };
     state.answeredToday = 0;
+    state.edgeToday = 0;
     state.drops.last = "—";
+    state.story = [];
     finalizeWeeklyIdentity(wk);
-    // soften identity progress each new week (keeps long-term but resets drama)
-    state.identity.progress = Math.floor(state.identity.progress * 0.55);
-    state.live.feed = [];
-    pushFeed("⏱️", "New season started. Fresh drama.");
     save();
   }
 }
@@ -1092,7 +1188,7 @@ function msToHMS(ms){
 function nextSundayEnd(){
   const now = new Date();
   const end = new Date(now);
-  const day = now.getDay(); // 0..6 (Sun=0)
+  const day = now.getDay(); // 0..6
   const daysToSunday = (7 - day) % 7;
   end.setDate(now.getDate() + daysToSunday);
   end.setHours(23,59,59,999);
@@ -1103,8 +1199,10 @@ function updateResetBadge(){
   const end = nextSundayEnd();
   const ms = end - new Date();
   const txt = "Reset in " + msToHMS(ms);
-  const sb = $("sbReset"); if(sb) sb.textContent = txt;
-  const lg = $("lgReset"); if(lg) lg.textContent = msToHMS(ms);
+  const sb = $("sbReset");
+  if(sb) sb.textContent = txt;
+  const lg = $("lgReset");
+  if(lg) lg.textContent = msToHMS(ms);
 }
 
 /* ================== Questions + Context ================== */
@@ -1117,20 +1215,21 @@ const QUESTIONS = [
 ];
 
 const CONTEXT_POOL = [
-  ["🚀","Elon posted a Doge meme"],
-  ["🏦","Fed hinted rates stay higher"],
-  ["📉","Liquidations spiked in last hour"],
-  ["📈","ETF inflows accelerated today"],
+  ["🚀","Viral post boosted sentiment"],
+  ["🏦","Rates talk: market on edge"],
+  ["📉","Liquidations spiked recently"],
+  ["📈","Inflows accelerated today"],
   ["🧠","Sentiment index flipped bullish"],
-  ["🧊","Whale moved coins to exchange"],
-  ["🧨","Macro data came in hotter than expected"],
-  ["🗣️","Central bank speech in 2 hours"],
-  ["⚡","Volatility expanded after breakout"],
+  ["🧊","Large holder moved to exchange"],
+  ["🧨","Macro data surprised markets"],
+  ["🗣️","Major speech in 2 hours"],
+  ["⚡","Volatility expanded after move"],
   ["🧾","Large options expiry nearby"]
 ];
 
 let qIndex = 0;
-let currentContext = [];
+let currentContext = pickContextLines();
+let liveTimer = null;
 
 /* ================== Helpers ================== */
 const money = (n)=>{
@@ -1152,11 +1251,11 @@ function accuracyLast(n=30){
   return (ok/slice.length)*100;
 }
 function topPercentApprox(iq){
-  if(iq>=1550) return 1;
-  if(iq>=1400) return 2;
-  if(iq>=1250) return 10;
-  if(iq>=1120) return 25;
-  return 60;
+  if(iq>=1550) return "0.5%";
+  if(iq>=1400) return "2%";
+  if(iq>=1250) return "10%";
+  if(iq>=1120) return "25%";
+  return "60%";
 }
 function closeTimerText(){
   const d = new Date();
@@ -1166,43 +1265,45 @@ function closeTimerText(){
   return msToHMS(ms);
 }
 function crowdPickFromPct(crowdUp){ return (crowdUp >= 50) ? "UP" : "DOWN"; }
-function fmtTop(n){ return `Top ${n}%`; }
+function crowdDirLabel(pct){ return pct>=50 ? "UP" : "DOWN"; }
 
-/* ================== Live feed ================== */
-function timeShort(ts=Date.now()){
-  const d = new Date(ts);
-  const h = String(d.getHours()).padStart(2,"0");
-  const m = String(d.getMinutes()).padStart(2,"0");
-  return `${h}:${m}`;
-}
-function pushFeed(emoji, msg){
-  state.live.feed.unshift({ t: Date.now(), msg: `${emoji} ${msg}` });
-  state.live.feed = state.live.feed.slice(0, 6);
+function inviteURL(){
+  const u = new URL(location.href);
+  u.searchParams.set("ref", state.inviteCode);
+  return u.toString();
 }
 
-/* ================== Identity ================== */
-const ARCHETYPES = [
-  { key:"Crowd Breaker", hint:"Pick against the majority.", rule:"contrarian" },
-  { key:"Wave Rider", hint:"Ride the majority momentum.", rule:"follow" },
-  { key:"Signal Brain", hint:"Balance picks; avoid extremes.", rule:"balanced" }
-];
+/* ================== Toast ================== */
+let toastT = null;
+function toast(icon, title, desc){
+  const el = $("toast");
+  $("toastIcon").textContent = icon;
+  $("toastTitle").textContent = title;
+  $("toastDesc").textContent = desc;
+  el.classList.add("show");
+  if(toastT) clearTimeout(toastT);
+  toastT = setTimeout(()=> el.classList.remove("show"), 3500);
+}
+$("toastX").addEventListener("click", ()=> $("toast").classList.remove("show"));
 
+/* ================== Identity (Thinking Type + Progress) ================== */
 function recomputeIdentity(){
   const last = state.picks.slice(0, 20);
   if(last.length === 0){
     state.identity.type = "Newbie";
-    state.identity.target = "Crowd Breaker";
-    state.identity.progress = clamp(state.identity.progress, 0, 100);
+    state.identity.next = "Data Mind";
+    state.identity.progress = 10;
     return;
   }
-
-  let contra=0, follow=0, mom=0;
+  let contra = 0, follow = 0, mom = 0, rare = 0;
   for(let i=0;i<last.length;i++){
     const p = last[i];
-    const crowd = crowdPickFromPct(p.crowdUpAtPick ?? p.crowdUp ?? 50);
+    const crowd = crowdPickFromPct(p.crowdUp);
     if(p.choice !== crowd) contra++;
     else follow++;
     if(i>0 && last[i-1].choice === p.choice) mom++;
+    if(p.crowdUp >= 50 && p.choice==="DOWN") rare++;
+    if(p.crowdUp < 50 && p.choice==="UP") rare++;
   }
   state.identity.stats.momentum = mom;
   state.identity.stats.contrarian = contra;
@@ -1212,31 +1313,30 @@ function recomputeIdentity(){
   const contraRate = contra / total;
   const followRate = follow / total;
 
-  let type = "Signal Brain";
-  if(contraRate >= 0.62) type = "Crowd Breaker";
-  else if(followRate >= 0.62) type = "Wave Rider";
+  let type = "Data Mind";
+  if(contraRate >= 0.62) type = "Contrarian Mind";
+  else if(followRate >= 0.62) type = "Crowd Follower";
+  else if(mom >= Math.min(6, Math.floor(last.length/2))) type = "Momentum Hunter";
 
   state.identity.type = type;
-  state.identity.target = type;
 
-  // progress grows with behavior + light daily checks (simulated)
-  // keep it understandable: 0..100
-  const base = clamp(Math.floor((last.length/20)*100), 0, 100);
-  const style = (type==="Crowd Breaker") ? Math.floor(contraRate*100) : (type==="Wave Rider") ? Math.floor(followRate*100) : 55;
-  const blended = Math.floor((base*0.55) + (style*0.45));
-  state.identity.progress = clamp(Math.max(state.identity.progress, blended), 0, 100);
-}
+  // Progress toward a “next” archetype (simple, addictive, demo-friendly)
+  // If you keep being rare/contrarian -> "Rebel Mind"
+  // If you keep being consistent -> "Wave Rider"
+  // Else -> "Analyst Core"
+  let next = "Analyst Core";
+  let prog = 40;
 
-function finalizeWeeklyIdentity(newWeekKey){
-  recomputeIdentity();
-  const type = state.identity.type || "Signal Brain";
-  const evo = state.identity.evo || [];
-  const prevWeek = state.identity.weekStart || state.seasonKey || getWeekKey();
-  if(evo.length===0 || evo[0].week !== prevWeek){
-    evo.unshift({ week: prevWeek, type });
-    state.identity.evo = evo.slice(0, 8);
-  }
-  state.identity.weekStart = newWeekKey;
+  const rareRate = rare / Math.max(1,last.length);
+  if(rareRate >= 0.35 || contraRate >= 0.55){ next = "Rebel Mind"; prog = clamp(50 + rareRate*120 + contraRate*60, 40, 99); }
+  else if(mom >= Math.min(5, Math.floor(last.length/3))){ next = "Wave Rider"; prog = clamp(45 + (mom/Math.max(1,last.length))*180, 35, 99); }
+  else { next = "Analyst Core"; prog = clamp(35 + (1-Math.abs(contraRate-0.5))*80, 25, 95); }
+
+  // tiny bias from streak
+  prog = clamp(prog + Math.min(8, state.streak), 10, 99);
+
+  state.identity.next = next;
+  state.identity.progress = Math.round(prog);
 }
 
 /* ================== Minimal sound ================== */
@@ -1290,9 +1390,6 @@ function show(id){
     $("uiStepHint").textContent = "Ready";
   }
 
-  // a "check" increases identity stickiness a tiny bit (intraday loop)
-  onSoftCheck();
-
   render();
 }
 
@@ -1308,7 +1405,7 @@ $("btnBackHome").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03);
 
 $("btnResetAll").addEventListener("click", ()=>{
   localStorage.removeItem(KEY);
-  state = defaultState();
+  state = initDefaults(defaultState());
   save();
   qIndex = 0;
   setQuestion(qIndex);
@@ -1386,7 +1483,7 @@ document.querySelectorAll(".tab").forEach(t=>{
   });
 });
 
-/* ================== Context ================== */
+/* ================== Context lines ================== */
 function pickContextLines(){
   const a = Math.floor(Math.random() * CONTEXT_POOL.length);
   let b = Math.floor(Math.random() * CONTEXT_POOL.length);
@@ -1405,157 +1502,68 @@ function renderContext(){
   });
 }
 
-/* ================== Live engine ==================
-   - Crowd shifts all day (simulated)
-   - Rank shifts all day (simulated)
-   - Pre-result phase messages
-   - Live users counter
-*/
-function qKey(q){
-  return `${q.sym}|${q.horizon}|${todayISO()}`;
-}
-function initLiveForQuestion(q){
-  const id = qKey(q);
-  if(state.live.qId !== id){
-    state.live.qId = id;
-    state.live.crowdWas = q.crowdUp;
-    state.live.crowdNow = q.crowdUp;
-    state.live.rankWas = topPercentApprox(state.iq);
-    state.live.rankNow = topPercentApprox(state.iq);
-    state.live.phase = "—";
-    state.live.feed = [];
-    pushFeed("🟢", "Live day started. Crowd will shift.");
-  }
-}
-
-function driftCrowd(){
-  const q = QUESTIONS[qIndex % QUESTIONS.length];
-  initLiveForQuestion(q);
-
-  // drift with small random walk, anchored around original crowdUp
-  const anchor = q.crowdUp;
-  const now = state.live.crowdNow;
-  const step = (Math.random() < 0.5 ? -1 : 1) * (1 + Math.floor(Math.random()*2)); // 1..2
-  let next = now + step;
-
-  // pull back toward anchor slowly
-  if(Math.random() < 0.35){
-    next += (anchor > next) ? 1 : (anchor < next ? -1 : 0);
-  }
-  next = clamp(next, 35, 75);
-
-  if(next !== now){
-    state.live.crowdNow = next;
-    // feed only on meaningful changes
-    if(Math.abs(next-now) >= 2){
-      pushFeed("👥", `Crowd shifted to <b>${next}%</b> UP`);
-    }
-  }
-}
-
-function driftRank(){
-  // rank "moves" based on live checking + IQ + randomness
-  const base = topPercentApprox(state.iq);
-  let now = state.live.rankNow;
-
-  // small movement
-  const nudge = (Math.random() < 0.5 ? -1 : 1) * (Math.random() < 0.7 ? 1 : 2);
-  now = clamp(now + nudge, 1, 90);
-
-  // keep around base with gentle pull
-  if(Math.random() < 0.50){
-    now += (base > now) ? 1 : (base < now ? -1 : 0);
-  }
-  now = clamp(now, 1, 90);
-
-  const prev = state.live.rankNow;
-  state.live.rankNow = now;
-
-  if(now !== prev && Math.abs(now-prev) >= 2){
-    const dir = (now < prev) ? "UP" : "DOWN"; // lower top% = better
-    pushFeed("🏆", `You moved <span class="${dir==="UP"?"good":"warn"}">${dir}</span> to <b>${fmtTop(now)}</b>`);
-  }
-}
-
-function updatePhase(){
-  // pre-result narrative: if user answered today, tension revolves around their pick vs crowd
-  const last = state.picks[0];
-  if(!last || last.date !== todayISO()){
-    // if not answered: streak danger near midnight
-    const d = new Date();
-    const minsLeft = Math.floor((new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23,59,59,999) - d)/60000);
-    if(minsLeft <= 120){
-      state.live.phase = "⚠ Streak in danger. Check before midnight.";
-    } else {
-      state.live.phase = "Make your pick. Live drama starts.";
-    }
-    return;
-  }
-
-  // answered: build tension relative to crowd movement
-  const crowdNow = state.live.crowdNow;
-  const crowdPickNow = crowdPickFromPct(crowdNow);
-  if(last.choice !== crowdPickNow){
-    state.live.phase = "😈 You are against the crowd right now.";
-  } else {
-    state.live.phase = "🟢 You are with the crowd right now.";
-  }
-
-  // extra spice
-  if(Math.random() < 0.18){
-    state.live.phase = (Math.random() < 0.5)
-      ? "⚡ Crowd is flipping. Still sure?"
-      : "🔥 Your pick is holding. Keep watching.";
-  }
-}
-
-function driftLiveUsers(){
-  // simulate active users
-  let u = state.live.liveUsers || 1200;
-  u += (Math.random()<0.5?-1:1) * (5 + Math.floor(Math.random()*18));
-  u = clamp(u, 420, 9900);
-  state.live.liveUsers = Math.round(u);
-}
-
-function onSoftCheck(){
-  // each time user navigates, tiny identity progression
-  const now = Date.now();
-  if(now - (state.live.lastCheckAt||0) < 25000) return; // no spam
-  state.live.lastCheckAt = now;
-
-  // tiny progress bump encourages checking behavior
-  const bump = (Math.random() < 0.6) ? 1 : 2;
-  state.identity.progress = clamp(state.identity.progress + bump, 0, 100);
-  save();
-}
-
 /* ================== Question ================== */
 function setQuestion(i){
   const q = QUESTIONS[i % QUESTIONS.length];
-  initLiveForQuestion(q);
-
   $("qSym").textContent = q.sym;
   $("qPx").textContent = money(q.px);
   $("qTitle").textContent = q.title;
   $("qHorizon").textContent = `Horizon: ${q.horizon}`;
-
-  // bar shows current crowdNow
-  $("qBar").style.width = state.live.crowdNow + "%";
+  $("qChance").textContent = q.chance;
   $("qMode").textContent = q.mode;
 
-  // live crowd
-  $("qCrowdNow").textContent = state.live.crowdNow + "%";
-  $("qCrowdWas").textContent = state.live.crowdWas + "%";
+  // Live crowd: start at base each time
+  state.live.crowdBase = q.crowdUp;
+  state.live.crowdPct = q.crowdUp;
+  state.live.lastCrowdSnap = q.crowdUp;
 
-  // context
+  updateCrowdUI();
+  $("qBar").style.width = q.crowdUp + "%";
+
   currentContext = pickContextLines();
   renderContext();
 
-  // rare indicator placeholder
-  $("uiRare").innerHTML = `Only <b>—</b> picked your choice`;
-
-  render();
+  startLiveCrowd();
 }
+
+function updateCrowdUI(){
+  const pct = clamp(Math.round(state.live.crowdPct), 3, 97);
+  $("qCrowd").textContent = pct + "%";
+  $("qCrowdDir").textContent = crowdDirLabel(pct);
+  $("qBar").style.width = pct + "%";
+  $("qLive").textContent = "●";
+  $("cveLive").textContent = pct + "% " + crowdDirLabel(pct);
+}
+
+/* ================== LIVE CROWD MOVEMENT (V6) ================== */
+function startLiveCrowd(){
+  if(liveTimer) clearInterval(liveTimer);
+  liveTimer = setInterval(()=>{
+    // drift around base; slightly increases as close time approaches
+    const base = state.live.crowdBase ?? 50;
+    const drift = (Math.random() - 0.5) * 2.2; // -1.1..1.1
+    const pull = (base - state.live.crowdPct) * 0.05;
+    state.live.crowdPct = clamp(state.live.crowdPct + drift + pull, 5, 95);
+
+    // occasional “flip drama”
+    if(Math.random() < 0.05){
+      state.live.crowdPct = clamp(state.live.crowdPct + (Math.random()<0.5?-4:4), 5, 95);
+    }
+
+    updateCrowdUI();
+
+    // subtle “movement” to make check-ins meaningful even without playing
+    if(Math.random() < 0.10){
+      const old = state.live.rankTop;
+      state.live.rankTop = topPercentApprox(state.iq); // still tied to IQ, but can “move” via story too
+      if(old !== state.live.rankTop){
+        state.live.rankDelta = (Math.random()<0.5?"+":"-") + (1+Math.floor(Math.random()*6));
+      }
+    }
+  }, 2400);
+}
+
+/* Next demo question */
 $("btnNextQ").addEventListener("click", ()=>{
   qIndex = (qIndex+1) % QUESTIONS.length;
   setQuestion(qIndex);
@@ -1564,11 +1572,11 @@ $("btnNextQ").addEventListener("click", ()=>{
 
 /* ================== Mystery drops ================== */
 const DROPS = [
-  "🎁 Bonus insight unlocked",
+  "🎁 Early Signal Preview",
   "🎁 +5 Bonus IQ",
-  "🎁 Streak shield",
   "🎁 “Genesis Spark” badge",
-  "🎁 Early recap preview"
+  "🎁 Double streak protection",
+  "🎁 Access: Pro context (demo)"
 ];
 function rollDrop(){
   if(Math.random() > 0.22) return "—";
@@ -1577,19 +1585,10 @@ function rollDrop(){
   state.drops.last = d;
   return d;
 }
-// Intraday micro-reward (for checking), low chance
-function rollMicroDrop(){
-  if(Math.random() > 0.08) return null;
-  const d = ["🎁 Tiny bonus", "🎁 Extra context", "🎁 Rank boost"][Math.floor(Math.random()*3)];
-  state.drops.unlocked += 1;
-  state.drops.last = d;
-  pushFeed("🎁", `Mystery drop: <b>${d.replace("🎁 ","")}</b>`);
-  return d;
-}
 
 /* ================== Outcome simulation ================== */
 function simulateOutcome(q){
-  const crowdProb = (state.live.crowdNow ?? q.crowdUp) / 100;
+  const crowdProb = (state.live.crowdPct ?? q.crowdUp)/100;
   const iqEdge = clamp((state.iq-1000)/3000, -0.08, 0.08);
   const upProb = clamp(crowdProb + iqEdge, 0.35, 0.65);
   return (Math.random() < upProb) ? "UP" : "DOWN";
@@ -1599,15 +1598,93 @@ function scorePick(correct){
   return correct ? (base + Math.floor(Math.random()*6)) : -(base - 3);
 }
 
-/* ================== Rare choice % ================== */
-function rarePctFor(choice, crowdNowUp){
-  // if crowd is 70% UP, then DOWN is rare=30%
-  const up = clamp(crowdNowUp, 5, 95);
-  const rare = (choice==="UP") ? up : (100-up);
-  // make it feel “real”: tiny noise
-  const noise = (Math.random()<0.5?-1:1) * Math.floor(Math.random()*3); // -2..+2
-  return clamp(rare + noise, 5, 95);
+/* ================== DAILY STORY ARC (V6) ================== */
+function pushStory(icon, text){
+  state.story.unshift({ t: Date.now(), icon, text });
+  state.story = state.story.slice(0, 12);
+  save();
 }
+function storyTemplates(lastPick){
+  const from = lastPick.crowdAtPick ?? lastPick.crowdUp;
+  const to = Math.round(state.live.crowdPct);
+  const dir = crowdDirLabel(to);
+  const topA = topPercentApprox(state.iq);
+  return [
+    {icon:"👀", text:`Crowd changed ${from}% → ${to}% (${dir}).`},
+    {icon:"📊", text:`Your rank moved in your league (${Math.random()<0.5?"+":"-"}${1+Math.floor(Math.random()*8)} positions).`},
+    {icon:"🧬", text:`Identity evolving into ${state.identity.next} — progress ${state.identity.progress}%.`},
+    {icon:"🔥", text:`Only ${10+Math.floor(Math.random()*22)}% picked what you picked.`},
+    {icon:"🎁", text:`Mystery signal unlocked: ${Math.random()<0.5?"Pro context":"Early peek"} (demo).`}
+  ];
+}
+let storyTimer = null;
+function startStoryArc(){
+  if(storyTimer) clearInterval(storyTimer);
+  const last = state.picks[0];
+  if(!last) return;
+
+  // pre-result phase: schedule a few updates across ~2–5 minutes
+  const pool = storyTemplates(last);
+  let i = 0;
+  toast("🧩","Pre-result phase", "Check back — crowd + rank + identity will move (demo).");
+  storyTimer = setInterval(()=>{
+    if(i >= pool.length){ clearInterval(storyTimer); storyTimer=null; return; }
+    const it = pool[i++];
+    pushStory(it.icon, it.text);
+    toast(it.icon, "Update", it.text);
+    render(); // update recap feed
+  }, 55000); // ~55s cadence (feels “alive”, not spammy)
+}
+
+/* ================== Check-in (V6) ================== */
+function resetCheckinsIfNeeded(){
+  const t = todayISO();
+  if(state.checkins.date !== t){
+    state.checkins.date = t;
+    state.checkins.used = 0;
+  }
+}
+function doCheckIn(){
+  resetCheckinsIfNeeded();
+  if(state.checkins.used >= 3){
+    toast("⛔","Check-in limit", "You’ve used all check-ins today.");
+    return;
+  }
+  state.checkins.used += 1;
+  // micro reward: small +1..+3 IQ or tiny progress bump
+  const gain = 1 + Math.floor(Math.random()*3);
+  state.iq = Math.max(700, state.iq + gain);
+  recomputeIdentity();
+  pushStory("✅", `Check-in reward: +${gain} IQ. (${state.checkins.used}/3 today)`);
+  save();
+  toast("✅","Check-in", `+${gain} IQ. Come back later — crowd may flip.`);
+  render();
+}
+$("btnCheckIn").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); doCheckIn(); });
+
+/* ================== Invite link (V6) ================== */
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }catch{}
+  alert(t);
+  return false;
+}
+$("btnInvite").addEventListener("click", async ()=>{
+  beep(520,0.03,"triangle",0.03);
+  const link = inviteURL();
+  await copyText(link);
+  toast("🔗","Invite link copied", "Share it — friends land directly in the game.");
+});
+
+/* ================== Telegram (placeholder without backend) ================== */
+$("btnTG").addEventListener("click", ()=>{
+  beep(520,0.03,"triangle",0.03);
+  // Without a backend + bot you cannot push messages.
+  // This opens Telegram with your invite link as a message draft.
+  const link = inviteURL();
+  const tg = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Market IQ — daily battle. Can you beat me?")}`;
+  window.open(tg, "_blank");
+  toast("✈️","Telegram share", "This shares your invite link. Real “push updates” needs a bot/backend.");
+});
 
 /* ================== Play ================== */
 function play(choice){
@@ -1615,17 +1692,14 @@ function play(choice){
 
   const t = todayISO();
   if(state.lastPlayDate === t){
-    showReward("Already played today", "Come back later — live crowd movement continues.", 0, 0, 0, "—");
+    showReward("Already played today", "Come back later — crowd & rank can still move (check Recap).", 0, 0, 0, "—");
     return;
   }
 
   sPick();
 
   const q = QUESTIONS[qIndex % QUESTIONS.length];
-  initLiveForQuestion(q);
-
-  const crowdAtPick = state.live.crowdNow; // capture
-  const rare = rarePctFor(choice, crowdAtPick);
+  const crowdAtPick = Math.round(state.live.crowdPct ?? q.crowdUp);
 
   const outcome = simulateOutcome(q);
   const correct = (choice === outcome);
@@ -1633,7 +1707,6 @@ function play(choice){
   const delta = scorePick(correct);
   state.iq = Math.max(700, state.iq + delta);
 
-  // streak
   const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
   if(state.lastPlayDate === yesterday) state.streak += 1;
   else state.streak = 1;
@@ -1641,95 +1714,61 @@ function play(choice){
   state.lastPlayDate = t;
   state.answeredToday = 1;
 
-  // crowd result (based on crowd at pick, not now)
   const crowdPick = crowdPickFromPct(crowdAtPick);
   const crowdCorrect = (crowdPick === outcome);
 
-  // battle score (season)
+  state.edgeToday = (correct?1:0) - (crowdCorrect?1:0);
+
   if(correct) state.battle.you += 1;
   if(crowdCorrect) state.battle.crowd += 1;
 
-  // crowd vs experts season score
   const expertPick = (crowdAtPick >= 50) ? "DOWN" : "UP";
   if(outcome === crowdPick) state.cve.crowd += 1;
   if(outcome === expertPick) state.cve.experts += 1;
 
-  // duel
   if(state.duel.active){
     state.duel.you += correct ? 1 : 0;
     state.duel.friend += (Math.random() < 0.52) ? 1 : 0;
   }
 
-  // rank movement on pick (instant dopamine)
-  const prevRank = state.live.rankNow;
-  // If correct, improve rank; if wrong, worsen slightly (demo feel)
-  const rankDelta = correct ? -(2 + Math.floor(Math.random()*3)) : (1 + Math.floor(Math.random()*3));
-  state.live.rankNow = clamp(state.live.rankNow + rankDelta, 1, 90);
-
-  // identity progress from pick style
-  const contra = (choice !== crowdPick);
-  const progGain = contra ? (4 + Math.floor(Math.random()*4)) : (2 + Math.floor(Math.random()*3));
-  state.identity.progress = clamp(state.identity.progress + progGain, 0, 100);
-
-  // store pick
   state.picks.unshift({
-    date:t,
-    sym:q.sym,
-    horizon:q.horizon,
-    choice,
-    crowdUpAtPick:crowdAtPick,
-    crowdUpNow:state.live.crowdNow,
-    outcome,
-    correct,
-    crowdCorrect,
-    rarePct: rare
+    date:t, sym:q.sym, horizon:q.horizon,
+    choice, crowdUp: crowdAtPick, crowdAtPick,
+    outcome, correct, crowdCorrect
   });
   state.picks = state.picks.slice(0, 60);
 
-  // update identity type
   recomputeIdentity();
 
-  // push feed highlights
-  pushFeed("🎯", `You picked <b>${choice}</b>. Only <b>${rare}%</b> did the same.`);
-  pushFeed("👥", `Crowd at pick: <b>${crowdAtPick}%</b> UP`);
-  if(state.live.rankNow !== prevRank){
-    const dir = (state.live.rankNow < prevRank) ? "UP" : "DOWN";
-    pushFeed("🏆", `Rank moved <span class="${dir==="UP"?"good":"warn"}">${dir}</span> to <b>${fmtTop(state.live.rankNow)}</b>`);
-  }
-
-  // drop
   const drop = rollDrop();
-  if(drop !== "—") pushFeed("🎁", `Drop: <b>${drop.replace("🎁 ","")}</b>`);
-
   save();
 
   if(correct) sWin();
 
+  // story arc starts after a pick
+  pushStory("🟨", `You picked ${choice} on ${q.sym}. Crowd was ${crowdAtPick}% ${crowdDirLabel(crowdAtPick)}.`);
+  startStoryArc();
+
   showReward(
     correct ? "Win ✅" : "Loss ❌",
-    `You picked ${choice}. Outcome: ${outcome}. Crowd at pick: ${crowdAtPick}% UP.`,
+    `You picked ${choice}. Outcome: ${outcome}. Crowd was ${crowdAtPick}% (${crowdPick}).`,
     delta,
     1,
-    (state.live.rankNow - prevRank),
+    state.edgeToday,
     drop
   );
-
-  // update rare UI
-  $("uiRare").innerHTML = `Only <b>${rare}%</b> picked your choice`;
 }
 
 $("btnUp").addEventListener("click", ()=> play("UP"));
 $("btnDown").addEventListener("click", ()=> play("DOWN"));
 
 /* ================== Reward modal ================== */
-function showReward(title, desc, iqDelta, streakDelta, rankDelta, dropText){
+function showReward(title, desc, iqDelta, streakDelta, edgeDelta, dropText){
   $("rwTitle").textContent = title;
   $("rwDesc").textContent = desc;
   $("rwIQ").textContent = (iqDelta>=0?"+":"") + iqDelta;
   $("rwStreak").textContent = "+" + streakDelta;
-  const rd = rankDelta;
-  const sign = (rd<=0?"+":""); // lower top% is better, so negative means improvement
-  $("rwRank").textContent = `${sign}${rd}`;
+  $("rwEdge").textContent = (edgeDelta>=0?"+":"") + edgeDelta;
   $("rwDrop").textContent = dropText || "—";
   $("overlay").classList.add("show");
 }
@@ -1742,31 +1781,33 @@ $("rwShareText").addEventListener("click", async ()=>{ await shareOrCopyText(sha
 function shareText(){
   const acc = accuracyLast(30);
   const accTxt = acc===null ? "—" : Math.round(acc) + "%";
-  const top = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
+  const top = topPercentApprox(state.iq);
+
   const last = state.picks[0];
-  const lastLine = last ? `Crowd: ${last.crowdUpAtPick}% UP • I chose ${last.choice} • Only ${last.rarePct}% did the same` : "No picks yet";
+  const lastLine = last
+    ? `Crowd: ${last.crowdUp}% ${crowdDirLabel(last.crowdUp)} • I chose ${last.choice} • Outcome: ${last.outcome}`
+    : "No picks yet";
 
   return [
     `Market IQ`,
-    `I’m currently ${top} (demo).`,
+    `I’m Top ${top} (demo).`,
     `IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}`,
+    `Evolving: ${state.identity.next} • Progress: ${state.identity.progress}%`,
     `Streak: ${state.streak} day(s) • Accuracy: ${accTxt}`,
     lastLine,
     ``,
     `Can you beat me?`,
-    location.href
+    inviteURL()
   ].join("\n");
 }
 async function shareOrCopyText(text){
   try{
     if(navigator.share){
-      await navigator.share({ title:"Market IQ", text, url: location.href });
+      await navigator.share({ title:"Market IQ", text, url: inviteURL() });
       return true;
     }
   }catch{}
-  try{ await navigator.clipboard.writeText(text); return true; }catch{}
-  alert(text);
-  return false;
+  return copyText(text);
 }
 $("btnShareText").addEventListener("click", async ()=>{ beep(520,0.03,"triangle",0.03); await shareOrCopyText(shareText()); });
 
@@ -1781,22 +1822,26 @@ function drawRounded(ctx, x, y, w, h, r){
   ctx.arcTo(x,y,x+w,y,rr);
   ctx.closePath();
 }
+
 function buildCardPayload(mode){
   const acc = accuracyLast(30);
-  const d = {
+  return {
     mode,
     iq: state.iq,
     league: leagueFromIQ(state.iq),
     streak: state.streak,
-    top: fmtTop(state.live.rankNow || topPercentApprox(state.iq)),
+    top: topPercentApprox(state.iq),
     acc: acc===null ? "—" : (Math.round(acc) + "%"),
-    type: state.identity.type || "Signal Brain",
+    type: state.identity.type || "Data Mind",
+    next: state.identity.next || "—",
+    prog: state.identity.progress || 0,
     season: state.season,
     battle: { you: state.battle.you, crowd: state.battle.crowd },
-    last: state.picks[0] || null
+    last: state.picks[0] || null,
+    link: inviteURL().replace(/^https?:\/\//,"")
   };
-  return d;
 }
+
 function cardTitle(mode){
   if(mode==="battle") return "YOU vs CROWD";
   if(mode==="streak") return "STREAK FLEX";
@@ -1804,15 +1849,16 @@ function cardTitle(mode){
 }
 function cardHeadline(d){
   if(d.mode==="battle"){
-    const crowdLine = d.last ? `Crowd: ${d.last.crowdUpAtPick}% UP` : "Crowd: —";
-    const youLine = d.last ? `Me: ${d.last.choice} (only ${d.last.rarePct}%)` : "Me: —";
+    const crowdLine = d.last ? `Crowd: ${d.last.crowdUp}% ${crowdDirLabel(d.last.crowdUp)}` : "Crowd: —";
+    const youLine = d.last ? `Me: ${d.last.choice}` : "Me: —";
     return [crowdLine, youLine, "Can you beat me?"];
   }
   if(d.mode==="streak"){
-    return [`${d.streak}-DAY STREAK`, "Still alive.", "Can you beat me?"];
+    return [`${d.streak}-DAY STREAK`, `Evolving: ${d.next}`, `Progress ${d.prog}%`];
   }
-  return [`I’m currently ${d.top}`, `IQ ${d.iq} • ${d.league}`, `Type: ${d.type}`];
+  return [`Top ${d.top}`, `IQ ${d.iq} • ${d.league}`, `Type: ${d.type}`];
 }
+
 async function generateShareCardPNG(mode){
   const d = buildCardPayload(mode);
 
@@ -1858,11 +1904,11 @@ async function generateShareCardPNG(mode){
   ctx.fillText(lines[2], 110, 340);
 
   const blocks = [
-    {k:"Top", v:d.top, c:"#22c55e"},
     {k:"IQ", v:String(d.iq), c:"#22d3ee"},
-    {k:"Type", v:d.type, c:"rgba(229,231,235,0.92)"},
+    {k:"League", v:d.league, c:"#fbbf24"},
+    {k:"Next", v:`${d.next} ${d.prog}%`, c:"#22c55e"},
+    {k:"Top", v:d.top, c:"#22c55e"},
     {k:"Accuracy", v:d.acc, c:"#22c55e"},
-    {k:"Streak", v:String(d.streak), c:"#fbbf24"},
     {k:"Season", v:String(d.season), c:"rgba(229,231,235,0.92)"}
   ];
 
@@ -1884,7 +1930,7 @@ async function generateShareCardPNG(mode){
     ctx.fillStyle = b.c;
     ctx.font = "980 26px ui-sans-serif, system-ui";
     let vv = b.v;
-    if(b.k==="Type" && vv.length>18) vv = vv.slice(0,18) + "…";
+    if(vv.length>18) vv = vv.slice(0,18) + "…";
     ctx.fillText(vv, x+18, y+62);
   }
 
@@ -1898,26 +1944,30 @@ async function generateShareCardPNG(mode){
 
   ctx.fillStyle = "rgba(148,163,184,0.95)";
   ctx.font = "900 16px ui-sans-serif, system-ui";
-  const footer = d.last ? `Last: ${d.last.sym} • Me: ${d.last.choice} (only ${d.last.rarePct}%)` : "Last: —";
-  ctx.fillText(footer.length>90 ? footer.slice(0,90)+"…" : footer, 110, 625);
+  const txt = d.last ? `Last: ${d.last.sym} • Me: ${d.last.choice} • Outcome: ${d.last.outcome}` : "Last: —";
+  const short = txt.length>86 ? txt.slice(0,86)+"…" : txt;
+  ctx.fillText(short, 110, 625);
 
   ctx.fillStyle = "rgba(34,211,238,0.92)";
   ctx.font = "900 16px ui-sans-serif, system-ui";
-  ctx.fillText(location.href.replace(/^https?:\/\//,""), 860, 625);
+  ctx.fillText(d.link, 800, 625);
 
   return new Promise((resolve)=>{
     canvas.toBlob((blob)=> resolve(blob), "image/png", 0.92);
   });
 }
+
 async function shareCardPNG(mode){
   const blob = await generateShareCardPNG(mode);
   const file = new File([blob], `market-iq-${mode}.png`, {type:"image/png"});
+
   try{
     if(navigator.canShare && navigator.canShare({ files:[file] })){
-      await navigator.share({ title:"Market IQ", text:"Can you beat me?", files:[file] });
+      await navigator.share({ title:"Market IQ", text:"Can you beat me? " + inviteURL(), files:[file] });
       return true;
     }
   }catch{}
+
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -1928,6 +1978,7 @@ async function shareCardPNG(mode){
   setTimeout(()=> URL.revokeObjectURL(url), 1500);
   return true;
 }
+
 async function shareCardAndHint(){
   beep(520,0.03,"triangle",0.03);
   const mode = state.shareCardMode || "status";
@@ -1938,6 +1989,7 @@ async function shareCardAndHint(){
     setTimeout(()=> h.style.display="none", 1400);
   }
 }
+
 $("btnSharePNG").addEventListener("click", shareCardAndHint);
 $("btnShareCardTop").addEventListener("click", shareCardAndHint);
 
@@ -1947,14 +1999,16 @@ $("btnHotPost").addEventListener("click", async ()=>{
   const q = QUESTIONS[qIndex % QUESTIONS.length];
   const last = state.picks[0];
   const line = last
-    ? `Crowd: ${last.crowdUpAtPick}% UP • I chose ${last.choice} (only ${last.rarePct}%)`
-    : `Crowd: ${state.live.crowdNow}% UP on ${q.sym}`;
+    ? `Crowd: ${last.crowdUp}% ${crowdDirLabel(last.crowdUp)} • I chose ${last.choice} • Outcome: ${last.outcome}`
+    : `Crowd: ${Math.round(state.live.crowdPct)}% ${crowdDirLabel(Math.round(state.live.crowdPct))} on ${q.sym}`;
   const text =
 `${line}
-Rank: ${fmtTop(state.live.rankNow || topPercentApprox(state.iq))}
+Battle score: You ${state.battle.you} — Crowd ${state.battle.crowd}
 My IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}
-${location.href}`;
-  try{ await navigator.clipboard.writeText(text); }catch{ alert(text); }
+Evolving: ${state.identity.next} (${state.identity.progress}%)
+${inviteURL()}`;
+  await copyText(text);
+  toast("🧾","X post copied", "Paste into X and publish.");
 });
 
 $("btnStartDuel").addEventListener("click", ()=>{
@@ -1962,82 +2016,71 @@ $("btnStartDuel").addEventListener("click", ()=>{
   state.duel.active = true;
   state.duel.you = 0;
   state.duel.friend = 0;
-  pushFeed("⚔️", "Duel started. Beat your friend.");
   save();
+  toast("⚔️","Duel started", "7-day demo duel is active.");
   render();
 });
 
-/* ================== Render helpers ================== */
-function renderFeed(){
-  const box = $("feedItems");
-  if(!box) return;
-  box.innerHTML = "";
-  const items = state.live.feed || [];
+/* ================== Share-card mode sync ================== */
+(function syncTabs(){
+  const mode = state.shareCardMode || "status";
+  document.querySelectorAll(".tab").forEach(t=>{
+    t.classList.toggle("active", t.dataset.card === mode);
+  });
+})();
+
+/* ================== Timer ticks ================== */
+function tick(){
+  const tEl = $("qTimer");
+  if(tEl) tEl.textContent = closeTimerText();
+  updateResetBadge();
+  setTimeout(tick, 1000);
+}
+
+/* ================== Render ================== */
+function renderStory(){
+  const el = $("storyFeed");
+  if(!el) return;
+  el.innerHTML = "";
+  const items = state.story || [];
   if(items.length===0){
-    box.innerHTML = `<div class="feedItem"><div class="feedTime">—</div><div class="feedTxt">No events yet. Crowd will move soon.</div></div>`;
+    el.innerHTML = `<div class="kv"><span class="k">No story updates yet</span><span class="v">Make a pick to start the arc</span></div>`;
     return;
   }
-  items.forEach(it=>{
-    box.insertAdjacentHTML("beforeend", `
-      <div class="feedItem">
-        <div class="feedTime">${timeShort(it.t)}</div>
-        <div class="feedTxt">${it.msg}</div>
+  items.slice(0,8).forEach(s=>{
+    const time = new Date(s.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    el.insertAdjacentHTML("beforeend", `
+      <div class="kv">
+        <span class="k">${s.icon} ${s.text}</span>
+        <span class="v">${time}</span>
       </div>
     `);
   });
 }
 
-function promoText(){
-  // simple promo pressure: closer when your seasonal score increases
-  const you = state.battle.you || 0;
-  const need = clamp(5 - you, 0, 9);
-  return (need===0) ? "Promotion secured ✅" : `${need} pts to promotion`;
-}
-
-/* ================== Render ================== */
 function render(){
   weeklyResetIfNeeded();
+  resetCheckinsIfNeeded();
 
-  // recompute identity occasionally
-  recomputeIdentity();
-
-  // header mini stats
+  // header
   $("uiIQ").textContent = state.iq;
   $("uiLeague").textContent = leagueFromIQ(state.iq);
+  $("uiTop").textContent = "Top " + topPercentApprox(state.iq);
   $("uiType").textContent = state.identity.type || "—";
   $("uiGenesis").textContent = state.genesis ? "ON" : "OFF";
-
-  // top %
-  $("uiTopPct").textContent = `${state.live.rankNow || topPercentApprox(state.iq)}%`;
-
-  // season badges
   $("sbSeason").textContent = `Season ${state.season}`;
+
   updateResetBadge();
   updateSoundBtn();
 
-  // live block
-  $("uiLiveUsers").textContent = state.live.liveUsers.toLocaleString();
-  $("qCrowdNow").textContent = state.live.crowdNow + "%";
-  $("qCrowdWas").textContent = state.live.crowdWas + "%";
-  $("uiRankNow").textContent = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
+  // identity progress
+  $("idNext").textContent = state.identity.next || "—";
+  $("idPct").textContent = (state.identity.progress||0) + "%";
+  $("idBar").style.width = (state.identity.progress||0) + "%";
 
-  // phase text
-  $("uiPhase").textContent = state.live.phase;
-
-  // identity bar
-  $("idName").textContent = `Identity: ${state.identity.type || "—"}`;
-  const hint = (state.identity.type==="Crowd Breaker")
-    ? "You thrive against the majority."
-    : (state.identity.type==="Wave Rider")
-      ? "You ride the crowd momentum."
-      : "You stay balanced and calm.";
-  $("idSub").textContent = hint;
-  $("idPct").textContent = `${state.identity.progress || 0}%`;
-  $("idBarFill").style.width = clamp(state.identity.progress || 0, 0, 100) + "%";
-
-  // today stats
+  // today
   $("uiAnswered").textContent = `${state.answeredToday}/1`;
-  $("uiStreak").textContent = state.streak;
+  $("uiEdge").textContent = (state.edgeToday>=0?"+":"") + state.edgeToday;
 
   // battle scores
   $("uiYouScore").textContent = state.battle.you;
@@ -2046,12 +2089,16 @@ function render(){
   // recap
   const you = state.answeredToday ? (state.picks[0]?.correct ? 1 : 0) : 0;
   const crowd = state.answeredToday ? (state.picks[0]?.crowdCorrect ? 1 : 0) : 0;
+
   $("recYou").textContent = `${you}/1`;
   $("recCrowd").textContent = `${crowd}/1`;
-  $("recTop").textContent = fmtTop(state.live.rankNow || topPercentApprox(state.iq));
+  $("recTop").textContent = topPercentApprox(state.iq);
   $("recStreak").textContent = state.streak;
   $("recIQ").textContent = state.iq;
   $("recType").textContent = state.identity.type || "—";
+  $("recRankMove").textContent = state.live.rankDelta || "—";
+
+  renderStory();
 
   // history
   const hist = $("hist");
@@ -2064,7 +2111,7 @@ function render(){
       const badge = p.correct ? `<span class="chip green">✅</span>` : `<span class="chip red">❌</span>`;
       hist.insertAdjacentHTML("beforeend", `
         <div class="kv">
-          <span class="k">${p.sym} • ${p.date} • You: ${p.choice} (only ${p.rarePct}%) • Crowd: ${p.crowdUpAtPick}% UP • Outcome: ${p.outcome}</span>
+          <span class="k">${p.sym} • ${p.date} • You: ${p.choice} • Outcome: ${p.outcome} • Crowd: ${p.crowdUp}% ${crowdDirLabel(p.crowdUp)}</span>
           <span class="v">${badge}</span>
         </div>
       `);
@@ -2076,13 +2123,12 @@ function render(){
   const creator = (state.iq >= 1200 && state.streak >= 7);
 
   $("lgLeague").textContent = leagueFromIQ(state.iq);
-  $("lgPromo").textContent = promoText();
   $("lgSeason").textContent = `Season ${state.season}`;
   $("lgGenesis").textContent = state.genesis ? "Enabled" : "Disabled";
   $("lgVerified").textContent = verified ? "Unlocked" : "Locked";
   $("lgCreator").textContent = creator ? "Eligible" : "Locked";
 
-  // leaderboard
+  // leaderboard (demo)
   const lb = $("lb");
   lb.innerHTML = "";
   const demoLB = [
@@ -2105,6 +2151,7 @@ function render(){
   $("cveCrowd").textContent = state.cve.crowd;
   $("cveExperts").textContent = state.cve.experts;
   $("cveScore").textContent = `Crowd ${state.cve.crowd} — Experts ${state.cve.experts}`;
+  $("cveLive").textContent = Math.round(state.live.crowdPct) + "% " + crowdDirLabel(Math.round(state.live.crowdPct));
 
   // duel
   $("duelState").textContent = state.duel.active ? "Active" : "Inactive";
@@ -2119,17 +2166,14 @@ function render(){
   $("pfLeague").textContent = leagueFromIQ(state.iq);
   const acc = accuracyLast(30);
   $("pfAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
-  $("pfType").textContent = state.identity.type || "—";
-  $("pfProg").textContent = `${state.identity.progress || 0}%`;
-  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
 
-  // badges
   const badges = [];
   if(state.genesis) badges.push({t:"Genesis", cls:"gold"});
   if(state.streak>=7) badges.push({t:"7-day streak", cls:"gold"});
   if(verified) badges.push({t:"Verified Mind", cls:"cyan"});
   if(creator) badges.push({t:"Creator eligible", cls:"green"});
   if(state.drops.unlocked>=1) badges.push({t:"Mystery drop", cls:"gold"});
+  if((state.story||[]).length>=3) badges.push({t:"Story arc", cls:"cyan"});
 
   const pfBadges = $("pfBadges");
   pfBadges.innerHTML = "";
@@ -2139,75 +2183,38 @@ function render(){
     badges.forEach(b=> pfBadges.insertAdjacentHTML("beforeend", `<span class="chip ${b.cls}">${b.t}</span>`));
   }
 
+  $("pfType").textContent = state.identity.type || "—";
+  const evo = state.identity.evo || [];
+  const evoText = evo.length
+    ? evo.slice(0,4).map(e=>`${e.week}: ${e.type}`).join(" → ")
+    : `This week: ${state.seasonKey || getWeekKey()} (${state.identity.type || "—"})`;
+  $("pfEvo").textContent = evoText.length>70 ? evoText.slice(0,70) + "…" : evoText;
+
+  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
+
+  // identity progress in profile
+  $("pfNext").textContent = state.identity.next || "—";
+  $("pfPct").textContent = (state.identity.progress||0) + "%";
+  $("pfBar").style.width = (state.identity.progress||0) + "%";
+  $("pfEvoHint").textContent = `To evolve faster: pick rare choices vs crowd, keep streak, or stay consistent.`;
+
   // creator
   $("crStatus").textContent = creator ? "Eligible ✅" : "Locked";
   $("crAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
   $("crStreak").textContent = state.streak;
   $("crLeague").textContent = leagueFromIQ(state.iq);
   $("crType").textContent = state.identity.type || "—";
-
-  // feed
-  renderFeed();
-
-  // rare indicator if played today
-  const last = state.picks[0];
-  if(last && last.date===todayISO()){
-    $("uiRare").innerHTML = `Only <b>${last.rarePct}%</b> picked your choice`;
-  }
-}
-
-/* ================== Timer ticks ================== */
-function tick1s(){
-  const tEl = $("qTimer");
-  if(tEl) tEl.textContent = closeTimerText();
-  updateResetBadge();
-  setTimeout(tick1s, 1000);
-}
-
-/* ================== Live tick (intraday loop) ==================
-   Slow + safe to avoid mobile lag
-*/
-function tickLive(){
-  weeklyResetIfNeeded();
-
-  driftLiveUsers();
-
-  // crowd/rank drift even if user doesn't act
-  if(Math.random() < 0.85) driftCrowd();
-  if(Math.random() < 0.65) driftRank();
-
-  // micro reward occasionally
-  rollMicroDrop();
-
-  // sometimes simulate friend move (social pressure)
-  if(Math.random() < 0.12){
-    const names = ["Alex","Mia","Noah","Lena","Max"];
-    const n = names[Math.floor(Math.random()*names.length)];
-    const p = (Math.random() < 0.5) ? "UP" : "DOWN";
-    pushFeed("👤", `${n} picked <b>${p}</b>`);
-  }
-
-  updatePhase();
-  save();
-  render();
-
-  // 20–35s feels “alive” without looking fake
-  const next = 20000 + Math.floor(Math.random()*15000);
-  setTimeout(tickLive, next);
 }
 
 /* ================== Init ================== */
 weeklyResetIfNeeded();
 recomputeIdentity();
 updateSoundBtn();
-
-const startQ = QUESTIONS[qIndex % QUESTIONS.length];
-initLiveForQuestion(startQ);
 setQuestion(qIndex);
+renderContext();
 save();
 render();
-tick1s();
-tickLive();
+tick();
 
 /* first-run behavior */
 if(state.picks.length > 0 || state.lastPlayDate){
@@ -2215,14 +2222,6 @@ if(state.picks.length > 0 || state.lastPlayDate){
 }else{
   show("s-on1");
 }
-
-/* ================== Share-card mode sync ================== */
-(function syncTabs(){
-  const mode = state.shareCardMode || "status";
-  document.querySelectorAll(".tab").forEach(t=>{
-    t.classList.toggle("active", t.dataset.card === mode);
-  });
-})();
 </script>
 </body>
-                    </html>
+                      </html>
