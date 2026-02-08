@@ -1,0 +1,2353 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Market IQ — V7 Mobile</title>
+  <meta name="description" content="A 30-second daily market prediction game that becomes reputation, status, and creator monetization." />
+  <meta name="theme-color" content="#020617" />
+
+  <style>
+    :root{
+      --bg0:#020617; --bg1:#050b1a;
+      --panel: rgba(255,255,255,.06);
+      --panel2: rgba(255,255,255,.085);
+      --stroke: rgba(255,255,255,.10);
+      --text:#e5e7eb; --muted:#94a3b8;
+      --cyan:#22d3ee; --cyan2:#0891b2;
+      --gold:#fbbf24; --green:#22c55e; --red:#fb7185;
+      --shadow: 0 40px 120px rgba(0,0,0,.82);
+
+      --navH: 74px;
+      --safeT: env(safe-area-inset-top);
+      --safeB: env(safe-area-inset-bottom);
+      --safeL: env(safe-area-inset-left);
+      --safeR: env(safe-area-inset-right);
+      --navTotal: calc(var(--navH) + var(--safeB));
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1000px 700px at 18% 15%, rgba(34,211,238,.16), transparent 60%),
+        radial-gradient(900px 650px at 82% 22%, rgba(251,191,36,.12), transparent 55%),
+        radial-gradient(900px 650px at 60% 92%, rgba(244,63,94,.08), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 14px;
+      padding-top: calc(14px + var(--safeT));
+      padding-bottom: calc(14px + var(--safeB));
+      overflow:hidden;
+      touch-action: manipulation;
+    }
+
+    /* MOBILE-ONLY WRAP */
+    .wrap{
+      width: min(420px, calc(100vw - 28px));
+      height: min(920px, calc(100dvh - 28px - var(--safeT) - var(--safeB)));
+      max-height: calc(var(--vh, 1vh) * 100 - 28px);
+      display:flex;
+      align-items:stretch;
+      justify-content:center;
+    }
+
+    /* phone */
+    .phone{
+      width:100%;
+      height:100%;
+      border-radius:34px;
+      border:1px solid rgba(255,255,255,.12);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      box-shadow: var(--shadow), 0 0 70px rgba(34,211,238,.12);
+      overflow:hidden;
+      position:relative;
+      backdrop-filter: blur(14px);
+    }
+
+    .statusbar{
+      height:44px;
+      padding: 14px 16px 0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color: rgba(229,231,235,.80);
+      font-size: 12px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
+    }
+
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 6px 10px;
+      border-radius:999px;
+      background: rgba(0,0,0,.25);
+      border:1px solid rgba(255,255,255,.08);
+      max-width: 62vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .dot{width:8px;height:8px;border-radius:999px;background:var(--cyan);box-shadow:0 0 18px rgba(34,211,238,.65)}
+
+    .app{
+      height: calc(100% - 44px);
+      background: linear-gradient(180deg, rgba(2,6,23,.92), rgba(2,6,23,.98));
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      min-height:0;
+    }
+
+    /* top */
+    .top{
+      padding: 14px 16px 10px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 10px;
+      flex: 0 0 auto;
+    }
+    .brand{display:flex; flex-direction:column; gap:6px; min-width:0}
+    .logo{
+      font-size:11px; letter-spacing:3px; text-transform:uppercase;
+      color: rgba(34,211,238,.95);
+      white-space:nowrap;
+    }
+    .tagline{font-size:12px; color: rgba(148,163,184,.92); line-height:1.25}
+
+    .topRight{display:flex; flex-direction:column; gap:8px; align-items:flex-end; min-width: 164px}
+    .topBtns{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    .topBtn{
+      height:34px;
+      padding: 0 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.25);
+      color: rgba(229,231,235,.92);
+      font-weight: 900;
+      font-size: 12px;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      white-space:nowrap;
+    }
+    .topBtn.primary{
+      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(8,145,178,.95));
+      border-color: rgba(34,211,238,.30);
+      color:#041017;
+    }
+    .topBtn.warn{
+      background: linear-gradient(135deg, rgba(251,191,36,.95), rgba(245,158,11,.95));
+      border-color: rgba(251,191,36,.25);
+      color:#1b1100;
+    }
+
+    /* compact stats (NO OVERLAP) */
+    .miniStats{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      width: 100%;
+    }
+    .miniCard{
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .miniLabel{font-size:10px; color: rgba(148,163,184,.86)}
+    .miniValue{margin-top:3px; font-weight:900; font-size: 14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .c{color:var(--cyan)} .g{color:var(--green)} .y{color:var(--gold)} .r{color:var(--red)}
+
+    /* progress */
+    .progressWrap{
+      padding: 0 16px 10px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      flex: 0 0 auto;
+    }
+    .progress{
+      flex:1;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+    }
+    .progress > div{
+      height:100%; width: 10%;
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.95));
+      transition: width .25s ease;
+    }
+    .stepHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
+
+    /* MAIN area where screens live */
+    .main{
+      position:relative;
+      flex: 1 1 auto;
+      min-height:0;
+      padding-bottom: calc(var(--navTotal) + 16px);
+    }
+
+    /* screens */
+    .screen{
+      position:absolute;
+      inset: 0;
+      overflow:hidden;
+      opacity:0;
+      transform: translateX(8px);
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .screen.active{opacity:1; transform:translateX(0); pointer-events:auto;}
+
+    .scroll{
+      height:100%;
+      overflow:auto;
+      padding: 10px 16px 14px;
+      padding-left: calc(16px + var(--safeL));
+      padding-right: calc(16px + var(--safeR));
+      padding-bottom: calc(var(--navTotal) + 24px); /* ✅ important: prevents nav overlap */
+      scrollbar-width:none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .scroll::-webkit-scrollbar{display:none}
+
+    .card{
+      border-radius: 24px;
+      background: linear-gradient(160deg, rgba(255,255,255,.085), rgba(255,255,255,.03));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 60px rgba(0,0,0,.28);
+      overflow:hidden;
+    }
+    .card + .card{margin-top:12px}
+    .pad{padding:16px}
+    .h1{font-size:18px; font-weight:950; margin:0 0 6px}
+    .h2{font-size:12px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.85); margin:0 0 10px}
+    .p{color: rgba(148,163,184,.92); font-size: 13px; line-height:1.5; margin:0}
+
+    .row{display:flex; gap:10px}
+    .col{flex:1; min-width:0}
+    .kv{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      padding: 10px 0;
+      border-bottom: 1px dashed rgba(255,255,255,.10);
+      font-size: 13px;
+    }
+    .kv:last-child{border-bottom:0}
+    .kv .k{color: rgba(229,231,235,.92)}
+    .kv .v{color: rgba(148,163,184,.95); font-weight: 900; text-align:right}
+
+    .chipRow{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; align-items:center}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(229,231,235,.92);
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      white-space:nowrap;
+      max-width: 100%;
+    }
+    .chip b{font-weight:950}
+    .chip.cyan{border-color: rgba(34,211,238,.24); background: rgba(34,211,238,.08)}
+    .chip.gold{border-color: rgba(251,191,36,.22); background: rgba(251,191,36,.10)}
+    .chip.green{border-color: rgba(34,197,94,.22); background: rgba(34,197,94,.10)}
+    .chip.red{border-color: rgba(244,63,94,.22); background: rgba(244,63,94,.10)}
+
+    /* select as chip */
+    .chipSelect{
+      height: 30px;
+      border-radius: 999px;
+      padding: 0 10px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(229,231,235,.92);
+      font-weight: 900;
+      font-size: 12px;
+      outline:none;
+      max-width: 44vw;
+    }
+
+    /* Play card */
+    .hero{
+      padding: 16px;
+      background:
+        radial-gradient(680px 380px at 15% 12%, rgba(34,211,238,.14), transparent 62%),
+        radial-gradient(680px 380px at 85% 18%, rgba(251,191,36,.11), transparent 60%),
+        rgba(255,255,255,.04);
+    }
+    .sym{font-size:12px;color: rgba(148,163,184,.92)}
+    .price{font-size:34px;font-weight:980; letter-spacing:-.5px; margin-top:4px}
+    .spark{
+      height: 56px; border-radius: 16px;
+      background: linear-gradient(90deg, rgba(34,211,238,.08), rgba(34,197,94,.06), rgba(251,191,36,.08));
+      border: 1px solid rgba(255,255,255,.08);
+      margin-top: 10px;
+      position:relative; overflow:hidden;
+    }
+    .spark:before{
+      content:"";
+      position:absolute; inset:-60px -160px;
+      background: linear-gradient(120deg, transparent, rgba(255,255,255,.10), transparent);
+      transform: translateX(-40%);
+      animation: shimmer 4.2s linear infinite;
+    }
+    @keyframes shimmer{ 0%{transform: translateX(-40%)} 100%{transform: translateX(40%)} }
+
+    .context{
+      margin-top: 12px;
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.26);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .contextTop{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      margin-bottom: 8px;
+    }
+    .ctxTitle{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
+    .ctxHint{font-size:11px; color: rgba(148,163,184,.92); white-space:nowrap}
+    .ctxLine{
+      font-size: 13px;
+      color: rgba(229,231,235,.92);
+      line-height: 1.35;
+      display:flex;
+      gap: 8px;
+      padding: 6px 0;
+      border-bottom: 1px dashed rgba(255,255,255,.10);
+    }
+    .ctxLine:last-child{border-bottom:0}
+    .ctxEmoji{width:18px; text-align:center}
+
+    .question{padding: 14px 16px; border-top: 1px solid rgba(255,255,255,.06)}
+    .qTitle{font-size: 16px; font-weight: 950; line-height:1.25}
+    .qMeta{margin-top:8px; display:flex; justify-content:space-between; gap:10px; color: rgba(148,163,184,.92); font-size: 12px}
+    .bar{
+      height: 10px; border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-top: 8px;
+    }
+    .bar > div{
+      height:100%;
+      width: 50%;
+      background: linear-gradient(90deg, rgba(34,211,238,.95), rgba(34,197,94,.95));
+      transition: width .25s ease;
+    }
+
+    .btnRow{
+      padding: 12px 16px 16px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    button{-webkit-tap-highlight-color: transparent}
+    .btn{
+      height: 66px;
+      border-radius: 18px;
+      border: none;
+      font-size: 16px;
+      font-weight: 980;
+      cursor:pointer;
+      transition: transform .12s ease, filter .12s ease;
+      user-select:none;
+    }
+    .btn:active{transform: scale(.985)}
+    .btn.up{background: linear-gradient(135deg, #22c55e, #16a34a); color:#06100a; box-shadow:0 16px 40px rgba(34,197,94,.18)}
+    .btn.down{background: linear-gradient(135deg, #fb7185, #e11d48); color:white; box-shadow:0 16px 40px rgba(244,63,94,.18)}
+    .btn.ghost{
+      grid-column: 1 / 3;
+      height: 46px;
+      font-size: 13px;
+      font-weight: 950;
+      border-radius: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      color: rgba(229,231,235,.92);
+      box-shadow:none;
+    }
+    .btn.primarySmall{
+      height: 46px;
+      font-size: 13px;
+      font-weight: 980;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(251,191,36,.22));
+      color:#041017;
+      border: 1px solid rgba(34,211,238,.25);
+    }
+
+    /* small action row */
+    .miniActions{
+      margin-top:10px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .miniActions .topBtn{height:36px}
+
+    /* toast */
+    .toast{
+      position:absolute;
+      left: 12px;
+      right: 12px;
+      bottom: calc(var(--navTotal) + 12px);
+      padding: 12px 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 24px 70px rgba(0,0,0,.55);
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+      z-index: 30;
+    }
+    .toast.show{display:flex}
+    .toast .tIcon{width:28px; height:28px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10)}
+    .toast .tText{flex:1}
+    .toast .tTitle{font-weight:950; font-size:13px}
+    .toast .tDesc{margin-top:2px; font-size:12px; color:rgba(148,163,184,.95); line-height:1.35}
+    .toast .tX{
+      width:38px; height:38px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(229,231,235,.92);
+      cursor:pointer;
+      font-weight: 980;
+    }
+
+    /* bottom nav */
+    .nav{
+      position:absolute; left:0; right:0; bottom:0;
+      height: var(--navH);
+      padding-bottom: var(--safeB);
+      display:flex; justify-content:space-around; align-items:center;
+      background: rgba(0,0,0,.35);
+      border-top: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(16px);
+      z-index: 20;
+    }
+    .nav .item{
+      width: 64px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap: 6px;
+      color: rgba(148,163,184,.92);
+      font-size: 10px;
+      cursor:pointer;
+      user-select:none;
+    }
+    .nav .ico{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      font-size: 18px;
+    }
+    .nav .item.active{color: rgba(229,231,235,.95)}
+    .nav .item.active .ico{
+      background: linear-gradient(135deg, rgba(34,211,238,.95), rgba(8,145,178,.95));
+      border-color: rgba(34,211,238,.30);
+      color:#041017;
+      box-shadow: 0 14px 40px rgba(34,211,238,.14);
+    }
+
+    /* modal */
+    .overlay{
+      position:absolute; inset:0;
+      display:none;
+      align-items:flex-end;
+      justify-content:center;
+      padding: 14px;
+      padding-bottom: calc(14px + var(--safeB));
+      background: rgba(2,6,23,.65);
+      backdrop-filter: blur(10px);
+      z-index: 40;
+    }
+    .overlay.show{display:flex}
+    .sheet{
+      width:100%;
+      border-radius: 26px;
+      background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 30px 120px rgba(0,0,0,.70);
+      overflow:hidden;
+      max-height: 72vh;
+    }
+    .sheetTop{
+      padding: 14px 14px 10px;
+      display:flex; justify-content:space-between; gap: 12px;
+    }
+    .sheetTop h3{margin:0; font-size: 16px}
+    .sheetTop p{margin:6px 0 0; font-size: 12px; color: rgba(148,163,184,.92); line-height:1.35}
+    .xbtn{
+      width: 40px; height: 40px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.35);
+      color: rgba(229,231,235,.92);
+      cursor:pointer;
+      font-weight: 980;
+      user-select:none;
+    }
+    .sheetGrid{
+      padding: 0 14px 14px;
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .big{
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.10);
+      overflow:hidden;
+    }
+    .big .lab{font-size: 10px; color: rgba(148,163,184,.86)}
+    .big .val{margin-top:4px; font-size: 18px; font-weight: 980; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .sheetActions{
+      padding: 0 14px 14px;
+      display:flex; gap: 10px;
+    }
+    .sheetActions .btn.ghost{height:44px; grid-column:auto; flex:1}
+    .sheetActions .btn.primarySmall{height:44px; flex:1}
+
+    /* share card chooser */
+    .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-top:10px}
+    .tab{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.24);
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(229,231,235,.92);
+      cursor:pointer;
+      user-select:none;
+    }
+    .tab.active{background: rgba(34,211,238,.14); border-color: rgba(34,211,238,.28); color: rgba(229,231,235,.95)}
+    .hint{margin-top:10px;font-size:12px;color:rgba(148,163,184,.92)}
+
+    /* identity progress */
+    .progCard{
+      margin-top:12px;
+      padding: 12px;
+      border-radius: 18px;
+      background: rgba(0,0,0,.26);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .progTop{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .progTop .lab{font-size:11px; letter-spacing:2px; text-transform:uppercase; color: rgba(148,163,184,.86)}
+    .progTop .pct{font-size:12px; color: rgba(148,163,184,.92)}
+    .progBar{
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      overflow:hidden;
+      margin-top: 8px;
+    }
+    .progBar > div{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(251,191,36,.95), rgba(34,211,238,.95), rgba(34,197,94,.95));
+      transition: width .25s ease;
+    }
+
+    a{color: var(--cyan); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    @media (prefers-reduced-motion: reduce){
+      .screen, .progress > div, .bar > div, .spark:before, .progBar>div { transition:none !important; animation:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="phone" id="phone">
+      <div class="statusbar">
+        <div class="pill"><span class="dot"></span><span id="sbSeason">Season 0</span></div>
+        <div class="pill" id="sbReset">Reset in --:--:--</div>
+      </div>
+
+      <div class="app">
+        <div class="top">
+          <div class="brand">
+            <div class="logo">MARKET IQ</div>
+            <div class="tagline">UP / DOWN → status → identity → creator.</div>
+          </div>
+
+          <div class="topRight">
+            <div class="topBtns">
+              <button class="topBtn primary" id="btnPitch">Pitch mode</button>
+              <button class="topBtn" id="btnSound">Sound: OFF</button>
+              <button class="topBtn warn" id="btnShareCardTop">Share-card</button>
+            </div>
+
+            <div class="miniStats">
+              <div class="miniCard">
+                <div class="miniLabel">Market IQ</div>
+                <div class="miniValue"><span class="c" id="uiIQ">1000</span> • <span class="y" id="uiLeague">Bronze</span> • <span class="g" id="uiTop">Top 60%</span></div>
+              </div>
+              <div class="miniCard">
+                <div class="miniLabel">Identity</div>
+                <div class="miniValue" id="uiType">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progressWrap">
+          <div class="progress"><div id="uiProg"></div></div>
+          <div class="stepHint" id="uiStepHint">Step 1/3</div>
+        </div>
+
+        <div class="main">
+          <!-- TOAST -->
+          <div class="toast" id="toast">
+            <div class="tIcon" id="toastIcon">⚡</div>
+            <div class="tText">
+              <div class="tTitle" id="toastTitle">Update</div>
+              <div class="tDesc" id="toastDesc">…</div>
+            </div>
+            <button class="tX" id="toastX">✕</button>
+          </div>
+
+          <!-- ONBOARD 1 -->
+          <section class="screen active" id="s-on1">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Are you smarter than the crowd?</div>
+                  <p class="p">One question per day. Two buttons. No charts needed.</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">30 seconds/day</span>
+                    <span class="chip gold">Status & leagues</span>
+                    <span class="chip green">Share to flex</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Why people invite friends</div>
+                  <div class="kv"><span class="k">“I beat 80%”</span><span class="v y">Status</span></div>
+                  <div class="kv"><span class="k">Crowd swings</span><span class="v c">Drama</span></div>
+                  <div class="kv"><span class="k">Weekly seasons</span><span class="v y">Fresh start</span></div>
+                  <button class="btn primarySmall" id="btnOn1">Continue</button>
+                </div>
+              </div>
+
+              <div class="hint">Swipe left/right to move. (Pitch mode runs automatically.)</div>
+            </div>
+          </section>
+
+          <!-- ONBOARD 2 -->
+          <section class="screen" id="s-on2">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">You get an identity (not just a score).</div>
+                  <p class="p">Your choices reveal your mind style: Momentum, Contrarian, Data-Mind…</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">Easy gameplay</span>
+                    <span class="chip gold">Deep meaning</span>
+                    <span class="chip">Evolves weekly</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Endgame</div>
+                  <div class="kv"><span class="k">Verified Mind</span><span class="v c">Access</span></div>
+                  <div class="kv"><span class="k">Market Voice</span><span class="v y">Influence</span></div>
+                  <div class="kv"><span class="k">Signal Creator</span><span class="v g">Monetize</span></div>
+                  <button class="btn primarySmall" id="btnOn2">Continue</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ONBOARD 3 -->
+          <section class="screen" id="s-on3">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Daily Market Battle.</div>
+                  <p class="p">You vs Crowd vs Experts. Every day creates a shareable story.</p>
+                  <div class="chipRow">
+                    <span class="chip gold">Crowd vs You</span>
+                    <span class="chip cyan">Share cards</span>
+                    <span class="chip green">Duel friends</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Ready?</div>
+                  <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="uiGenesis">ON</span></div>
+                  <div class="kv"><span class="k">Season reset</span><span class="v">Sunday 23:59</span></div>
+                  <button class="btn primarySmall" id="btnStartPlay">Start playing</button>
+                  <button class="btn ghost" id="btnResetAll">Reset demo</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PLAY -->
+          <section class="screen" id="s-play">
+            <div class="scroll">
+              <div class="card">
+                <div class="hero">
+                  <div class="sym" id="qSym">BTC / USD</div>
+                  <div class="price" id="qPx">$98,500</div>
+                  <div class="spark" aria-hidden="true"></div>
+
+                  <div class="chipRow">
+                    <select id="assetSelect" class="chipSelect" aria-label="Asset">
+                      <option value="BTC">BTC</option>
+                      <option value="ETH">ETH</option>
+                      <option value="SOL">SOL</option>
+                      <option value="DOGE">DOGE</option>
+                      <option value="NASDAQ">NASDAQ</option>
+                      <option value="GOLD">GOLD</option>
+                    </select>
+
+                    <span class="chip cyan" id="qMode">Daily Pulse</span>
+                    <span class="chip">Closes in <b id="qTimer">--:--:--</b></span>
+                    <span class="chip gold">Crowd <b id="qCrowd">63%</b> <span id="qCrowdDir">UP</span></span>
+                    <span class="chip">Live <b id="qLive">●</b></span>
+                    <span class="chip" id="qPrecision">Mode: BASIC</span>
+                  </div>
+
+                  <div class="context">
+                    <div class="contextTop">
+                      <div class="ctxTitle">Context</div>
+                      <div class="ctxHint" id="ctxRefresh">tap “Next”</div>
+                    </div>
+                    <div id="ctxLines"></div>
+                  </div>
+
+                  <div class="progCard">
+                    <div class="progTop">
+                      <div class="lab">Identity evolution</div>
+                      <div class="pct"><span id="idNext">—</span> • <b id="idPct">0%</b></div>
+                    </div>
+                    <div class="progBar"><div id="idBar"></div></div>
+                    <div class="hint" style="margin-top:8px">Evolve by being rare, consistent, or contrarian.</div>
+                  </div>
+
+                  <div class="miniActions">
+                    <button class="topBtn" id="btnCheckIn">Check-in (+1)</button>
+                    <button class="topBtn" id="btnInvite">Copy invite link</button>
+                    <button class="topBtn" id="btnTG">Telegram share</button>
+                  </div>
+                </div>
+
+                <div class="question">
+                  <div class="qTitle" id="qTitle">Will BTC be higher in 24h?</div>
+                  <div class="qMeta">
+                    <span id="qHorizon">Horizon: 24h</span>
+                    <span>Your edge: <b id="qChance">58%</b></span>
+                  </div>
+                  <div class="bar"><div id="qBar"></div></div>
+                </div>
+
+                <!-- V7: BASIC + STRONG precision (adds “B” without killing A) -->
+                <div class="btnRow">
+                  <button class="btn up" id="btnUpWeak">⬆ UP</button>
+                  <button class="btn down" id="btnDownWeak">⬇ DOWN</button>
+                  <button class="btn up" id="btnUpStrong">⬆⬆ STRONG</button>
+                  <button class="btn down" id="btnDownStrong">⬇⬇ STRONG</button>
+                  <button class="btn ghost" id="btnNextQ">Next ▸</button>
+                </div>
+              </div>
+
+              <div class="row" style="gap:12px;">
+                <div class="card col">
+                  <div class="pad">
+                    <div class="h2">Today</div>
+                    <div class="kv"><span class="k">Answered</span><span class="v" id="uiAnswered">0/1</span></div>
+                    <div class="kv"><span class="k">Edge vs crowd</span><span class="v g" id="uiEdge">+0</span></div>
+                    <div class="kv"><span class="k">Skip risk</span><span class="v r" id="uiSkipRisk">—</span></div>
+                  </div>
+                </div>
+                <div class="card col">
+                  <div class="pad">
+                    <div class="h2">Battle</div>
+                    <div class="kv"><span class="k">You</span><span class="v y" id="uiYouScore">0</span></div>
+                    <div class="kv"><span class="k">Crowd</span><span class="v c" id="uiCrowdScore">0</span></div>
+                    <div class="kv"><span class="k">Precision</span><span class="v" id="uiPrecStats">—</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Rule</div>
+                  <p class="p">Basic = safe. Strong = higher reward + higher penalty. Check-ins pull you back during the day.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- RECAP -->
+          <section class="screen" id="s-recap">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Recap (share this)</div>
+                  <p class="p">People share status + story, not analysis.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">You</div>
+                        <div class="miniValue y" style="font-size:18px;" id="recYou">0/1</div>
+                        <div class="p" style="margin-top:6px;">Your result today.</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Crowd</div>
+                        <div class="miniValue c" style="font-size:18px;" id="recCrowd">0/1</div>
+                        <div class="p" style="margin-top:6px;">Majority result.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chipRow" style="margin-top:10px;">
+                    <span class="chip">Top <b id="recTop">—</b></span>
+                    <span class="chip">Streak <b id="recStreak">0</b></span>
+                    <span class="chip cyan">IQ <b id="recIQ">1000</b></span>
+                    <span class="chip gold">Type <b id="recType">—</b></span>
+                    <span class="chip">Live rank <b id="recRankMove">—</b></span>
+                  </div>
+
+                  <div class="tabs">
+                    <div class="tab active" data-card="status">STATUS</div>
+                    <div class="tab" data-card="battle">YOU vs CROWD</div>
+                    <div class="tab" data-card="streak">STREAK</div>
+                  </div>
+
+                  <div class="row" style="margin-top:12px;">
+                    <button class="btn primarySmall col" id="btnShareText">Share text</button>
+                    <button class="btn ghost col" id="btnSharePNG">Share-card PNG</button>
+                  </div>
+                  <div class="hint" id="shareHint" style="display:none;">Saved / shared ✅</div>
+
+                  <div class="card" style="margin-top:12px; background:rgba(0,0,0,.22); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">Daily story arc</div>
+                      <div id="storyFeed"></div>
+                      <div class="hint">These updates simulate “pre-result phase” so people check back.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Recent picks (demo)</div>
+                  <div id="hist"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- LEAGUES -->
+          <section class="screen" id="s-leagues">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Leagues & Seasons</div>
+                  <p class="p">Weekly reset makes it alive. Fresh drama every week.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Your league</div>
+                        <div class="miniValue y" style="font-size:18px;" id="lgLeague">Bronze</div>
+                        <div class="p" style="margin-top:6px;">Promotion: Top 20%</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Reset</div>
+                        <div class="miniValue c" style="font-size:18px;" id="lgReset">--:--:--</div>
+                        <div class="p" style="margin-top:6px;" id="lgSeason">Season 0</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="kv"><span class="k">Genesis badge</span><span class="v y" id="lgGenesis">Enabled</span></div>
+                  <div class="kv"><span class="k">Verified Mind unlock</span><span class="v c" id="lgVerified">Locked</span></div>
+                  <div class="kv"><span class="k">Signal Creator unlock</span><span class="v g" id="lgCreator">Locked</span></div>
+
+                  <div class="hint">Demo reset uses your device time. (No backend.)</div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Global leaderboard (demo)</div>
+                  <div id="lb"></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CROWD -->
+          <section class="screen" id="s-crowd">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Crowd vs Experts (X machine)</div>
+                  <p class="p">Every day you can post one line: “Crowd was wrong/right”.</p>
+                  <div class="chipRow">
+                    <span class="chip cyan">Crowd score <b id="cveCrowd">0</b></span>
+                    <span class="chip gold">Experts score <b id="cveExperts">0</b></span>
+                    <span class="chip">Live crowd <b id="cveLive">—</b></span>
+                  </div>
+                  <div class="kv"><span class="k">Post ready</span><span class="v" id="cveScore">Crowd 0 — Experts 0</span></div>
+                  <button class="btn primarySmall" id="btnHotPost">Copy X post</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2>Friends duel (demo)</div>
+                  <div class="kv"><span class="k">7-day duel</span><span class="v" id="duelState">Inactive</span></div>
+                  <div class="kv"><span class="k">You</span><span class="v y" id="duelYou">0</span></div>
+                  <div class="kv"><span class="k">Friend</span><span class="v c" id="duelFriend">0</span></div>
+                  <button class="btn ghost" id="btnStartDuel">Start demo duel</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Random reward (dopamine)</div>
+                  <div class="kv"><span class="k">Mystery drops</span><span class="v y" id="dropState">—</span></div>
+                  <p class="p">Sometimes you unlock a tiny bonus. This creates “one more day” behavior.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PROFILE -->
+          <section class="screen" id="s-profile">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Your Market Passport</div>
+                  <p class="p">Your identity + reputation. Built for screenshots.</p>
+
+                  <div class="row" style="margin-top:10px;">
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Market IQ</div>
+                        <div class="miniValue c" style="font-size:18px;" id="pfIQ">1000</div>
+                        <div class="p" style="margin-top:6px;" id="pfLeague">Bronze</div>
+                      </div>
+                    </div>
+                    <div class="card col" style="background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                      <div class="pad">
+                        <div class="h2">Accuracy</div>
+                        <div class="miniValue g" style="font-size:18px;" id="pfAcc">—</div>
+                        <div class="p" style="margin-top:6px;">Last picks</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chipRow" id="pfBadges"></div>
+
+                  <div class="progCard">
+                    <div class="progTop">
+                      <div class="lab">Evolution</div>
+                      <div class="pct"><span id="pfNext">—</span> • <b id="pfPct">0%</b></div>
+                    </div>
+                    <div class="progBar"><div id="pfBar"></div></div>
+                    <div class="hint" style="margin-top:8px" id="pfEvoHint">—</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Identity history</div>
+                  <div class="kv"><span class="k">Current</span><span class="v y" id="pfType">—</span></div>
+                  <div class="kv"><span class="k">Path</span><span class="v" id="pfEvo">—</span></div>
+                  <p class="p">Your mind style changes week to week as you play.</p>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="pad">
+                  <div class="h2">Path to Creator</div>
+                  <div class="kv"><span class="k">Eligibility</span><span class="v" id="pfElig">Not yet</span></div>
+                  <div class="kv"><span class="k">Requirement</span><span class="v">IQ ≥ 1200 + Streak ≥ 7</span></div>
+                  <button class="btn primarySmall" id="btnCreator">Preview Creator</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- CREATOR -->
+          <section class="screen" id="s-creator">
+            <div class="scroll">
+              <div class="card">
+                <div class="pad">
+                  <div class="h1">Signal Creator (endgame)</div>
+                  <p class="p">Monetize reputation. Retail subscribes because your history is measurable.</p>
+
+                  <div class="kv"><span class="k">Creator status</span><span class="v" id="crStatus">Locked</span></div>
+                  <div class="kv"><span class="k">Public page</span><span class="v">Signals + track record</span></div>
+                  <div class="kv"><span class="k">Revenue share</span><span class="v g">Enabled</span></div>
+
+                  <div class="card" style="margin-top:12px; background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.10); box-shadow:none;">
+                    <div class="pad">
+                      <div class="h2">What retail sees</div>
+                      <div class="kv"><span class="k">Accuracy</span><span class="v" id="crAcc">—</span></div>
+                      <div class="kv"><span class="k">Streak</span><span class="v" id="crStreak">0</span></div>
+                      <div class="kv"><span class="k">League</span><span class="v" id="crLeague">Bronze</span></div>
+                      <div class="kv"><span class="k">Mind type</span><span class="v y" id="crType">—</span></div>
+                    </div>
+                  </div>
+
+                  <button class="btn ghost" id="btnBackHome">Back to Play</button>
+                </div>
+              </div>
+
+              <div class="hint">Demo only — real product needs verified market data + anti-cheat.</div>
+            </div>
+          </section>
+
+          <!-- NAV -->
+          <div class="nav" id="nav">
+            <div class="item" data-go="s-play"><div class="ico">🎮</div><div>Play</div></div>
+            <div class="item" data-go="s-recap"><div class="ico">📈</div><div>Recap</div></div>
+            <div class="item" data-go="s-leagues"><div class="ico">🏆</div><div>Leagues</div></div>
+            <div class="item" data-go="s-crowd"><div class="ico">⚔️</div><div>Crowd</div></div>
+            <div class="item" data-go="s-profile"><div class="ico">👤</div><div>You</div></div>
+          </div>
+
+          <!-- REWARD MODAL -->
+          <div class="overlay" id="overlay">
+            <div class="sheet">
+              <div class="sheetTop">
+                <div>
+                  <h3 id="rwTitle">Pick submitted ✅</h3>
+                  <p id="rwDesc">Instant reward (demo). Tomorrow you’d see the final result.</p>
+                </div>
+                <button class="xbtn" id="rwClose">✕</button>
+              </div>
+
+              <div class="sheetGrid">
+                <div class="big">
+                  <div class="lab">Market IQ</div>
+                  <div class="val c" id="rwIQ">+12</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Streak</div>
+                  <div class="val y" id="rwStreak">+1</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Edge vs crowd</div>
+                  <div class="val g" id="rwEdge">+1</div>
+                </div>
+                <div class="big">
+                  <div class="lab">Mystery drop</div>
+                  <div class="val y" id="rwDrop">—</div>
+                </div>
+              </div>
+
+              <div class="sheetActions">
+                <button class="btn ghost" id="rwShareText">Share text</button>
+                <button class="btn primarySmall" id="rwGoRecap">Go to Recap</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- /main -->
+      </div><!-- /app -->
+    </div><!-- /phone -->
+  </div><!-- /wrap -->
+
+<script>
+/* ================== Viewport fix (iOS/Android) ================== */
+(function setVH(){
+  const set = ()=> document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  set();
+  window.addEventListener('resize', set, {passive:true});
+})();
+
+/* ================== State ================== */
+const KEY = "market_iq_super_demo_v7";
+const clamp = (x,a,b)=>Math.max(a,Math.min(b,x));
+const todayISO = ()=> new Date().toISOString().slice(0,10);
+const $ = (id)=>document.getElementById(id);
+
+const defaultState = () => ({
+  season: 0,
+  genesis: true,
+  iq: 1000,
+  streak: 0,
+  lastPlayDate: null,
+  answeredToday: 0,
+  edgeToday: 0,
+  picks: [], // {date,asset,sym,horizon,choice,strength,crowdUp,outcome,correct,crowdCorrect,crowdAtPick}
+  battle: { you:0, crowd:0 },
+  cve: { crowd:0, experts:0 },
+  duel: { active:false, you:0, friend:0 },
+  drops: { last:"—", unlocked:0 },
+  sound: false,
+  shareCardMode: "status",
+  identity: {
+    type: "—",
+    evo: [],
+    weekStart: "",
+    stats: { momentum:0, contrarian:0, crowdFollow:0 },
+    progress: 0,
+    next: "—"
+  },
+  seasonKey: "",
+  inviteCode: "",
+  checkins: { date:"", used:0 }, // 0..3
+  story: [],
+  live: {
+    crowdPct: 63,
+    crowdBase: 63,
+    lastCrowdSnap: null,
+    rankTop: "60%",
+    rankDelta: "—"
+  },
+  // V7 economy
+  precision: { strongWins:0, strongLosses:0 },
+  lastPenaltyApplied: "" // YYYY-MM-DD
+});
+
+let state = load();
+
+function load(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return initDefaults(defaultState());
+    return initDefaults({ ...defaultState(), ...JSON.parse(raw) });
+  }catch{
+    return initDefaults(defaultState());
+  }
+}
+function initDefaults(s){
+  if(!s.inviteCode){
+    s.inviteCode = Math.random().toString(36).slice(2,8).toUpperCase();
+  }
+  if(!s.checkins) s.checkins = { date:"", used:0 };
+  if(!s.story) s.story = [];
+  if(!s.live) s.live = { crowdPct:63, crowdBase:63, lastCrowdSnap:null, rankTop:"60%", rankDelta:"—" };
+  if(!s.precision) s.precision = { strongWins:0, strongLosses:0 };
+  if(!s.lastPenaltyApplied) s.lastPenaltyApplied = "";
+  return s;
+}
+function save(){ localStorage.setItem(KEY, JSON.stringify(state)); }
+
+/* ================== Weekly season reset ================== */
+function getWeekKey(d=new Date()){
+  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const day = (date.getDay() + 6) % 7;
+  date.setDate(date.getDate() - day + 3);
+  const firstThursday = new Date(date.getFullYear(),0,4);
+  const diff = date - firstThursday;
+  const week = 1 + Math.round(diff / 604800000);
+  return `${date.getFullYear()}-W${String(week).padStart(2,"0")}`;
+}
+function finalizeWeeklyIdentity(newWeekKey){
+  recomputeIdentity();
+  const type = state.identity.type || "Data Mind";
+  const evo = state.identity.evo || [];
+  const prevWeek = state.identity.weekStart || state.seasonKey || getWeekKey();
+  if(evo.length===0 || evo[0].week !== prevWeek){
+    evo.unshift({ week: prevWeek, type });
+    state.identity.evo = evo.slice(0, 8);
+  }
+  state.identity.weekStart = newWeekKey;
+}
+function weeklyResetIfNeeded(){
+  const wk = getWeekKey();
+  if(!state.seasonKey){
+    state.seasonKey = wk;
+    if(!state.identity.weekStart) state.identity.weekStart = wk;
+    save();
+    return;
+  }
+  if(state.seasonKey !== wk){
+    state.season += 1;
+    state.seasonKey = wk;
+    state.battle = { you:0, crowd:0 };
+    state.cve = { crowd:0, experts:0 };
+    state.duel = { active:false, you:0, friend:0 };
+    state.answeredToday = 0;
+    state.edgeToday = 0;
+    state.drops.last = "—";
+    state.story = [];
+    state.precision = { strongWins:0, strongLosses:0 };
+    finalizeWeeklyIdentity(wk);
+    save();
+  }
+}
+
+/* ================== Reset countdown ================== */
+function msToHMS(ms){
+  const s = Math.max(0, Math.floor(ms/1000));
+  const h = String(Math.floor(s/3600)).padStart(2,"0");
+  const m = String(Math.floor((s%3600)/60)).padStart(2,"0");
+  const ss = String(s%60).padStart(2,"0");
+  return `${h}:${m}:${ss}`;
+}
+function nextSundayEnd(){
+  const now = new Date();
+  const end = new Date(now);
+  const day = now.getDay();
+  const daysToSunday = (7 - day) % 7;
+  end.setDate(now.getDate() + daysToSunday);
+  end.setHours(23,59,59,999);
+  if(end.getTime() < now.getTime()) end.setDate(end.getDate() + 7);
+  return end;
+}
+function updateResetBadge(){
+  const end = nextSundayEnd();
+  const ms = end - new Date();
+  const txt = "Reset in " + msToHMS(ms);
+  const sb = $("sbReset");
+  if(sb) sb.textContent = txt;
+  const lg = $("lgReset");
+  if(lg) lg.textContent = msToHMS(ms);
+}
+
+/* ================== Assets (Token Selector) ================== */
+const ASSETS = {
+  BTC:   { sym:"BTC / USD",    px:98500, horizon:"24h", crowdUp:63, chance:"58%", mode:"Daily Pulse", vol:1.2 },
+  ETH:   { sym:"ETH / USD",    px:3420,  horizon:"24h", crowdUp:56, chance:"54%", mode:"Daily Pulse", vol:1.3 },
+  SOL:   { sym:"SOL / USD",    px:112,   horizon:"24h", crowdUp:52, chance:"53%", mode:"Daily Pulse", vol:1.6 },
+  DOGE:  { sym:"DOGE / USD",   px:0.18,  horizon:"24h", crowdUp:59, chance:"55%", mode:"Daily Pulse", vol:1.8 },
+  NASDAQ:{ sym:"NASDAQ / QQQ", px:476,   horizon:"7d",  crowdUp:48, chance:"52%", mode:"Weekly Pulse", vol:0.8 },
+  GOLD:  { sym:"GOLD / XAU",   px:2340,  horizon:"7d",  crowdUp:60, chance:"55%", mode:"Weekly Pulse", vol:0.6 }
+};
+
+let currentAsset = "BTC";
+let liveTimer = null;
+let storyTimer = null;
+
+/* ================== Context ================== */
+const CONTEXT_POOL = [
+  ["🚀","Viral post boosted sentiment"],
+  ["🏦","Rates talk: market on edge"],
+  ["📉","Liquidations spiked recently"],
+  ["📈","Inflows accelerated today"],
+  ["🧠","Sentiment index flipped bullish"],
+  ["🧊","Large holder moved to exchange"],
+  ["🧨","Macro data surprised markets"],
+  ["🗣️","Major speech in 2 hours"],
+  ["⚡","Volatility expanded after move"],
+  ["🧾","Large options expiry nearby"]
+];
+function pickContextLines(){
+  const a = Math.floor(Math.random() * CONTEXT_POOL.length);
+  let b = Math.floor(Math.random() * CONTEXT_POOL.length);
+  if(b === a) b = (b + 1) % CONTEXT_POOL.length;
+  return [CONTEXT_POOL[a], CONTEXT_POOL[b]];
+}
+let currentContext = pickContextLines();
+function renderContext(){
+  const box = $("ctxLines");
+  if(!box) return;
+  box.innerHTML = "";
+  currentContext.forEach(([emo,text])=>{
+    const div = document.createElement("div");
+    div.className = "ctxLine";
+    div.innerHTML = `<div class="ctxEmoji">${emo}</div><div>${text}</div>`;
+    box.appendChild(div);
+  });
+}
+
+/* ================== Helpers ================== */
+const money = (n)=>{
+  const isInt = Math.abs(n) >= 100 || Number.isInteger(n);
+  const v = isInt ? Math.round(n).toLocaleString() : Number(n).toFixed(2);
+  return "$" + v;
+};
+function leagueFromIQ(iq){
+  if(iq>=1550) return "Legend";
+  if(iq>=1400) return "Diamond";
+  if(iq>=1250) return "Gold";
+  if(iq>=1120) return "Silver";
+  return "Bronze";
+}
+function accuracyLast(n=30){
+  const slice = state.picks.slice(0,n);
+  if(slice.length===0) return null;
+  const ok = slice.filter(p=>p.correct).length;
+  return (ok/slice.length)*100;
+}
+function topPercentApprox(iq){
+  if(iq>=1550) return "0.5%";
+  if(iq>=1400) return "2%";
+  if(iq>=1250) return "10%";
+  if(iq>=1120) return "25%";
+  return "60%";
+}
+function closeTimerText(){
+  const d = new Date();
+  const end = new Date(d);
+  end.setHours(23,59,59,999);
+  const ms = Math.max(0, end-d);
+  return msToHMS(ms);
+}
+function crowdPickFromPct(crowdUp){ return (crowdUp >= 50) ? "UP" : "DOWN"; }
+function crowdDirLabel(pct){ return pct>=50 ? "UP" : "DOWN"; }
+
+function inviteURL(){
+  const u = new URL(location.href);
+  u.searchParams.set("ref", state.inviteCode);
+  u.searchParams.set("a", currentAsset);
+  return u.toString();
+}
+
+/* ================== Toast ================== */
+let toastT = null;
+function toast(icon, title, desc){
+  const el = $("toast");
+  $("toastIcon").textContent = icon;
+  $("toastTitle").textContent = title;
+  $("toastDesc").textContent = desc;
+  el.classList.add("show");
+  if(toastT) clearTimeout(toastT);
+  toastT = setTimeout(()=> el.classList.remove("show"), 3500);
+}
+$("toastX").addEventListener("click", ()=> $("toast").classList.remove("show"));
+
+/* ================== Identity ================== */
+function recomputeIdentity(){
+  const last = state.picks.slice(0, 20);
+  if(last.length === 0){
+    state.identity.type = "Newbie";
+    state.identity.next = "Data Mind";
+    state.identity.progress = 10;
+    return;
+  }
+  let contra = 0, follow = 0, mom = 0, rare = 0;
+  for(let i=0;i<last.length;i++){
+    const p = last[i];
+    const crowd = crowdPickFromPct(p.crowdUp);
+    if(p.choice !== crowd) contra++;
+    else follow++;
+    if(i>0 && last[i-1].choice === p.choice) mom++;
+    if(p.crowdUp >= 50 && p.choice==="DOWN") rare++;
+    if(p.crowdUp < 50 && p.choice==="UP") rare++;
+  }
+  state.identity.stats.momentum = mom;
+  state.identity.stats.contrarian = contra;
+  state.identity.stats.crowdFollow = follow;
+
+  const total = Math.max(1, contra + follow);
+  const contraRate = contra / total;
+  const followRate = follow / total;
+
+  let type = "Data Mind";
+  if(contraRate >= 0.62) type = "Contrarian Mind";
+  else if(followRate >= 0.62) type = "Crowd Follower";
+  else if(mom >= Math.min(6, Math.floor(last.length/2))) type = "Momentum Hunter";
+  state.identity.type = type;
+
+  let next = "Analyst Core";
+  let prog = 40;
+
+  const rareRate = rare / Math.max(1,last.length);
+  if(rareRate >= 0.35 || contraRate >= 0.55){ next = "Rebel Mind"; prog = clamp(50 + rareRate*120 + contraRate*60, 40, 99); }
+  else if(mom >= Math.min(5, Math.floor(last.length/3))){ next = "Wave Rider"; prog = clamp(45 + (mom/Math.max(1,last.length))*180, 35, 99); }
+  else { next = "Analyst Core"; prog = clamp(35 + (1-Math.abs(contraRate-0.5))*80, 25, 95); }
+
+  prog = clamp(prog + Math.min(8, state.streak), 10, 99);
+
+  state.identity.next = next;
+  state.identity.progress = Math.round(prog);
+}
+
+/* ================== Minimal sound ================== */
+let audioCtx = null;
+function ensureAudio(){
+  if(!audioCtx){
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(Ctx) audioCtx = new Ctx();
+  }
+}
+function beep(freq=440, dur=0.05, type="sine", gain=0.05){
+  if(!state.sound) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  if(audioCtx.state === "suspended"){ audioCtx.resume().catch(()=>{}); }
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type;
+  o.frequency.value = freq;
+  g.gain.value = gain;
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start();
+  o.stop(audioCtx.currentTime + dur);
+}
+function sSwipe(){ beep(520, 0.03, "triangle", 0.03); }
+function sPick(){ beep(880, 0.04, "square", 0.03); }
+function sWin(){ beep(740, 0.05, "sine", 0.04); setTimeout(()=>beep(980,0.06,"sine",0.04), 70); }
+
+/* ================== Screens & nav ================== */
+const screens = ["s-on1","s-on2","s-on3","s-play","s-recap","s-leagues","s-crowd","s-profile","s-creator"];
+let current = "s-on1";
+
+function show(id){
+  screens.forEach(s=>{
+    const el = document.getElementById(s);
+    if(el) el.classList.toggle("active", s===id);
+  });
+  current = id;
+
+  document.querySelectorAll(".nav .item").forEach(i=>{
+    i.classList.toggle("active", i.dataset.go===id);
+  });
+
+  const onSteps = ["s-on1","s-on2","s-on3"];
+  if(onSteps.includes(id)){
+    const idx = onSteps.indexOf(id)+1;
+    $("uiProg").style.width = (idx/onSteps.length*100) + "%";
+    $("uiStepHint").textContent = `Step ${idx}/${onSteps.length}`;
+  }else{
+    $("uiProg").style.width = "100%";
+    $("uiStepHint").textContent = "Ready";
+  }
+
+  render();
+}
+
+document.querySelectorAll(".nav .item").forEach(i=>{
+  i.addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show(i.dataset.go); });
+});
+
+$("btnOn1").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show("s-on2"); });
+$("btnOn2").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show("s-on3"); });
+$("btnStartPlay").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show("s-play"); });
+$("btnCreator").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show("s-creator"); });
+$("btnBackHome").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); show("s-play"); });
+
+$("btnResetAll").addEventListener("click", ()=>{
+  localStorage.removeItem(KEY);
+  state = initDefaults(defaultState());
+  save();
+  currentAsset = "BTC";
+  $("assetSelect").value = "BTC";
+  setAssetQuestion();
+  show("s-on1");
+});
+
+/* Swipe */
+let touchX = 0;
+document.addEventListener("touchstart", (e)=>{ touchX = e.touches[0].clientX; }, {passive:true});
+document.addEventListener("touchend", (e)=>{
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) < 60) return;
+
+  const onOrder = ["s-on1","s-on2","s-on3"];
+  const mainOrder = ["s-play","s-recap","s-leagues","s-crowd","s-profile","s-creator"];
+
+  if(onOrder.includes(current)){
+    const idx = onOrder.indexOf(current);
+    if(dx < 0 && idx < onOrder.length-1){ sSwipe(); show(onOrder[idx+1]); }
+    if(dx > 0 && idx > 0){ sSwipe(); show(onOrder[idx-1]); }
+    return;
+  }
+  if(mainOrder.includes(current)){
+    const idx = mainOrder.indexOf(current);
+    if(dx < 0 && idx < mainOrder.length-1){ sSwipe(); show(mainOrder[idx+1]); }
+    if(dx > 0 && idx > 0){ sSwipe(); show(mainOrder[idx-1]); }
+  }
+}, {passive:true});
+
+/* ================== Pitch mode ================== */
+let pitchRunning = false;
+let pitchTimer = null;
+function stopPitch(){
+  pitchRunning = false;
+  $("btnPitch").textContent = "Pitch mode";
+  if(pitchTimer) clearTimeout(pitchTimer);
+  pitchTimer = null;
+}
+function runPitch(){
+  if(pitchRunning){ stopPitch(); return; }
+  pitchRunning = true;
+  $("btnPitch").textContent = "Stop";
+  const seq = ["s-on1","s-on2","s-on3","s-play"];
+  let i = 0;
+  const step = ()=>{
+    if(!pitchRunning) return;
+    show(seq[i]);
+    i++;
+    if(i >= seq.length){ stopPitch(); return; }
+    pitchTimer = setTimeout(step, 1300);
+  };
+  step();
+}
+$("btnPitch").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); runPitch(); });
+
+/* ================== Sound toggle ================== */
+function updateSoundBtn(){
+  $("btnSound").textContent = state.sound ? "Sound: ON" : "Sound: OFF";
+}
+$("btnSound").addEventListener("click", ()=>{
+  state.sound = !state.sound;
+  save();
+  updateSoundBtn();
+  if(state.sound){ ensureAudio(); beep(660,0.05,"sine",0.04); }
+});
+
+/* ================== Share-card tabs ================== */
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+    t.classList.add("active");
+    state.shareCardMode = t.dataset.card;
+    save();
+    beep(520,0.03,"triangle",0.03);
+  });
+});
+
+/* ================== Asset selection ================== */
+$("assetSelect").addEventListener("change", (e)=>{
+  currentAsset = e.target.value;
+  setAssetQuestion();
+  toast("🪙","Asset changed", `Now playing: ${currentAsset}`);
+});
+
+/* ================== Live crowd movement ================== */
+function updateCrowdUI(){
+  const pct = clamp(Math.round(state.live.crowdPct), 3, 97);
+  $("qCrowd").textContent = pct + "%";
+  $("qCrowdDir").textContent = crowdDirLabel(pct);
+  $("qBar").style.width = pct + "%";
+  $("qLive").textContent = "●";
+  $("cveLive").textContent = pct + "% " + crowdDirLabel(pct);
+}
+function startLiveCrowd(){
+  if(liveTimer) clearInterval(liveTimer);
+  liveTimer = setInterval(()=>{
+    const asset = ASSETS[currentAsset] || ASSETS.BTC;
+    const base = state.live.crowdBase ?? asset.crowdUp ?? 50;
+    const vol = asset.vol ?? 1.0;
+
+    const drift = (Math.random() - 0.5) * (2.2 * vol);
+    const pull = (base - state.live.crowdPct) * 0.05;
+    state.live.crowdPct = clamp(state.live.crowdPct + drift + pull, 5, 95);
+
+    if(Math.random() < 0.05){
+      state.live.crowdPct = clamp(state.live.crowdPct + (Math.random()<0.5 ? -4 : 4) * vol, 5, 95);
+    }
+
+    updateCrowdUI();
+
+    if(Math.random() < 0.10){
+      const old = state.live.rankTop;
+      state.live.rankTop = topPercentApprox(state.iq);
+      if(old !== state.live.rankTop){
+        state.live.rankDelta = (Math.random()<0.5?"+":"-") + (1+Math.floor(Math.random()*6));
+      }
+    }
+  }, 2400);
+}
+
+/* ================== Question (per asset) ================== */
+function setAssetQuestion(){
+  const q = ASSETS[currentAsset] || ASSETS.BTC;
+  $("qSym").textContent = q.sym;
+  $("qPx").textContent = money(q.px);
+  $("qTitle").textContent = `Will ${currentAsset} be higher in ${q.horizon}?`;
+  $("qHorizon").textContent = `Horizon: ${q.horizon}`;
+  $("qChance").textContent = q.chance;
+  $("qMode").textContent = q.mode;
+
+  state.live.crowdBase = q.crowdUp;
+  state.live.crowdPct = q.crowdUp;
+  state.live.lastCrowdSnap = q.crowdUp;
+
+  updateCrowdUI();
+  $("qBar").style.width = q.crowdUp + "%";
+
+  currentContext = pickContextLines();
+  renderContext();
+
+  startLiveCrowd();
+  render();
+}
+
+/* Next: reshuffle context only (keeps token stable) */
+$("btnNextQ").addEventListener("click", ()=>{
+  currentContext = pickContextLines();
+  renderContext();
+  beep(520,0.03,"triangle",0.03);
+  toast("🧠","New context", "Same asset — new story.");
+});
+
+/* ================== Mystery drops ================== */
+const DROPS = [
+  "🎁 Early Signal Preview",
+  "🎁 +5 Bonus IQ",
+  "🎁 “Genesis Spark” badge",
+  "🎁 Double streak protection",
+  "🎁 Access: Pro context (demo)"
+];
+function rollDrop(){
+  if(Math.random() > 0.22) return "—";
+  const d = DROPS[Math.floor(Math.random()*DROPS.length)];
+  state.drops.unlocked += 1;
+  state.drops.last = d;
+  return d;
+}
+
+/* ================== V7: Scoring Engine (Basic vs Strong) ================== */
+function scorePrecision({strength, correct, crowdPct, choice}){
+  let base;
+  if(correct){
+    base = (strength==="STRONG") ? (22 + Math.floor(Math.random()*5)) : (12 + Math.floor(Math.random()*4));
+  }else{
+    base = (strength==="STRONG") ? -14 : -8;
+  }
+
+  // Rare bonus: going against extreme crowd
+  const rare = (crowdPct >= 70 && choice==="DOWN") || (crowdPct <= 30 && choice==="UP");
+  if(rare) base += 3 + Math.floor(Math.random()*6);
+
+  // streak multiplier
+  let mult = 1;
+  if(state.streak >= 14) mult = 1.40;
+  else if(state.streak >= 7) mult = 1.25;
+  else if(state.streak >= 3) mult = 1.10;
+
+  return Math.round(base * mult);
+}
+
+/* ================== Outcome simulation ================== */
+function simulateOutcome(){
+  const q = ASSETS[currentAsset] || ASSETS.BTC;
+  const crowdProb = (state.live.crowdPct ?? q.crowdUp)/100;
+  const iqEdge = clamp((state.iq-1000)/3000, -0.08, 0.08);
+  const upProb = clamp(crowdProb + iqEdge, 0.35, 0.65);
+  return (Math.random() < upProb) ? "UP" : "DOWN";
+}
+
+/* ================== Story arc ================== */
+function pushStory(icon, text){
+  state.story.unshift({ t: Date.now(), icon, text });
+  state.story = state.story.slice(0, 12);
+  save();
+}
+function storyTemplates(lastPick){
+  const from = lastPick.crowdAtPick ?? lastPick.crowdUp;
+  const to = Math.round(state.live.crowdPct);
+  const dir = crowdDirLabel(to);
+  return [
+    {icon:"👀", text:`Crowd changed ${from}% → ${to}% (${dir}).`},
+    {icon:"📊", text:`Rank moved (${Math.random()<0.5?"+":"-"}${1+Math.floor(Math.random()*8)} positions).`},
+    {icon:"🧬", text:`Evolving into ${state.identity.next} — ${state.identity.progress}%.`},
+    {icon:"🔥", text:`Only ${10+Math.floor(Math.random()*22)}% picked what you picked.`},
+    {icon:"🎁", text:`Mystery signal: ${Math.random()<0.5?"Pro context":"Early peek"} (demo).`}
+  ];
+}
+function startStoryArc(){
+  if(storyTimer) clearInterval(storyTimer);
+  const last = state.picks[0];
+  if(!last) return;
+
+  const pool = storyTemplates(last);
+  let i = 0;
+  toast("🧩","Pre-result phase", "Come back later — crowd + rank + identity will move.");
+
+  storyTimer = setInterval(()=>{
+    if(i >= pool.length){ clearInterval(storyTimer); storyTimer=null; return; }
+    const it = pool[i++];
+    pushStory(it.icon, it.text);
+    toast(it.icon, "Update", it.text);
+    render();
+  }, 55000);
+}
+
+/* ================== Check-in ================== */
+function resetCheckinsIfNeeded(){
+  const t = todayISO();
+  if(state.checkins.date !== t){
+    state.checkins.date = t;
+    state.checkins.used = 0;
+  }
+}
+function doCheckIn(){
+  resetCheckinsIfNeeded();
+  if(state.checkins.used >= 3){
+    toast("⛔","Check-in limit", "You’ve used all check-ins today.");
+    return;
+  }
+  state.checkins.used += 1;
+
+  const gain = 1 + Math.floor(Math.random()*3);
+  state.iq = Math.max(700, state.iq + gain);
+
+  // tiny evolution bump
+  state.identity.progress = clamp((state.identity.progress||0) + 1, 0, 99);
+
+  recomputeIdentity();
+  pushStory("✅", `Check-in: +${gain} IQ. (${state.checkins.used}/3 today)`);
+  save();
+  toast("✅","Check-in", `+${gain} IQ. Crowd may flip later.`);
+  render();
+}
+$("btnCheckIn").addEventListener("click", ()=>{ beep(520,0.03,"triangle",0.03); doCheckIn(); });
+
+/* ================== Invite link ================== */
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }catch{}
+  alert(t);
+  return false;
+}
+$("btnInvite").addEventListener("click", async ()=>{
+  beep(520,0.03,"triangle",0.03);
+  const link = inviteURL();
+  await copyText(link);
+  toast("🔗","Invite link copied", "Friends land directly in the game.");
+});
+
+/* ================== Telegram share (no backend) ================== */
+$("btnTG").addEventListener("click", ()=>{
+  beep(520,0.03,"triangle",0.03);
+  const link = inviteURL();
+  const tg = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Market IQ — daily battle. Can you beat me?")}`;
+  window.open(tg, "_blank");
+  toast("✈️","Telegram share", "This shares your invite link.");
+});
+
+/* ================== V7: Skip penalty (applies once per day) ================== */
+function daysBetweenISO(aISO, bISO){
+  const a = new Date(aISO + "T00:00:00");
+  const b = new Date(bISO + "T00:00:00");
+  return Math.round((b - a)/86400000);
+}
+function applySkipPenaltyIfNeeded(){
+  const today = todayISO();
+  if(state.lastPenaltyApplied === today) return; // only once/day
+
+  if(!state.lastPlayDate){
+    state.lastPenaltyApplied = today;
+    save();
+    return;
+  }
+
+  const diff = daysBetweenISO(state.lastPlayDate, today);
+  // if missed at least 1 full day (diff >= 2 means: last play was 2+ days ago)
+  if(diff >= 2){
+    const penalty = 5 + Math.min(10, diff*2);
+    state.iq = Math.max(700, state.iq - penalty);
+    state.streak = 0;
+    state.identity.progress = Math.max(0, (state.identity.progress||0) - 8);
+    pushStory("⚠️", `Missed day(s): -${penalty} IQ. Streak reset.`);
+    toast("⚠️","Missed day", `-${penalty} IQ. Come back daily to protect streak.`);
+  }
+  state.lastPenaltyApplied = today;
+  save();
+}
+
+/* ================== PLAY (V7 precision) ================== */
+function playPrecision(choice, strength){
+  weeklyResetIfNeeded();
+  applySkipPenaltyIfNeeded();
+
+  const t = todayISO();
+  if(state.lastPlayDate === t){
+    showReward("Already played today", "Come back later — crowd & rank still move (check Recap).", 0, 0, 0, "—");
+    return;
+  }
+
+  sPick();
+
+  const q = ASSETS[currentAsset] || ASSETS.BTC;
+  const crowdAtPick = Math.round(state.live.crowdPct ?? q.crowdUp);
+
+  const outcome = simulateOutcome();
+  const correct = (choice === outcome);
+
+  const delta = scorePrecision({strength, correct, crowdPct: crowdAtPick, choice});
+  state.iq = Math.max(700, state.iq + delta);
+
+  // streak logic: if played yesterday -> continue else reset to 1 on correct or 0 on loss
+  const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const continued = (state.lastPlayDate === yesterday);
+
+  if(correct){
+    state.streak = continued ? (state.streak + 1) : 1;
+  }else{
+    state.streak = 0;
+  }
+
+  state.lastPlayDate = t;
+  state.answeredToday = 1;
+
+  // crowd correctness
+  const crowdPick = crowdPickFromPct(crowdAtPick);
+  const crowdCorrect = (crowdPick === outcome);
+  state.edgeToday = (correct?1:0) - (crowdCorrect?1:0);
+
+  // season battle
+  if(correct) state.battle.you += 1;
+  if(crowdCorrect) state.battle.crowd += 1;
+
+  // experts opposite of crowd
+  const expertPick = (crowdAtPick >= 50) ? "DOWN" : "UP";
+  if(outcome === crowdPick) state.cve.crowd += 1;
+  if(outcome === expertPick) state.cve.experts += 1;
+
+  // duel
+  if(state.duel.active){
+    state.duel.you += correct ? 1 : 0;
+    state.duel.friend += (Math.random() < 0.52) ? 1 : 0;
+  }
+
+  // precision stats
+  if(strength==="STRONG"){
+    if(correct) state.precision.strongWins += 1;
+    else state.precision.strongLosses += 1;
+  }
+
+  state.picks.unshift({
+    date:t,
+    asset: currentAsset,
+    sym: q.sym,
+    horizon: q.horizon,
+    choice,
+    strength,
+    crowdUp: crowdAtPick,
+    crowdAtPick,
+    outcome,
+    correct,
+    crowdCorrect
+  });
+  state.picks = state.picks.slice(0, 60);
+
+  recomputeIdentity();
+
+  // tiny identity nudge for STRONG (because “more confident”)
+  if(strength==="STRONG") state.identity.progress = clamp((state.identity.progress||0) + 2, 0, 99);
+
+  const drop = rollDrop();
+  save();
+
+  if(correct) sWin();
+
+  // story
+  pushStory("🟨", `Picked ${choice} (${strength}) on ${currentAsset}. Crowd ${crowdAtPick}% ${crowdDirLabel(crowdAtPick)}.`);
+  startStoryArc();
+
+  showReward(
+    correct ? "Win ✅" : "Loss ❌",
+    `Asset: ${currentAsset} • Pick: ${choice} (${strength}) • Outcome: ${outcome} • Crowd: ${crowdAtPick}%`,
+    delta,
+    correct ? 1 : 0,
+    state.edgeToday,
+    drop
+  );
+
+  render();
+}
+
+/* Button wiring */
+$("btnUpWeak").addEventListener("click", ()=> playPrecision("UP","BASIC"));
+$("btnDownWeak").addEventListener("click", ()=> playPrecision("DOWN","BASIC"));
+$("btnUpStrong").addEventListener("click", ()=> playPrecision("UP","STRONG"));
+$("btnDownStrong").addEventListener("click", ()=> playPrecision("DOWN","STRONG"));
+
+/* ================== Reward modal ================== */
+function showReward(title, desc, iqDelta, streakDelta, edgeDelta, dropText){
+  $("rwTitle").textContent = title;
+  $("rwDesc").textContent = desc;
+  $("rwIQ").textContent = (iqDelta>=0?"+":"") + iqDelta;
+  $("rwStreak").textContent = (streakDelta>=0?"+":"") + streakDelta;
+  $("rwEdge").textContent = (edgeDelta>=0?"+":"") + edgeDelta;
+  $("rwDrop").textContent = dropText || "—";
+  $("overlay").classList.add("show");
+}
+function hideReward(){ $("overlay").classList.remove("show"); }
+$("rwClose").addEventListener("click", hideReward);
+$("rwGoRecap").addEventListener("click", ()=>{ hideReward(); show("s-recap"); });
+$("rwShareText").addEventListener("click", async ()=>{ await shareOrCopyText(shareText()); });
+
+/* ================== Share text ================== */
+function shareText(){
+  const acc = accuracyLast(30);
+  const accTxt = acc===null ? "—" : Math.round(acc) + "%";
+  const top = topPercentApprox(state.iq);
+  const last = state.picks[0];
+
+  const lastLine = last
+    ? `${last.asset}: Crowd ${last.crowdUp}% ${crowdDirLabel(last.crowdUp)} • I chose ${last.choice} (${last.strength}) • Outcome ${last.outcome}`
+    : "No picks yet";
+
+  return [
+    `Market IQ`,
+    `I’m Top ${top} (demo).`,
+    `IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}`,
+    `Evolving: ${state.identity.next} • Progress: ${state.identity.progress}%`,
+    `Streak: ${state.streak} • Accuracy: ${accTxt}`,
+    lastLine,
+    ``,
+    `Can you beat me?`,
+    inviteURL()
+  ].join("\n");
+}
+async function shareOrCopyText(text){
+  try{
+    if(navigator.share){
+      await navigator.share({ title:"Market IQ", text, url: inviteURL() });
+      return true;
+    }
+  }catch{}
+  return copyText(text);
+}
+$("btnShareText").addEventListener("click", async ()=>{ beep(520,0.03,"triangle",0.03); await shareOrCopyText(shareText()); });
+
+/* ================== Share-card PNG ================== */
+function drawRounded(ctx, x, y, w, h, r){
+  const rr = Math.min(r, w/2, h/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rr,y);
+  ctx.arcTo(x+w,y,x+w,y+h,rr);
+  ctx.arcTo(x+w,y+h,x,y+h,rr);
+  ctx.arcTo(x,y+h,x,y,rr);
+  ctx.arcTo(x,y,x+w,y,rr);
+  ctx.closePath();
+}
+function buildCardPayload(mode){
+  const acc = accuracyLast(30);
+  return {
+    mode,
+    iq: state.iq,
+    league: leagueFromIQ(state.iq),
+    streak: state.streak,
+    top: topPercentApprox(state.iq),
+    acc: acc===null ? "—" : (Math.round(acc) + "%"),
+    type: state.identity.type || "Data Mind",
+    next: state.identity.next || "—",
+    prog: state.identity.progress || 0,
+    season: state.season,
+    battle: { you: state.battle.you, crowd: state.battle.crowd },
+    last: state.picks[0] || null,
+    link: inviteURL().replace(/^https?:\/\//,"")
+  };
+}
+function cardTitle(mode){
+  if(mode==="battle") return "YOU vs CROWD";
+  if(mode==="streak") return "STREAK FLEX";
+  return "STATUS FLEX";
+}
+function cardHeadline(d){
+  if(d.mode==="battle"){
+    const crowdLine = d.last ? `Crowd: ${d.last.crowdUp}% ${crowdDirLabel(d.last.crowdUp)}` : "Crowd: —";
+    const youLine = d.last ? `Me: ${d.last.choice} (${d.last.strength})` : "Me: —";
+    return [crowdLine, youLine, "Can you beat me?"];
+  }
+  if(d.mode==="streak"){
+    return [`${d.streak}-DAY STREAK`, `Evolving: ${d.next}`, `Progress ${d.prog}%`];
+  }
+  return [`Top ${d.top}`, `IQ ${d.iq} • ${d.league}`, `Type: ${d.type}`];
+}
+async function generateShareCardPNG(mode){
+  const d = buildCardPayload(mode);
+  const W = 1200, H = 675;
+  const canvas = document.createElement("canvas");
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  const g = ctx.createLinearGradient(0,0,W,H);
+  g.addColorStop(0, "#020617");
+  g.addColorStop(1, "#07102a");
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.globalAlpha = 0.22;
+  ctx.fillStyle = "#22d3ee";
+  ctx.beginPath(); ctx.ellipse(250,180,220,160,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#fbbf24";
+  ctx.beginPath(); ctx.ellipse(980,140,240,170,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#22c55e";
+  ctx.beginPath(); ctx.ellipse(860,560,260,180,0,0,Math.PI*2); ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = "rgba(255,255,255,0.06)";
+  ctx.strokeStyle = "rgba(255,255,255,0.14)";
+  ctx.lineWidth = 2;
+  drawRounded(ctx, 60, 70, W-120, H-140, 34);
+  ctx.fill(); ctx.stroke();
+
+  ctx.fillStyle = "rgba(34,211,238,0.95)";
+  ctx.font = "900 18px ui-sans-serif, system-ui";
+  ctx.fillText("MARKET IQ", 110, 135);
+
+  ctx.fillStyle = "rgba(229,231,235,0.92)";
+  ctx.font = "950 18px ui-sans-serif, system-ui";
+  ctx.fillText(cardTitle(d.mode), 980, 135);
+
+  const lines = cardHeadline(d);
+  ctx.fillStyle = "rgba(229,231,235,0.95)";
+  ctx.font = "950 48px ui-sans-serif, system-ui";
+  ctx.fillText(lines[0], 110, 220);
+  ctx.fillText(lines[1], 110, 280);
+  ctx.fillText(lines[2], 110, 340);
+
+  const blocks = [
+    {k:"IQ", v:String(d.iq), c:"#22d3ee"},
+    {k:"League", v:d.league, c:"#fbbf24"},
+    {k:"Next", v:`${d.next} ${d.prog}%`, c:"#22c55e"},
+    {k:"Top", v:d.top, c:"#22c55e"},
+    {k:"Accuracy", v:d.acc, c:"#22c55e"},
+    {k:"Season", v:String(d.season), c:"rgba(229,231,235,0.92)"}
+  ];
+
+  const bx = 110, by = 380, bw = 980, bh = 80, gap = 12;
+  const colW = (bw - gap*2)/3;
+
+  function statBox(i, x, y){
+    const b = blocks[i];
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.strokeStyle = "rgba(255,255,255,0.12)";
+    ctx.lineWidth = 2;
+    drawRounded(ctx, x, y, colW, bh, 22);
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = "rgba(148,163,184,0.92)";
+    ctx.font = "900 14px ui-sans-serif, system-ui";
+    ctx.fillText(b.k, x+18, y+28);
+
+    ctx.fillStyle = b.c;
+    ctx.font = "980 26px ui-sans-serif, system-ui";
+    let vv = b.v;
+    if(vv.length>18) vv = vv.slice(0,18) + "…";
+    ctx.fillText(vv, x+18, y+62);
+  }
+
+  statBox(0, bx, by);
+  statBox(1, bx+colW+gap, by);
+  statBox(2, bx+(colW+gap)*2, by);
+
+  statBox(3, bx, by+bh+gap);
+  statBox(4, bx+colW+gap, by+bh+gap);
+  statBox(5, bx+(colW+gap)*2, by+bh+gap);
+
+  ctx.fillStyle = "rgba(148,163,184,0.95)";
+  ctx.font = "900 16px ui-sans-serif, system-ui";
+  const txt = d.last ? `Last: ${d.last.asset} • Me: ${d.last.choice} (${d.last.strength}) • Outcome: ${d.last.outcome}` : "Last: —";
+  const short = txt.length>86 ? txt.slice(0,86)+"…" : txt;
+  ctx.fillText(short, 110, 625);
+
+  ctx.fillStyle = "rgba(34,211,238,0.92)";
+  ctx.font = "900 16px ui-sans-serif, system-ui";
+  ctx.fillText(d.link, 800, 625);
+
+  return new Promise((resolve)=>{
+    canvas.toBlob((blob)=> resolve(blob), "image/png", 0.92);
+  });
+}
+async function shareCardPNG(mode){
+  const blob = await generateShareCardPNG(mode);
+  const file = new File([blob], `market-iq-${mode}.png`, {type:"image/png"});
+
+  try{
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ title:"Market IQ", text:"Can you beat me? " + inviteURL(), files:[file] });
+      return true;
+    }
+  }catch{}
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `market-iq-${mode}.png`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=> URL.revokeObjectURL(url), 1500);
+  return true;
+}
+async function shareCardAndHint(){
+  beep(520,0.03,"triangle",0.03);
+  const mode = state.shareCardMode || "status";
+  await shareCardPNG(mode);
+  const h = $("shareHint");
+  if(h){
+    h.style.display = "block";
+    setTimeout(()=> h.style.display="none", 1400);
+  }
+}
+$("btnSharePNG").addEventListener("click", shareCardAndHint);
+$("btnShareCardTop").addEventListener("click", shareCardAndHint);
+
+/* ================== Crowd post + duel ================== */
+$("btnHotPost").addEventListener("click", async ()=>{
+  beep(520,0.03,"triangle",0.03);
+  const last = state.picks[0];
+  const line = last
+    ? `Crowd: ${last.crowdUp}% ${crowdDirLabel(last.crowdUp)} • I chose ${last.choice} (${last.strength}) • Outcome: ${last.outcome}`
+    : `Crowd: ${Math.round(state.live.crowdPct)}% ${crowdDirLabel(Math.round(state.live.crowdPct))} on ${currentAsset}`;
+
+  const text =
+`${line}
+Battle score: You ${state.battle.you} — Crowd ${state.battle.crowd}
+My IQ: ${state.iq} (${leagueFromIQ(state.iq)}) • Type: ${state.identity.type}
+Evolving: ${state.identity.next} (${state.identity.progress}%)
+${inviteURL()}`;
+  await copyText(text);
+  toast("🧾","X post copied", "Paste into X and publish.");
+});
+$("btnStartDuel").addEventListener("click", ()=>{
+  beep(520,0.03,"triangle",0.03);
+  state.duel.active = true;
+  state.duel.you = 0;
+  state.duel.friend = 0;
+  save();
+  toast("⚔️","Duel started", "7-day demo duel is active.");
+  render();
+});
+
+/* ================== Timer ticks ================== */
+function tick(){
+  const tEl = $("qTimer");
+  if(tEl) tEl.textContent = closeTimerText();
+  updateResetBadge();
+  setTimeout(tick, 1000);
+}
+
+/* ================== Render ================== */
+function renderStory(){
+  const el = $("storyFeed");
+  if(!el) return;
+  el.innerHTML = "";
+  const items = state.story || [];
+  if(items.length===0){
+    el.innerHTML = `<div class="kv"><span class="k">No story updates yet</span><span class="v">Make a pick to start the arc</span></div>`;
+    return;
+  }
+  items.slice(0,8).forEach(s=>{
+    const time = new Date(s.t).toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+    el.insertAdjacentHTML("beforeend", `
+      <div class="kv">
+        <span class="k">${s.icon} ${s.text}</span>
+        <span class="v">${time}</span>
+      </div>
+    `);
+  });
+}
+
+function render(){
+  weeklyResetIfNeeded();
+  resetCheckinsIfNeeded();
+
+  // header
+  $("uiIQ").textContent = state.iq;
+  $("uiLeague").textContent = leagueFromIQ(state.iq);
+  $("uiTop").textContent = "Top " + topPercentApprox(state.iq);
+  $("uiType").textContent = state.identity.type || "—";
+  $("uiGenesis").textContent = state.genesis ? "ON" : "OFF";
+  $("sbSeason").textContent = `Season ${state.season}`;
+
+  updateResetBadge();
+  updateSoundBtn();
+
+  // identity progress
+  $("idNext").textContent = state.identity.next || "—";
+  $("idPct").textContent = (state.identity.progress||0) + "%";
+  $("idBar").style.width = (state.identity.progress||0) + "%";
+
+  // today
+  $("uiAnswered").textContent = `${state.answeredToday}/1`;
+  $("uiEdge").textContent = (state.edgeToday>=0?"+":"") + state.edgeToday;
+
+  // skip risk
+  const t = todayISO();
+  let risk = "OK";
+  if(!state.lastPlayDate) risk = "NEW";
+  else {
+    const diff = daysBetweenISO(state.lastPlayDate, t);
+    risk = diff >= 2 ? "PENALTY" : (diff === 1 ? "SAFE" : "DONE");
+  }
+  $("uiSkipRisk").textContent = risk;
+
+  // battle scores
+  $("uiYouScore").textContent = state.battle.you;
+  $("uiCrowdScore").textContent = state.battle.crowd;
+
+  // precision stats
+  $("uiPrecStats").textContent = `W${state.precision.strongWins} / L${state.precision.strongLosses}`;
+
+  // recap
+  const you = state.answeredToday ? (state.picks[0]?.correct ? 1 : 0) : 0;
+  const crowd = state.answeredToday ? (state.picks[0]?.crowdCorrect ? 1 : 0) : 0;
+  $("recYou").textContent = `${you}/1`;
+  $("recCrowd").textContent = `${crowd}/1`;
+  $("recTop").textContent = topPercentApprox(state.iq);
+  $("recStreak").textContent = state.streak;
+  $("recIQ").textContent = state.iq;
+  $("recType").textContent = state.identity.type || "—";
+  $("recRankMove").textContent = state.live.rankDelta || "—";
+  renderStory();
+
+  // history
+  const hist = $("hist");
+  hist.innerHTML = "";
+  const items = state.picks.slice(0, 6);
+  if(items.length===0){
+    hist.innerHTML = `<div class="kv"><span class="k">No picks yet</span><span class="v">Make a pick on Play</span></div>`;
+  }else{
+    items.forEach(p=>{
+      const badge = p.correct ? `<span class="chip green">✅</span>` : `<span class="chip red">❌</span>`;
+      hist.insertAdjacentHTML("beforeend", `
+        <div class="kv">
+          <span class="k">${p.asset} • ${p.date} • You: ${p.choice} (${p.strength}) • Outcome: ${p.outcome} • Crowd: ${p.crowdUp}% ${crowdDirLabel(p.crowdUp)}</span>
+          <span class="v">${badge}</span>
+        </div>
+      `);
+    });
+  }
+
+  // leagues
+  const verified = (state.iq >= 1250 && state.streak >= 10);
+  const creator = (state.iq >= 1200 && state.streak >= 7);
+
+  $("lgLeague").textContent = leagueFromIQ(state.iq);
+  $("lgSeason").textContent = `Season ${state.season}`;
+  $("lgGenesis").textContent = state.genesis ? "Enabled" : "Disabled";
+  $("lgVerified").textContent = verified ? "Unlocked" : "Locked";
+  $("lgCreator").textContent = creator ? "Eligible" : "Locked";
+
+  // leaderboard (demo)
+  const lb = $("lb");
+  lb.innerHTML = "";
+  const demoLB = [
+    {name:"NeoMacro", iq:1820},
+    {name:"QuantFox", iq:1650},
+    {name:"You", iq:state.iq},
+    {name:"CandleKid", iq:1180},
+    {name:"RetailPro", iq:1125}
+  ].sort((a,b)=>b.iq-a.iq);
+  demoLB.forEach((u,i)=>{
+    lb.insertAdjacentHTML("beforeend", `
+      <div class="kv">
+        <span class="k">#${i+1} ${u.name}</span>
+        <span class="v">${u.iq} • ${leagueFromIQ(u.iq)}</span>
+      </div>
+    `);
+  });
+
+  // crowd vs experts
+  $("cveCrowd").textContent = state.cve.crowd;
+  $("cveExperts").textContent = state.cve.experts;
+  $("cveScore").textContent = `Crowd ${state.cve.crowd} — Experts ${state.cve.experts}`;
+  $("cveLive").textContent = Math.round(state.live.crowdPct) + "% " + crowdDirLabel(Math.round(state.live.crowdPct));
+
+  // duel
+  $("duelState").textContent = state.duel.active ? "Active" : "Inactive";
+  $("duelYou").textContent = state.duel.you;
+  $("duelFriend").textContent = state.duel.friend;
+
+  // drops
+  $("dropState").textContent = state.drops.last || "—";
+
+  // profile
+  $("pfIQ").textContent = state.iq;
+  $("pfLeague").textContent = leagueFromIQ(state.iq);
+  const acc = accuracyLast(30);
+  $("pfAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
+
+  const badges = [];
+  if(state.genesis) badges.push({t:"Genesis", cls:"gold"});
+  if(state.streak>=7) badges.push({t:"7-day streak", cls:"gold"});
+  if(verified) badges.push({t:"Verified Mind", cls:"cyan"});
+  if(creator) badges.push({t:"Creator eligible", cls:"green"});
+  if(state.drops.unlocked>=1) badges.push({t:"Mystery drop", cls:"gold"});
+  if((state.story||[]).length>=3) badges.push({t:"Story arc", cls:"cyan"});
+  if(state.precision.strongWins>=3) badges.push({t:"Strong hitter", cls:"green"});
+
+  const pfBadges = $("pfBadges");
+  pfBadges.innerHTML = "";
+  if(badges.length===0){
+    pfBadges.innerHTML = `<span class="chip">No badges yet</span>`;
+  }else{
+    badges.forEach(b=> pfBadges.insertAdjacentHTML("beforeend", `<span class="chip ${b.cls}">${b.t}</span>`));
+  }
+
+  $("pfType").textContent = state.identity.type || "—";
+  const evo = state.identity.evo || [];
+  const evoText = evo.length
+    ? evo.slice(0,4).map(e=>`${e.week}: ${e.type}`).join(" → ")
+    : `This week: ${state.seasonKey || getWeekKey()} (${state.identity.type || "—"})`;
+  $("pfEvo").textContent = evoText.length>70 ? evoText.slice(0,70) + "…" : evoText;
+
+  $("pfElig").textContent = creator ? "Eligible ✅" : "Not yet";
+
+  // identity progress in profile
+  $("pfNext").textContent = state.identity.next || "—";
+  $("pfPct").textContent = (state.identity.progress||0) + "%";
+  $("pfBar").style.width = (state.identity.progress||0) + "%";
+  $("pfEvoHint").textContent = `Evolve faster: pick rare vs crowd, keep streak, use STRONG wisely.`;
+
+  // creator
+  $("crStatus").textContent = creator ? "Eligible ✅" : "Locked";
+  $("crAcc").textContent = acc===null ? "—" : Math.round(acc) + "%";
+  $("crStreak").textContent = state.streak;
+  $("crLeague").textContent = leagueFromIQ(state.iq);
+  $("crType").textContent = state.identity.type || "—";
+}
+
+/* ================== Init ================== */
+weeklyResetIfNeeded();
+resetCheckinsIfNeeded();
+recomputeIdentity();
+updateSoundBtn();
+
+// read referral asset from URL (optional)
+try{
+  const u = new URL(location.href);
+  const a = u.searchParams.get("a");
+  if(a && ASSETS[a]) currentAsset = a;
+}catch{}
+
+$("assetSelect").value = currentAsset;
+
+applySkipPenaltyIfNeeded();
+setAssetQuestion();
+renderContext();
+save();
+render();
+tick();
+
+/* first-run behavior */
+if(state.picks.length > 0 || state.lastPlayDate){
+  show("s-play");
+}else{
+  show("s-on1");
+}
+</script>
+</body>
+                                                     </html>
