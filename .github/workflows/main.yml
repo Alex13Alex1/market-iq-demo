@@ -10,7 +10,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: set up JDK 21 # Мы заменили 17 на 21
+      - name: set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -29,6 +29,13 @@ jobs:
           cp index.html www/
           npx cap init "Market IQ" com.alex13alex1.marketiq --web-dir www
           npx cap add android
+
+      - name: Fix Kotlin Duplicate Class Conflict
+        run: |
+          # Исправляем версию Kotlin в переменных проекта
+          sed -i 's/kotlin_version = .*/kotlin_version = "1.9.10"/' android/variables.gradle
+          # Добавляем правило разрешения конфликтов библиотек в основной файл сборки
+          echo "configurations.all { resolutionStrategy { force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10' } }" >> android/build.gradle
 
       - name: Build Android Project
         run: npx cap sync android
