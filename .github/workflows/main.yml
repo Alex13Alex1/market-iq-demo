@@ -2,7 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,48 +13,31 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 21
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: "20"
+          cache: "npm"
 
       - name: Install NPM deps
-        run: |
-          npm install
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+        run: npm ci
 
-      - name: Init Capacitor (SAFE)
-        run: |
-          npx cap init "Market IQ" com.alex13alex1.marketiq --web-dir www || true
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
 
-      - name: Add Android Platform
-        run: |
-          npx cap add android || true
+      # -------- Capacitor helpers (ОДИН раз) --------
+      - name: Capacitor sync (Android)
+        run: npx cap sync android
+      # ---------------------------------------------
 
-      - name: Sync Android
-        run: |
-          npx cap sync android
+      - name: Build APK (Debug)
+        run: cd android && ./gradlew assembleDebug
 
-      # 🔥 ФИКС Kotlin конфликтов
-      - name: Fix Kotlin Version
-        run: |
-          if [ -f android/variables.gradle ]; then
-            sed -i 's/kotlin_version = .*/kotlin_version = "1.9.10"/' android/variables.gradle
-          fi
-
-      - name: Build APK
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace
-
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: market-iq-apk
