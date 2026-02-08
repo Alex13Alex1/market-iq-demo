@@ -1,4 +1,5 @@
 name: Build Android APK
+
 on:
   push:
     branches: [ main ]
@@ -6,48 +7,54 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: set up JDK 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          distribution: temurin
+          java-version: 21
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Prepare Project and Install Capacitor
+      - name: Install NPM deps
         run: |
-          npm init -y
+          npm install
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          mkdir -p www
-          cp index.html www/
-          npx cap init "Market IQ" com.alex13alex1.marketiq --web-dir www
-          npx cap add android
 
-      - name: Fix Kotlin Duplicate Class Conflict
+      - name: Init Capacitor (SAFE)
         run: |
-          # Исправляем версию Kotlin в переменных проекта
-          sed -i 's/kotlin_version = .*/kotlin_version = "1.9.10"/' android/variables.gradle
-          # Добавляем правило разрешения конфликтов библиотек в основной файл сборки
-          echo "configurations.all { resolutionStrategy { force 'org.jetbrains.kotlin:kotlin-stdlib:1.9.10' } }" >> android/build.gradle
+          npx cap init "Market IQ" com.alex13alex1.marketiq --web-dir www || true
 
-      - name: Build Android Project
-        run: npx cap sync android
+      - name: Add Android Platform
+        run: |
+          npx cap add android || true
+
+      - name: Sync Android
+        run: |
+          npx cap sync android
+
+      # 🔥 ФИКС Kotlin конфликтов
+      - name: Fix Kotlin Version
+        run: |
+          if [ -f android/variables.gradle ]; then
+            sed -i 's/kotlin_version = .*/kotlin_version = "1.9.10"/' android/variables.gradle
+          fi
 
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --stacktrace
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: market-iq-debug-apk
+          name: market-iq-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
