@@ -1,0 +1,6 @@
+{
+  "appId": "com.alex13alex1.marketiq",
+  "appName": "Market IQ",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
