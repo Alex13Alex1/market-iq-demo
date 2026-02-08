@@ -2347,7 +2347,55 @@ if(state.picks.length > 0 || state.lastPlayDate){
   show("s-play");
 }else{
   show("s-on1");
+}/* ================= CAPACITOR NATIVE SHARE HELPERS ================= */
+
+function isNative(){
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
 }
+
+function blobToBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result.split(",")[1]);
+    reader.onerror=reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function nativeShareText(text){
+  const Share = window.Capacitor.Plugins.Share;
+  await Share.share({
+    title:"Market IQ",
+    text:text,
+    url:location.href
+  });
+}
+
+async function nativeSharePNG(blob){
+  const Share = window.Capacitor.Plugins.Share;
+  const FS = window.Capacitor.Plugins.Filesystem;
+
+  const base64 = await blobToBase64(blob);
+  const filename = "market-iq-"+Date.now()+".png";
+
+  await FS.writeFile({
+    path: filename,
+    data: base64,
+    directory: "CACHE"
+  });
+
+  const uri = await FS.getUri({
+    path: filename,
+    directory: "CACHE"
+  });
+
+  await Share.share({
+    title:"Market IQ",
+    text:"Can you beat me?",
+    files:[uri.uri]
+  });
+  }
+
 </script>
 </body>
                                                      </html>
